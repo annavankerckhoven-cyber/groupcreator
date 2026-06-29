@@ -88,7 +88,7 @@ function Index() {
                 If Group Creator saves you time, consider supporting development.
               </p>
               <Button asChild variant="outline" size="sm" className="bg-background">
-                <a href="https://www.buymeacoffee.com/yourname" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.buymeacoffee.com/annavankerckhoven" target="_blank" rel="noopener noreferrer">
                   Buy me a coffee
                 </a>
               </Button>
