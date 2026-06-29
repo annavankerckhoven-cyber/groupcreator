@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — Grouply" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Group Creator" }] }),
   component: AuthPage,
 });
 
@@ -58,7 +58,7 @@ function AuthPage() {
       <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">← Back home</Link>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Welcome to Grouply</CardTitle>
+          <CardTitle>Welcome to Group Creator</CardTitle>
           <CardDescription>Free for teachers. No credit card.</CardDescription>
         </CardHeader>
         <CardContent>

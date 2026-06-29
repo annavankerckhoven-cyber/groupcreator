@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { getPublicForm, submitPublicForm } from "@/lib/public-form.functions";
 
 export const Route = createFileRoute("/s/$token")({
-  head: () => ({ meta: [{ title: "Student form — Grouply" }] }),
+  head: () => ({ meta: [{ title: "Student form — Group Creator" }] }),
   component: StudentForm,
 });
 

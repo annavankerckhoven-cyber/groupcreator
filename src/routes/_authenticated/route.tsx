@@ -29,7 +29,7 @@ function AuthLayout() {
             <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
               <Users className="h-4 w-4" />
             </div>
-            <span className="text-lg font-semibold tracking-tight">Grouply</span>
+            <span className="text-lg font-semibold tracking-tight">Group Creator</span>
           </Link>
           <Button variant="ghost" size="sm" onClick={signOut}>
             <LogOut className="mr-1.5 h-4 w-4" /> Sign out
