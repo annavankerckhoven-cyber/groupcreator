@@ -99,7 +99,7 @@ function Index() {
               <h3 className="mb-2 text-lg font-semibold">Contact & suggestions</h3>
               <p className="text-sm text-muted-foreground">
                 Did you encounter an issue, or do you have ideas to improve this application?
-                Reach out at <span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
+                {"Reach out at\u00a0"}<span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
               </p>
             </CardContent>
           </Card>
