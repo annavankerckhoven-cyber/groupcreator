@@ -97,7 +97,8 @@ function ConfigDetail() {
   }
 
   async function regenerate() {
-    if (!data) return;
+    if (!data || !data.cfg) return;
+    const cfg = data.cfg;
     try {
       // Persist absent changes
       if (pendingAbsent) {
@@ -108,11 +109,11 @@ function ConfigDetail() {
           );
         }
       }
-      const presentIds = data.students.map((s) => s.id).filter((id) => !currentAbsent.has(id));
+      const presentIds = data.students.map((s) => s.id).filter((sid) => !currentAbsent.has(sid));
       const result = generateGroups({
         studentIds: presentIds,
-        groupSize: data.cfg.group_size,
-        sizePolicy: data.cfg.size_policy as "flex" | "strict",
+        groupSize: cfg.group_size,
+        sizePolicy: cfg.size_policy as "flex" | "strict",
         edges,
       });
       await persistGroups(result.groups);
@@ -128,10 +129,11 @@ function ConfigDetail() {
   }
 
   async function addAbsent(studentId: string) {
-    if (!data) return;
+    if (!data || !data.cfg) return;
+    const cfg = data.cfg;
     try {
       const { groups: next, createdNewGroup } = addStudentToBestGroup(
-        generatedGroups, studentId, edges, data.cfg.group_size, data.cfg.size_policy as "flex" | "strict",
+        generatedGroups, studentId, edges, cfg.group_size, cfg.size_policy as "flex" | "strict",
       );
       await persistGroups(next);
       // remove from absent
