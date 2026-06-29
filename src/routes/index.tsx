@@ -8,9 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Grouply — Smarter student group making" },
+      { title: "Group Creator — Smarter group making" },
       { name: "description", content: "Free tool for teachers to create classroom groups based on student preferences." },
-      { property: "og:title", content: "Grouply — Smarter student group making" },
+      { property: "og:title", content: "Group Creator — Smarter group making" },
       { property: "og:description", content: "Free tool for teachers to create classroom groups based on student preferences." },
     ],
   }),
@@ -30,7 +30,7 @@ function Index() {
           <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
             <Users className="h-4 w-4" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Grouply</span>
+          <span className="text-lg font-semibold tracking-tight">Group Creator</span>
         </div>
         <Button asChild variant="default">
           <Link to={signedIn ? "/dashboard" : "/auth"}>
@@ -46,11 +46,11 @@ function Index() {
             100% free, forever
           </div>
           <h1 className="mx-auto max-w-3xl text-5xl font-semibold tracking-tight md:text-6xl">
-            Make better student groups, without the drama.
+            Make better groups, without the drama.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
             Let your students quietly say who they'd like to work with — and who they really shouldn't.
-            Grouply turns those answers into balanced groups in seconds.
+            Group Creator turns those answers into balanced groups in seconds.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
@@ -65,7 +65,7 @@ function Index() {
         <section id="how" className="grid gap-6 py-12 md:grid-cols-3">
           {[
             { title: "Create a class", body: "Paste your roster or import a CSV/Excel file. Done in 30 seconds." },
-            { title: "Share one link", body: "Students pick who they'd like to work with — and who not. Anonymous to peers." },
+            { title: "Share a form", body: "Students pick who they'd like to work with — and who not. Anonymous to peers." },
             { title: "Generate groups", body: "Set a group size and hit go. Hard avoids are respected, friendships honored." },
           ].map((step, i) => (
             <Card key={i}>
@@ -83,10 +83,15 @@ function Index() {
             <CardContent className="pt-6">
               <Heart className="mb-3 h-5 w-5 text-primary" />
               <h3 className="mb-2 text-lg font-semibold text-accent-foreground">Why it's free</h3>
-              <p className="text-sm text-accent-foreground/80">
+              <p className="text-sm text-accent-foreground/80 mb-4">
                 Built by educators for educators. No ads, no upsells, no per-class fees.
-                If Grouply saves you time, consider supporting development.
+                If Group Creator saves you time, consider supporting development.
               </p>
+              <Button asChild variant="outline" size="sm" className="bg-background">
+                <a href="https://www.buymeacoffee.com/yourname" target="_blank" rel="noopener noreferrer">
+                  Buy me a coffee
+                </a>
+              </Button>
             </CardContent>
           </Card>
           <Card>
@@ -102,7 +107,7 @@ function Index() {
         </section>
 
         <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Grouply. Made with care for teachers.
+          © {new Date().getFullYear()} Group Creator. Made with care for teachers.
         </footer>
       </main>
     </div>
