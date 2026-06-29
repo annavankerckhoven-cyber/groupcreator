@@ -83,9 +83,10 @@ function Index() {
             <CardContent className="pt-6">
               <Heart className="mb-3 h-5 w-5 text-primary" />
               <h3 className="mb-2 text-lg font-semibold text-accent-foreground">Why it's free</h3>
-              <p className="text-sm text-accent-foreground/80 mb-4">
-                Built by educators for educators. No ads, no upsells, no per-class fees.
-                If Group Creator saves you time, consider supporting development.
+              <p className="text-sm text-accent-foreground/80 mb-4 whitespace-pre-line">
+                As a software developer and the daughter of a high school teacher, I created this platform to make it easier for teachers (and anyone else) who want to create groups.
+
+                My goal is to keep this application completely free and ad-free for everyone. If it has saved you time or made your work a little easier, feel free to buy me a coffee ;)
               </p>
               <Button asChild variant="outline" size="sm" className="bg-background">
                 <a href="https://www.buymeacoffee.com/annavankerckhoven" target="_blank" rel="noopener noreferrer">
