@@ -14,13 +14,298 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      classes: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      generated_groups: {
+        Row: {
+          config_id: string
+          group_index: number
+          id: string
+          student_id: string
+        }
+        Insert: {
+          config_id: string
+          group_index: number
+          id?: string
+          student_id: string
+        }
+        Update: {
+          config_id?: string
+          group_index?: number
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_groups_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "group_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_groups_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_config_absent: {
+        Row: {
+          config_id: string
+          student_id: string
+        }
+        Insert: {
+          config_id: string
+          student_id: string
+        }
+        Update: {
+          config_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_config_absent_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "group_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_config_absent_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_configs: {
+        Row: {
+          class_id: string
+          created_at: string
+          generated_at: string | null
+          group_size: number
+          id: string
+          name: string
+          size_policy: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          generated_at?: string | null
+          group_size: number
+          id?: string
+          name: string
+          size_policy?: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          generated_at?: string | null
+          group_size?: number
+          id?: string
+          name?: string
+          size_policy?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_configs_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preferences: {
+        Row: {
+          id: string
+          kind: string
+          submission_id: string
+          target_student_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          submission_id: string
+          target_student_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          submission_id?: string
+          target_student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferences_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferences_target_student_id_fkey"
+            columns: ["target_student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      share_links: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          token: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          token: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          class_id: string
+          id: string
+          student_id: string
+          submitted_at: string
+        }
+        Insert: {
+          class_id: string
+          id?: string
+          student_id: string
+          submitted_at?: string
+        }
+        Update: {
+          class_id?: string
+          id?: string
+          student_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      owns_class: { Args: { _class_id: string }; Returns: boolean }
+      owns_config: { Args: { _config_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
