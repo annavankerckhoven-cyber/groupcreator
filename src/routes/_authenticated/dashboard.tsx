@@ -8,7 +8,7 @@ import { Plus, Users, ChevronRight } from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Grouply" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Group Creator" }] }),
   component: Dashboard,
 });
 

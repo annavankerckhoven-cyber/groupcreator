@@ -13,7 +13,7 @@ import { Copy, Link as LinkIcon, Trash2, Plus, CheckCircle2, Circle, Settings } 
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id")({
-  head: () => ({ meta: [{ title: "Class — Grouply" }] }),
+  head: () => ({ meta: [{ title: "Class — Group Creator" }] }),
   component: ClassDetail,
 });
 

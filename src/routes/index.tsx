@@ -100,7 +100,7 @@ function Index() {
               <h3 className="mb-2 text-lg font-semibold">Contact & suggestions</h3>
               <p className="text-sm text-muted-foreground">
                 Got feedback, a feature request, or want to donate?
-                Reach out at <span className="font-medium text-foreground">hello@grouply.app</span>.
+                Reach out at <span className="font-medium text-foreground">hello@groupcreator.com</span>.
               </p>
             </CardContent>
           </Card>

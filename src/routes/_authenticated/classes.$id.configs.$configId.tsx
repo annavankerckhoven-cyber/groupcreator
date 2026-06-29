@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { generateGroups, addStudentToBestGroup, type Edge } from "@/lib/grouping";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId")({
-  head: () => ({ meta: [{ title: "Configuration — Grouply" }] }),
+  head: () => ({ meta: [{ title: "Configuration — Group Creator" }] }),
   component: ConfigDetail,
 });
 
