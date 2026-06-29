@@ -54,7 +54,7 @@ function Index() {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to={signedIn ? "/dashboard" : "/auth"}>Get started — free</Link>
+              <Link to={signedIn ? "/dashboard" : "/auth"}>Get started — completely free</Link>
             </Button>
             <a href="#how" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               How it works →
