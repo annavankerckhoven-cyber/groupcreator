@@ -7,9 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Copy, Link as LinkIcon, Trash2, Plus, CheckCircle2, Circle, Settings } from "lucide-react";
+import { Copy, Link as LinkIcon, Trash2, Plus, CheckCircle2, Circle, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id")({
@@ -21,20 +20,20 @@ function ClassDetail() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [configOpen, setConfigOpen] = useState(false);
+  const [projectOpen, setProjectOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
     queryFn: async () => {
-      const [cls, students, link, subs, configs] = await Promise.all([
+      const [cls, students, link, subs, projects] = await Promise.all([
         supabase.from("classes").select("id, name").eq("id", id).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("share_links").select("token").eq("class_id", id).limit(1).maybeSingle(),
         supabase.from("submissions").select("student_id, submitted_at").eq("class_id", id),
-        supabase.from("group_configs").select("id, name, group_size, size_policy, generated_at").eq("class_id", id).order("created_at", { ascending: false }),
+        supabase.from("group_configs").select("id, name, group_size, size_policy").eq("class_id", id).order("created_at", { ascending: false }),
       ]);
       return {
-        cls: cls.data, students: students.data ?? [], link: link.data, submissions: subs.data ?? [], configs: configs.data ?? [],
+        cls: cls.data, students: students.data ?? [], link: link.data, submissions: subs.data ?? [], projects: projects.data ?? [],
       };
     },
   });
@@ -128,31 +127,30 @@ function ClassDetail() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Group configurations</CardTitle>
-            <CardDescription>Create a config to generate groups for a specific project.</CardDescription>
+            <CardTitle className="text-base">Projects</CardTitle>
+            <CardDescription>Each project is one way of dividing the class — set the group size, then make runs to compute groups.</CardDescription>
           </div>
-          <Button size="sm" onClick={() => setConfigOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New config</Button>
+          <Button size="sm" onClick={() => setProjectOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New project</Button>
         </CardHeader>
         <CardContent>
-          {data.configs.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No configurations yet.</p>
+          {data.projects.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">No projects yet.</p>
           ) : (
             <ul className="divide-y divide-border">
-              {data.configs.map((c) => (
-                <li key={c.id}>
+              {data.projects.map((p) => (
+                <li key={p.id}>
                   <Link
                     to="/classes/$id/configs/$configId"
-                    params={{ id, configId: c.id }}
+                    params={{ id, configId: p.id }}
                     className="flex items-center justify-between py-3 hover:bg-muted/40 -mx-2 px-2 rounded-md"
                   >
                     <div>
-                      <div className="font-medium">{c.name}</div>
+                      <div className="font-medium">{p.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        Groups of {c.group_size} · {c.size_policy === "strict" ? "strict size" : "±1 allowed"}
-                        {c.generated_at ? ` · generated ${new Date(c.generated_at).toLocaleDateString()}` : " · not yet generated"}
+                        Groups of {p.group_size} · {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
                       </div>
                     </div>
-                    <Settings className="h-4 w-4 text-muted-foreground" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 </li>
               ))}
@@ -161,56 +159,42 @@ function ClassDetail() {
         </CardContent>
       </Card>
 
-      <NewConfigDialog
-        open={configOpen}
-        onOpenChange={setConfigOpen}
+      <NewProjectDialog
+        open={projectOpen}
+        onOpenChange={setProjectOpen}
         classId={id}
-        students={data.students}
         onCreated={() => qc.invalidateQueries({ queryKey: ["class", id] })}
       />
     </div>
   );
 }
 
-function NewConfigDialog({
-  open, onOpenChange, classId, students, onCreated,
+function NewProjectDialog({
+  open, onOpenChange, classId, onCreated,
 }: {
   open: boolean; onOpenChange: (o: boolean) => void;
-  classId: string; students: { id: string; name: string }[];
-  onCreated: () => void;
+  classId: string; onCreated: () => void;
 }) {
   const [name, setName] = useState("");
   const [size, setSize] = useState(4);
-  const [policy, setPolicy] = useState<"flex" | "strict">("flex");
-  const [absent, setAbsent] = useState<Set<string>>(new Set());
+  const [policy, setPolicy] = useState<"plus" | "minus">("plus");
   const [loading, setLoading] = useState(false);
-
-  function toggleAbsent(id: string) {
-    const next = new Set(absent);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    setAbsent(next);
-  }
 
   async function create() {
     if (!name.trim()) return toast.error("Give it a name");
     if (size < 2) return toast.error("Group size must be at least 2");
     setLoading(true);
     try {
-      const { data: cfg, error } = await supabase
+      const { data: proj, error } = await supabase
         .from("group_configs")
         .insert({ class_id: classId, name: name.trim(), group_size: size, size_policy: policy })
         .select("id")
         .single();
-      if (error || !cfg) throw error ?? new Error("Failed");
-      if (absent.size > 0) {
-        await supabase.from("group_config_absent").insert(
-          Array.from(absent).map((sid) => ({ config_id: cfg.id, student_id: sid })),
-        );
-      }
-      toast.success("Configuration created");
+      if (error || !proj) throw error ?? new Error("Failed");
+      toast.success("Project created");
       onCreated();
       onOpenChange(false);
-      setName(""); setSize(4); setPolicy("flex"); setAbsent(new Set());
+      setName(""); setSize(4); setPolicy("plus");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -222,41 +206,28 @@ function NewConfigDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>New group configuration</DialogTitle>
-          <DialogDescription>Set the parameters; you'll generate groups on the next screen.</DialogDescription>
+          <DialogTitle>New project</DialogTitle>
+          <DialogDescription>Set the group size; you'll create runs to compute groups on the project page.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="cn">Name</Label>
             <Input id="cn" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Project 1" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="gs">Students per group</Label>
-              <Input id="gs" type="number" min={2} value={size} onChange={(e) => setSize(parseInt(e.target.value) || 0)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>If it doesn't divide evenly</Label>
-              <RadioGroup value={policy} onValueChange={(v) => setPolicy(v as "flex" | "strict")} className="mt-1.5 space-y-1.5">
-                <div className="flex items-center gap-2"><RadioGroupItem value="flex" id="p-flex" /><Label htmlFor="p-flex" className="font-normal">Allow ±1 per group</Label></div>
-                <div className="flex items-center gap-2"><RadioGroupItem value="strict" id="p-strict" /><Label htmlFor="p-strict" className="font-normal">Strict size, leftover smaller</Label></div>
-              </RadioGroup>
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="gs">Students per group</Label>
+            <Input id="gs" type="number" min={2} value={size} onChange={(e) => setSize(parseInt(e.target.value) || 0)} />
           </div>
-          <div>
-            <Label>Mark students as absent (excluded from this run)</Label>
-            <div className="mt-2 max-h-56 space-y-1.5 overflow-auto rounded-md border border-border p-3">
-              {students.map((s) => (
-                <label key={s.id} className="flex cursor-pointer items-center gap-2">
-                  <Checkbox checked={absent.has(s.id)} onCheckedChange={() => toggleAbsent(s.id)} />
-                  <span className="text-sm">{s.name}</span>
-                </label>
-              ))}
-            </div>
+          <div className="space-y-1.5">
+            <Label>If it doesn't divide evenly</Label>
+            <RadioGroup value={policy} onValueChange={(v) => setPolicy(v as "plus" | "minus")} className="mt-1.5 space-y-1.5">
+              <div className="flex items-center gap-2"><RadioGroupItem value="plus" id="p-plus" /><Label htmlFor="p-plus" className="font-normal">Some groups with 1 additional person</Label></div>
+              <div className="flex items-center gap-2"><RadioGroupItem value="minus" id="p-minus" /><Label htmlFor="p-minus" className="font-normal">Some groups with 1 fewer person</Label></div>
+            </RadioGroup>
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={loading} onClick={create}>{loading ? "Creating…" : "Create configuration"}</Button>
+          <Button disabled={loading} onClick={create}>{loading ? "Creating…" : "Create project"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
