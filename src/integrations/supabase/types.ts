@@ -38,77 +38,10 @@ export type Database = {
         }
         Relationships: []
       }
-      generated_groups: {
-        Row: {
-          config_id: string
-          group_index: number
-          id: string
-          student_id: string
-        }
-        Insert: {
-          config_id: string
-          group_index: number
-          id?: string
-          student_id: string
-        }
-        Update: {
-          config_id?: string
-          group_index?: number
-          id?: string
-          student_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "generated_groups_config_id_fkey"
-            columns: ["config_id"]
-            isOneToOne: false
-            referencedRelation: "group_configs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "generated_groups_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      group_config_absent: {
-        Row: {
-          config_id: string
-          student_id: string
-        }
-        Insert: {
-          config_id: string
-          student_id: string
-        }
-        Update: {
-          config_id?: string
-          student_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "group_config_absent_config_id_fkey"
-            columns: ["config_id"]
-            isOneToOne: false
-            referencedRelation: "group_configs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "group_config_absent_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       group_configs: {
         Row: {
           class_id: string
           created_at: string
-          generated_at: string | null
           group_size: number
           id: string
           name: string
@@ -118,7 +51,6 @@ export type Database = {
         Insert: {
           class_id: string
           created_at?: string
-          generated_at?: string | null
           group_size: number
           id?: string
           name: string
@@ -128,7 +60,6 @@ export type Database = {
         Update: {
           class_id?: string
           created_at?: string
-          generated_at?: string | null
           group_size?: number
           id?: string
           name?: string
@@ -201,6 +132,139 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      run_absent: {
+        Row: {
+          run_id: string
+          student_id: string
+        }
+        Insert: {
+          run_id: string
+          student_id: string
+        }
+        Update: {
+          run_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "run_absent_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "run_absent_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      run_distribution_groups: {
+        Row: {
+          distribution_id: string
+          group_index: number
+          student_id: string
+        }
+        Insert: {
+          distribution_id: string
+          group_index: number
+          student_id: string
+        }
+        Update: {
+          distribution_id?: string
+          group_index?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "run_distribution_groups_distribution_id_fkey"
+            columns: ["distribution_id"]
+            isOneToOne: false
+            referencedRelation: "run_distributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "run_distribution_groups_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      run_distributions: {
+        Row: {
+          id: string
+          is_favorite: boolean
+          rank: number
+          run_id: string
+          score: number
+        }
+        Insert: {
+          id?: string
+          is_favorite?: boolean
+          rank: number
+          run_id: string
+          score: number
+        }
+        Update: {
+          id?: string
+          is_favorite?: boolean
+          rank?: number
+          run_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "run_distributions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runs: {
+        Row: {
+          completed_at: string | null
+          config_id: string
+          created_at: string
+          id: string
+          is_favorite: boolean
+          status: string
+          time_limit_seconds: number
+        }
+        Insert: {
+          completed_at?: string | null
+          config_id: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          status?: string
+          time_limit_seconds: number
+        }
+        Update: {
+          completed_at?: string | null
+          config_id?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          status?: string
+          time_limit_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runs_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "group_configs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       share_links: {
         Row: {
@@ -306,6 +370,8 @@ export type Database = {
     Functions: {
       owns_class: { Args: { _class_id: string }; Returns: boolean }
       owns_config: { Args: { _config_id: string }; Returns: boolean }
+      owns_distribution: { Args: { _dist_id: string }; Returns: boolean }
+      owns_run: { Args: { _run_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
