@@ -25,9 +25,9 @@ function ProjectPage() {
     queryKey: ["project", configId],
     queryFn: async () => {
       const [proj, students, runs] = await Promise.all([
-        supabase.from("group_configs").select("id, name, group_size, size_policy, favorite_run_id").eq("id", configId).single(),
+        supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
-        supabase.from("runs").select("id, created_at, time_limit_seconds, status, best_score").eq("config_id", configId).order("created_at", { ascending: false }),
+        supabase.from("runs").select("id, created_at, time_limit_seconds, status, is_favorite").eq("config_id", configId).order("created_at", { ascending: false }),
       ]);
       return { project: proj.data, students: students.data ?? [], runs: runs.data ?? [] };
     },
@@ -67,14 +67,14 @@ function ProjectPage() {
                     className="flex items-center justify-between -mx-2 rounded-md px-2 py-3 hover:bg-muted/40"
                   >
                     <div className="flex items-center gap-2">
-                      {project.favorite_run_id === r.id && <Heart className="h-4 w-4 fill-primary text-primary" />}
+                      {r.is_favorite && <Heart className="h-4 w-4 fill-primary text-primary" />}
                       <div>
                         <div className="font-medium">
                           {new Date(r.created_at).toLocaleString()}{" "}
                           {r.status !== "completed" && <span className="ml-1 text-xs text-muted-foreground">({r.status})</span>}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {r.time_limit_seconds}s · best score {r.best_score ?? "—"}
+                          {r.time_limit_seconds}s
                         </div>
                       </div>
                     </div>
