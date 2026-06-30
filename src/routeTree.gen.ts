@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as STokenRouteImport } from './routes/s.$token'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClassesIdRouteImport } from './routes/_authenticated/classes.$id'
+import { Route as AuthenticatedClassesIdConfigsConfigIdRouteImport } from './routes/_authenticated/classes.$id.configs.$configId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -45,20 +46,28 @@ const AuthenticatedClassesIdRoute = AuthenticatedClassesIdRouteImport.update({
   path: '/classes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedClassesIdConfigsConfigIdRoute =
+  AuthenticatedClassesIdConfigsConfigIdRouteImport.update({
+    id: '/configs/$configId',
+    path: '/configs/$configId',
+    getParentRoute: () => AuthenticatedClassesIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
-  '/classes/$id': typeof AuthenticatedClassesIdRoute
+  '/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
+  '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
-  '/classes/$id': typeof AuthenticatedClassesIdRoute
+  '/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
+  '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -67,13 +76,26 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
-  '/_authenticated/classes/$id': typeof AuthenticatedClassesIdRoute
+  '/_authenticated/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
+  '/_authenticated/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/s/$token' | '/classes/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/s/$token'
+    | '/classes/$id'
+    | '/classes/$id/configs/$configId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/s/$token' | '/classes/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/s/$token'
+    | '/classes/$id'
+    | '/classes/$id/configs/$configId'
   id:
     | '__root__'
     | '/'
@@ -82,6 +104,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/s/$token'
     | '/_authenticated/classes/$id'
+    | '/_authenticated/classes/$id/configs/$configId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -135,17 +158,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/classes/$id/configs/$configId': {
+      id: '/_authenticated/classes/$id/configs/$configId'
+      path: '/configs/$configId'
+      fullPath: '/classes/$id/configs/$configId'
+      preLoaderRoute: typeof AuthenticatedClassesIdConfigsConfigIdRouteImport
+      parentRoute: typeof AuthenticatedClassesIdRoute
+    }
   }
 }
 
+interface AuthenticatedClassesIdRouteChildren {
+  AuthenticatedClassesIdConfigsConfigIdRoute: typeof AuthenticatedClassesIdConfigsConfigIdRoute
+}
+
+const AuthenticatedClassesIdRouteChildren: AuthenticatedClassesIdRouteChildren =
+  {
+    AuthenticatedClassesIdConfigsConfigIdRoute:
+      AuthenticatedClassesIdConfigsConfigIdRoute,
+  }
+
+const AuthenticatedClassesIdRouteWithChildren =
+  AuthenticatedClassesIdRoute._addFileChildren(
+    AuthenticatedClassesIdRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedClassesIdRoute: typeof AuthenticatedClassesIdRoute
+  AuthenticatedClassesIdRoute: typeof AuthenticatedClassesIdRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedClassesIdRoute: AuthenticatedClassesIdRoute,
+  AuthenticatedClassesIdRoute: AuthenticatedClassesIdRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
