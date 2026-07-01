@@ -32,6 +32,11 @@ function Index() {
           </div>
           <span className="text-lg font-semibold tracking-tight">Group Creator</span>
         </div>
+        <Button asChild variant="outline">
+          <a href="https://www.buymeacoffee.com/annavankerckhoven" target="_blank" rel="noopener noreferrer">
+            Buy me a coffee
+          </a>
+        </Button>
         <Button asChild variant="default">
           <Link to={signedIn ? "/dashboard" : "/auth"}>
             {signedIn ? "Go to dashboard" : "Log in / Sign up"}
@@ -46,11 +51,11 @@ function Index() {
             100% free, forever
           </div>
           <h1 className="mx-auto max-w-3xl text-5xl font-semibold tracking-tight md:text-6xl">
-            Make better groups, without the drama.
+            Making group work work.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
             Let your students quietly say who they'd like to work with — and who they really shouldn't.
-            Group Creator turns those answers into balanced groups in seconds.
+            Group Creator turns those answers into balanced groups.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
@@ -79,34 +84,20 @@ function Index() {
         </section>
 
         <section className="grid gap-6 py-12 md:grid-cols-2">
-          <Card className="bg-accent border-accent">
-            <CardContent className="pt-6">
-              <Heart className="mb-3 h-5 w-5 text-primary" />
-              <h3 className="mb-2 text-lg font-semibold text-accent-foreground">Why it's free</h3>
-              <p className="text-sm text-accent-foreground/80 mb-4 whitespace-pre-line">
-                {`As a software developer and the daughter of a high school teacher, I created this platform to make it easier for teachers (and anyone else) who want to create groups.\n\nMy goal is to keep this application completely free and ad-free for everyone. If it has saved you time or made your work a little easier, feel free to buy me a coffee ;)`}
-              </p>
-              <Button asChild variant="outline" size="sm" className="bg-background">
-                <a href="https://www.buymeacoffee.com/annavankerckhoven" target="_blank" rel="noopener noreferrer">
-                  Buy me a coffee
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
           <Card>
             <CardContent className="pt-6">
               <Mail className="mb-3 h-5 w-5 text-primary" />
               <h3 className="mb-2 text-lg font-semibold">Contact & suggestions</h3>
               <p className="text-sm text-muted-foreground">
                 Did you encounter an issue, or do you have ideas to improve this application?
-                {"Reach out at\u00a0"}<span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
+                {"Reach out to\u00a0"}<span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
               </p>
             </CardContent>
           </Card>
         </section>
 
         <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Group Creator. Made with care for teachers.
+          © {new Date().getFullYear()} Group Creator.
         </footer>
       </main>
     </div>
