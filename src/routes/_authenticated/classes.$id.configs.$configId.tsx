@@ -167,7 +167,7 @@ function NewRunDialog({
         <div className="space-y-5">
           <div>
             <Label>Run name</Label>
-            <Input id="runname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter the run name" required />
+            <Input className="mt-2" id="runname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter the run name" required />
           </div>
           <div>
             <Label>Absent students (excluded from this run)</Label>
