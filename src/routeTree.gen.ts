@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as STokenRouteImport } from './routes/s.$token'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClassesIdRouteImport } from './routes/_authenticated/classes.$id'
+import { Route as AuthenticatedClassesIdIndexRouteImport } from './routes/_authenticated/classes.$id.index'
 import { Route as AuthenticatedClassesIdConfigsConfigIdRouteImport } from './routes/_authenticated/classes.$id.configs.$configId'
 import { Route as AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteImport } from './routes/_authenticated/classes.$id.configs.$configId.runs.$runId'
 import { Route as AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRouteImport } from './routes/_authenticated/classes.$id.configs.$configId.runs.$runId.distributions.$distId.present'
@@ -48,6 +49,12 @@ const AuthenticatedClassesIdRoute = AuthenticatedClassesIdRouteImport.update({
   path: '/classes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedClassesIdIndexRoute =
+  AuthenticatedClassesIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedClassesIdRoute,
+  } as any)
 const AuthenticatedClassesIdConfigsConfigIdRoute =
   AuthenticatedClassesIdConfigsConfigIdRouteImport.update({
     id: '/configs/$configId',
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
   '/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
+  '/classes/$id/': typeof AuthenticatedClassesIdIndexRoute
   '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
   '/classes/$id/configs/$configId/runs/$runId': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
   '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
@@ -84,7 +92,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
-  '/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
+  '/classes/$id': typeof AuthenticatedClassesIdIndexRoute
   '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
   '/classes/$id/configs/$configId/runs/$runId': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
   '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
   '/_authenticated/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
+  '/_authenticated/classes/$id/': typeof AuthenticatedClassesIdIndexRoute
   '/_authenticated/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
   '/_authenticated/classes/$id/configs/$configId/runs/$runId': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
   '/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/s/$token'
     | '/classes/$id'
+    | '/classes/$id/'
     | '/classes/$id/configs/$configId'
     | '/classes/$id/configs/$configId/runs/$runId'
     | '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/s/$token'
     | '/_authenticated/classes/$id'
+    | '/_authenticated/classes/$id/'
     | '/_authenticated/classes/$id/configs/$configId'
     | '/_authenticated/classes/$id/configs/$configId/runs/$runId'
     | '/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
@@ -186,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/classes/$id/': {
+      id: '/_authenticated/classes/$id/'
+      path: '/'
+      fullPath: '/classes/$id/'
+      preLoaderRoute: typeof AuthenticatedClassesIdIndexRouteImport
+      parentRoute: typeof AuthenticatedClassesIdRoute
+    }
     '/_authenticated/classes/$id/configs/$configId': {
       id: '/_authenticated/classes/$id/configs/$configId'
       path: '/configs/$configId'
@@ -241,11 +259,13 @@ const AuthenticatedClassesIdConfigsConfigIdRouteWithChildren =
   )
 
 interface AuthenticatedClassesIdRouteChildren {
+  AuthenticatedClassesIdIndexRoute: typeof AuthenticatedClassesIdIndexRoute
   AuthenticatedClassesIdConfigsConfigIdRoute: typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
 }
 
 const AuthenticatedClassesIdRouteChildren: AuthenticatedClassesIdRouteChildren =
   {
+    AuthenticatedClassesIdIndexRoute: AuthenticatedClassesIdIndexRoute,
     AuthenticatedClassesIdConfigsConfigIdRoute:
       AuthenticatedClassesIdConfigsConfigIdRouteWithChildren,
   }
