@@ -179,7 +179,7 @@ function NewRunDialog({
               </span>
             </div>
             <Slider min={10} max={180} step={5} value={[seconds]} onValueChange={(v) => setSeconds(v[0])} className="mt-3" />
-            <p className="mt-1 text-xs text-muted-foreground">Longer runs explore more solutions. 10 seconds to 3 minutes.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Longer runs explore more solutions. For the best results, set to 3 minutes.</p>
           </div>
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
