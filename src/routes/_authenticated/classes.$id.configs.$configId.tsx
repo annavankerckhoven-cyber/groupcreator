@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Play, Heart, AlertTriangle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId")({
   head: () => ({ meta: [{ title: "Project — Group Creator" }] }),
@@ -27,7 +28,7 @@ function ProjectPage() {
       const [proj, students, runs] = await Promise.all([
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
-        supabase.from("runs").select("id, created_at, time_limit_seconds, status, is_favorite").eq("config_id", configId).order("created_at", { ascending: false }),
+        supabase.from("runs").select("id, name, created_at, time_limit_seconds, status, is_favorite").eq("config_id", configId).order("created_at", { ascending: false }),
       ]);
       return { project: proj.data, students: students.data ?? [], runs: runs.data ?? [] };
     },
@@ -50,7 +51,7 @@ function ProjectPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base">Runs</CardTitle>
-            <CardDescription>Each run computes the 5 best group distributions for this project.</CardDescription>
+            <CardDescription>Each run computes 5 group distributions.</CardDescription>
           </div>
           <Button size="sm" onClick={() => setRunOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New run</Button>
         </CardHeader>
@@ -70,6 +71,9 @@ function ProjectPage() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 font-medium">
                         {r.is_favorite && <Heart className="h-4 w-4 fill-primary text-primary" />}
+                        <span>{r.name?.trim() ? r.name : "Untitled run"}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
                         {new Date(r.created_at).toLocaleString()}
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -115,7 +119,8 @@ function NewRunDialog({
   onCreated: () => void;
 }) {
   const [absent, setAbsent] = useState<Set<string>>(new Set());
-  const [seconds, setSeconds] = useState(30);
+  const [name, setName] = useState("");
+  const [seconds, setSeconds] = useState(180);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -128,9 +133,10 @@ function NewRunDialog({
   async function createAndStart() {
     setLoading(true);
     try {
+      const trimmedName = name.trim();
       const { data: run, error } = await supabase
         .from("runs")
-        .insert({ config_id: configId, time_limit_seconds: seconds, status: "pending" })
+        .insert({ config_id: configId, time_limit_seconds: seconds, status: "pending", name: trimmedName || "Untitled run" })
         .select("id")
         .single();
       if (error || !run) throw error ?? new Error("Failed");
@@ -160,6 +166,10 @@ function NewRunDialog({
         </DialogHeader>
         <div className="space-y-5">
           <div>
+            <Label>Run name</Label>
+            <Input id="runname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter the run name" required />
+          </div>
+          <div>
             <Label>Absent students (excluded from this run)</Label>
             <div className="mt-2 max-h-56 space-y-1.5 overflow-auto rounded-md border border-border p-3">
               {students.length === 0 && <p className="text-sm text-muted-foreground">No students in this class.</p>}
@@ -179,7 +189,7 @@ function NewRunDialog({
               </span>
             </div>
             <Slider min={10} max={180} step={5} value={[seconds]} onValueChange={(v) => setSeconds(v[0])} className="mt-3" />
-            <p className="mt-1 text-xs text-muted-foreground">Longer runs explore more solutions. For the best results, set to 3 minutes.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Longer runs explore more solutions. For optimal results, set to 3 minutes.</p>
           </div>
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
