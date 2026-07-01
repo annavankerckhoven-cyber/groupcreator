@@ -235,7 +235,6 @@ export type Database = {
           created_at: string
           id: string
           is_favorite: boolean
-          name: string
           status: string
           time_limit_seconds: number
         }
@@ -245,7 +244,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_favorite?: boolean
-          name?: string
           status?: string
           time_limit_seconds: number
         }
@@ -255,7 +253,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_favorite?: boolean
-          name?: string
           status?: string
           time_limit_seconds?: number
         }

@@ -28,7 +28,7 @@ function ProjectPage() {
       const [proj, students, runs] = await Promise.all([
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
-        supabase.from("runs").select("id, name, created_at, time_limit_seconds, status, is_favorite").eq("config_id", configId).order("created_at", { ascending: false }),
+        supabase.from("runs").select("id, created_at, time_limit_seconds, status, is_favorite").eq("config_id", configId).order("created_at", { ascending: false }),
       ]);
       return { project: proj.data, students: students.data ?? [], runs: runs.data ?? [] };
     },
@@ -71,7 +71,6 @@ function ProjectPage() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 font-medium">
                         {r.is_favorite && <Heart className="h-4 w-4 fill-primary text-primary" />}
-                        <span>{r.name?.trim() ? r.name : "Untitled run"}</span>
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {new Date(r.created_at).toLocaleString()}
@@ -119,7 +118,6 @@ function NewRunDialog({
   onCreated: () => void;
 }) {
   const [absent, setAbsent] = useState<Set<string>>(new Set());
-  const [name, setName] = useState("");
   const [seconds, setSeconds] = useState(180);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -131,50 +129,22 @@ function NewRunDialog({
   }
 
   async function createAndStart() {
-    if (loading) return;
-
     setLoading(true);
     try {
-      const trimmedName = name.trim();
-      const insertPayload = {
-        config_id: configId,
-        time_limit_seconds: seconds,
-        status: "pending",
-        name: trimmedName || "Untitled run",
-      };
-
       const { data: run, error } = await supabase
         .from("runs")
-        .insert(insertPayload)
+        .insert({ config_id: configId, time_limit_seconds: seconds, status: "pending" })
         .select("id")
         .single();
-
-      if (error) {
-        console.error("Failed to create run", error);
-        throw new Error(error.message || "Failed to create run");
-      }
-
-      if (!run?.id) {
-        throw new Error("The run could not be created.");
-      }
-
+      if (error || !run) throw error ?? new Error("Failed");
       if (absent.size > 0) {
-        const { error: absentError } = await supabase.from("run_absent").insert(
+        await supabase.from("run_absent").insert(
           Array.from(absent).map((sid) => ({ run_id: run.id, student_id: sid })),
         );
-
-        if (absentError) {
-          console.error("Failed to save absent students", absentError);
-        }
       }
-
       onCreated();
       onOpenChange(false);
-      navigate({
-        to: "/classes/$id/configs/$configId/runs/$runId",
-        params: { id: classId, configId, runId: run.id },
-        search: { autostart: 1 },
-      });
+      navigate({ to: "/classes/$id/configs/$configId/runs/$runId", params: { id: classId, configId, runId: run.id }, search: { autostart: 1 } });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -192,10 +162,6 @@ function NewRunDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
-          <div>
-            <Label>Run name</Label>
-            <Input className="mt-2" id="runname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter the run name" required />
-          </div>
           <div>
             <Label>Absent students (excluded from this run)</Label>
             <div className="mt-2 max-h-56 space-y-1.5 overflow-auto rounded-md border border-border p-3">
