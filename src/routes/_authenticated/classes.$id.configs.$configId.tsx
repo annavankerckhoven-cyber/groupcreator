@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Play, Heart, ChevronRight, AlertTriangle } from "lucide-react";
+import { Plus, Play, Heart, AlertTriangle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId")({
@@ -58,31 +58,38 @@ function ProjectPage() {
           {data.runs.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">No runs yet. Create one to compute groups.</p>
           ) : (
-            <ul className="divide-y divide-border">
+            <div className="grid gap-4 sm:grid-cols-2">
               {data.runs.map((r) => (
-                <li key={r.id}>
-                  <Link
-                    to="/classes/$id/configs/$configId/runs/$runId"
-                    params={{ id, configId, runId: r.id }}
-                    className="flex items-center justify-between -mx-2 rounded-md px-2 py-3 hover:bg-muted/40"
-                  >
-                    <div className="flex items-center gap-2">
-                      {r.is_favorite && <Heart className="h-4 w-4 fill-primary text-primary" />}
-                      <div>
-                        <div className="font-medium">
-                          {new Date(r.created_at).toLocaleString()}{" "}
-                          {r.status !== "completed" && <span className="ml-1 text-xs text-muted-foreground">({r.status})</span>}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {r.time_limit_seconds}s
-                        </div>
+                <Link
+                  key={r.id}
+                  to="/classes/$id/configs/$configId/runs/$runId"
+                  params={{ id, configId, runId: r.id }}
+                  className="group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-muted/30"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 font-medium">
+                        {r.is_favorite && <Heart className="h-4 w-4 fill-primary text-primary" />}
+                        {new Date(r.created_at).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {r.time_limit_seconds}s time limit
+                      </div>
+                      <div className="text-xs">
+                        <span className={
+                          r.status === "completed" ? "text-primary" :
+                          r.status === "running" ? "text-amber-600" :
+                          r.status === "error" ? "text-destructive" : "text-muted-foreground"
+                        }>
+                          {r.status}
+                        </span>
                       </div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </Link>
-                </li>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+                </Link>
               ))}
-            </ul>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -134,7 +141,7 @@ function NewRunDialog({
       }
       onCreated();
       onOpenChange(false);
-      navigate({ to: "/classes/$id/configs/$configId/runs/$runId", params: { id: classId, configId, runId: run.id }, search: { autostart: 1 } as never });
+      navigate({ to: "/classes/$id/configs/$configId/runs/$runId", params: { id: classId, configId, runId: run.id }, search: { autostart: 1 } });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

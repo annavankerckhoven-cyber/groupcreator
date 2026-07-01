@@ -16,6 +16,8 @@ import { Route as STokenRouteImport } from './routes/s.$token'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClassesIdRouteImport } from './routes/_authenticated/classes.$id'
 import { Route as AuthenticatedClassesIdConfigsConfigIdRouteImport } from './routes/_authenticated/classes.$id.configs.$configId'
+import { Route as AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteImport } from './routes/_authenticated/classes.$id.configs.$configId.runs.$runId'
+import { Route as AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRouteImport } from './routes/_authenticated/classes.$id.configs.$configId.runs.$runId.distributions.$distId.present'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -52,6 +54,20 @@ const AuthenticatedClassesIdConfigsConfigIdRoute =
     path: '/configs/$configId',
     getParentRoute: () => AuthenticatedClassesIdRoute,
   } as any)
+const AuthenticatedClassesIdConfigsConfigIdRunsRunIdRoute =
+  AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteImport.update({
+    id: '/runs/$runId',
+    path: '/runs/$runId',
+    getParentRoute: () => AuthenticatedClassesIdConfigsConfigIdRoute,
+  } as any)
+const AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute =
+  AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRouteImport.update(
+    {
+      id: '/distributions/$distId/present',
+      path: '/distributions/$distId/present',
+      getParentRoute: () => AuthenticatedClassesIdConfigsConfigIdRunsRunIdRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,7 +75,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
   '/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
-  '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRoute
+  '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
+  '/classes/$id/configs/$configId/runs/$runId': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
+  '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,7 +85,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
   '/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
-  '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRoute
+  '/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
+  '/classes/$id/configs/$configId/runs/$runId': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
+  '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,7 +97,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$token': typeof STokenRoute
   '/_authenticated/classes/$id': typeof AuthenticatedClassesIdRouteWithChildren
-  '/_authenticated/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRoute
+  '/_authenticated/classes/$id/configs/$configId': typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
+  '/_authenticated/classes/$id/configs/$configId/runs/$runId': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
+  '/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,6 +110,8 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/classes/$id'
     | '/classes/$id/configs/$configId'
+    | '/classes/$id/configs/$configId/runs/$runId'
+    | '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -96,6 +120,8 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/classes/$id'
     | '/classes/$id/configs/$configId'
+    | '/classes/$id/configs/$configId/runs/$runId'
+    | '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
   id:
     | '__root__'
     | '/'
@@ -105,6 +131,8 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/_authenticated/classes/$id'
     | '/_authenticated/classes/$id/configs/$configId'
+    | '/_authenticated/classes/$id/configs/$configId/runs/$runId'
+    | '/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,17 +193,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassesIdConfigsConfigIdRouteImport
       parentRoute: typeof AuthenticatedClassesIdRoute
     }
+    '/_authenticated/classes/$id/configs/$configId/runs/$runId': {
+      id: '/_authenticated/classes/$id/configs/$configId/runs/$runId'
+      path: '/runs/$runId'
+      fullPath: '/classes/$id/configs/$configId/runs/$runId'
+      preLoaderRoute: typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteImport
+      parentRoute: typeof AuthenticatedClassesIdConfigsConfigIdRoute
+    }
+    '/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present': {
+      id: '/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
+      path: '/distributions/$distId/present'
+      fullPath: '/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present'
+      preLoaderRoute: typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRouteImport
+      parentRoute: typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRoute
+    }
   }
 }
 
+interface AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteChildren {
+  AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute: typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute
+}
+
+const AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteChildren: AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteChildren =
+  {
+    AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute:
+      AuthenticatedClassesIdConfigsConfigIdRunsRunIdDistributionsDistIdPresentRoute,
+  }
+
+const AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren =
+  AuthenticatedClassesIdConfigsConfigIdRunsRunIdRoute._addFileChildren(
+    AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteChildren,
+  )
+
+interface AuthenticatedClassesIdConfigsConfigIdRouteChildren {
+  AuthenticatedClassesIdConfigsConfigIdRunsRunIdRoute: typeof AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren
+}
+
+const AuthenticatedClassesIdConfigsConfigIdRouteChildren: AuthenticatedClassesIdConfigsConfigIdRouteChildren =
+  {
+    AuthenticatedClassesIdConfigsConfigIdRunsRunIdRoute:
+      AuthenticatedClassesIdConfigsConfigIdRunsRunIdRouteWithChildren,
+  }
+
+const AuthenticatedClassesIdConfigsConfigIdRouteWithChildren =
+  AuthenticatedClassesIdConfigsConfigIdRoute._addFileChildren(
+    AuthenticatedClassesIdConfigsConfigIdRouteChildren,
+  )
+
 interface AuthenticatedClassesIdRouteChildren {
-  AuthenticatedClassesIdConfigsConfigIdRoute: typeof AuthenticatedClassesIdConfigsConfigIdRoute
+  AuthenticatedClassesIdConfigsConfigIdRoute: typeof AuthenticatedClassesIdConfigsConfigIdRouteWithChildren
 }
 
 const AuthenticatedClassesIdRouteChildren: AuthenticatedClassesIdRouteChildren =
   {
     AuthenticatedClassesIdConfigsConfigIdRoute:
-      AuthenticatedClassesIdConfigsConfigIdRoute,
+      AuthenticatedClassesIdConfigsConfigIdRouteWithChildren,
   }
 
 const AuthenticatedClassesIdRouteWithChildren =
