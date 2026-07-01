@@ -131,23 +131,50 @@ function NewRunDialog({
   }
 
   async function createAndStart() {
+    if (loading) return;
+
     setLoading(true);
     try {
       const trimmedName = name.trim();
+      const insertPayload = {
+        config_id: configId,
+        time_limit_seconds: seconds,
+        status: "pending",
+        name: trimmedName || "Untitled run",
+      };
+
       const { data: run, error } = await supabase
         .from("runs")
-        .insert({ config_id: configId, time_limit_seconds: seconds, status: "pending", name: trimmedName || "Untitled run" })
+        .insert(insertPayload)
         .select("id")
         .single();
-      if (error || !run) throw error ?? new Error("Failed");
+
+      if (error) {
+        console.error("Failed to create run", error);
+        throw new Error(error.message || "Failed to create run");
+      }
+
+      if (!run?.id) {
+        throw new Error("The run could not be created.");
+      }
+
       if (absent.size > 0) {
-        await supabase.from("run_absent").insert(
+        const { error: absentError } = await supabase.from("run_absent").insert(
           Array.from(absent).map((sid) => ({ run_id: run.id, student_id: sid })),
         );
+
+        if (absentError) {
+          console.error("Failed to save absent students", absentError);
+        }
       }
+
       onCreated();
       onOpenChange(false);
-      navigate({ to: "/classes/$id/configs/$configId/runs/$runId", params: { id: classId, configId, runId: run.id }, search: { autostart: 1 } });
+      navigate({
+        to: "/classes/$id/configs/$configId/runs/$runId",
+        params: { id: classId, configId, runId: run.id },
+        search: { autostart: 1 },
+      });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
