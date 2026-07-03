@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Play, Heart, AlertTriangle, ArrowRight } from "lucide-react";
+import { Plus, Play, Heart, AlertTriangle, ArrowRight, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
@@ -21,6 +21,9 @@ function ProjectPage() {
   const { id, configId } = Route.useParams();
   const qc = useQueryClient();
   const [runOpen, setRunOpen] = useState(false);
+  const [runToDelete, setRunToDelete] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["project", configId],
@@ -65,8 +68,15 @@ function ProjectPage() {
                   key={r.id}
                   to="/classes/$id/configs/$configId/runs/$runId"
                   params={{ id, configId, runId: r.id }}
-                  className="group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-muted/30"
+                  className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-muted/30"
                 >
+                  <button
+                    aria-label="Delete run"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRunToDelete(r.id); setConfirmOpen(true); }}
+                    className="absolute right-3 top-3 z-10 rounded-md p-1 text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </button>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 font-medium">
@@ -96,6 +106,35 @@ function ProjectPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={confirmOpen} onOpenChange={(o) => { if (!o) { setConfirmOpen(false); setRunToDelete(null); } else setConfirmOpen(true); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Delete run</DialogTitle>
+            <DialogDescription>Are you sure you want to delete this run? The results will no longer be available.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-2">
+              <Button disabled={deleting} onClick={() => { setConfirmOpen(false); setRunToDelete(null); }}>Cancel</Button>
+              <Button disabled={deleting} onClick={async () => {
+                if (!runToDelete) return;
+                setDeleting(true);
+                try {
+                  const { error } = await supabase.from("runs").delete().eq("id", runToDelete);
+                  if (error) throw error;
+                  qc.invalidateQueries({ queryKey: ["project", configId] });
+                } catch (e) {
+                  toast.error((e as Error).message);
+                } finally {
+                  setDeleting(false);
+                  setConfirmOpen(false);
+                  setRunToDelete(null);
+                }
+              }}>{deleting ? "Deleting…" : "Confirm"}</Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <NewRunDialog
         open={runOpen}
