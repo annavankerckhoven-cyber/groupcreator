@@ -24,6 +24,26 @@ function ProjectPage() {
   const [runToDelete, setRunToDelete] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState<string | null>(null);
+
+  async function toggleRunFavorite(runId: string, nextFavorite: boolean) {
+    setFavoriteLoading(runId);
+    try {
+      if (nextFavorite) {
+        await supabase.from("runs").update({ is_favorite: false }).eq("config_id", configId);
+        const { error } = await supabase.from("runs").update({ is_favorite: true }).eq("id", runId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("runs").update({ is_favorite: false }).eq("id", runId);
+        if (error) throw error;
+      }
+      qc.invalidateQueries({ queryKey: ["project", configId] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setFavoriteLoading(null);
+    }
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["project", configId],
@@ -68,12 +88,27 @@ function ProjectPage() {
                   key={r.id}
                   to="/classes/$id/configs/$configId/runs/$runId"
                   params={{ id, configId, runId: r.id }}
-                  className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-muted/30"
+                  className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30"
                 >
+                  <button
+                    aria-label={r.is_favorite ? "Add to favorites" : "Remove from favorites"}
+                    disabled={favoriteLoading === r.id}
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      await toggleRunFavorite(r.id, !r.is_favorite);
+                    }}
+                    className="absolute right-3 top-3 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 group-hover:opacity-100"
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${r.is_favorite ? "fill-primary text-primary" : "text-muted-foreground"}`}
+                      fill={r.is_favorite ? "currentColor" : "none"}
+                    />
+                  </button>
                   <button
                     aria-label="Delete run"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRunToDelete(r.id); setConfirmOpen(true); }}
-                    className="absolute right-3 top-3 z-10 rounded-md p-1 text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
+                    className="absolute right-3 top-12 z-10 rounded-md p-1 text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
                   >
                     <Trash className="h-4 w-4" />
                   </button>
@@ -94,11 +129,10 @@ function ProjectPage() {
                           r.status === "running" ? "text-amber-600" :
                           r.status === "error" ? "text-destructive" : "text-muted-foreground"
                         }>
-                          {r.status}
+                          {r.status === "completed" ? "Succeeded. Click to view results." : r.status}
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                   </div>
                 </Link>
               ))}
