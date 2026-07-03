@@ -22,9 +22,25 @@ export type ProgressFn = (m: ProgressMsg) => void;
 /** Plan group sizes from N students, target size S, and policy. */
 export function computeGroupSizes(n: number, size: number, policy: "plus" | "minus"): number[] {
   if (n <= 0) return [];
+  if (size <= 1) return Array.from({ length: n }, () => 1);
   if (n <= size) return [n];
+
+  const balancedSizes = (groups: number) => {
+    const count = Math.max(1, Math.min(n, groups));
+    const base = Math.floor(n / count);
+    const extra = n - base * count;
+    return [...Array(extra).fill(base + 1), ...Array(count - extra).fill(base)];
+  };
+
   if (policy === "plus") {
-    const g = Math.floor(n / size);
+    let g = Math.floor(n / size);
+    while (n > g * (size + 1)) g++;
+
+    // Some combinations cannot be represented using only size/size+1 groups
+    // (for example 8 students with a target group size of 6). Fall back to the
+    // closest balanced distribution instead of crashing the optimizer.
+    if (n < g * size) return balancedSizes(g);
+
     const rem = n - g * size;
     // `rem` groups of size+1, the rest of size
     return [...Array(rem).fill(size + 1), ...Array(g - rem).fill(size)];
@@ -33,10 +49,8 @@ export function computeGroupSizes(n: number, size: number, policy: "plus" | "min
   const g = Math.ceil(n / size);
   const shortage = g * size - n;
   if (shortage > g) {
-    // can't achieve with only "-1" per group → fall back to plus distribution
-    const gg = Math.floor(n / size);
-    const rem = n - gg * size;
-    return [...Array(rem).fill(size + 1), ...Array(gg - rem).fill(size)];
+    // Can't achieve with only size/size-1 groups; use the closest balanced split.
+    return balancedSizes(g);
   }
   return [...Array(shortage).fill(size - 1), ...Array(g - shortage).fill(size)];
 }

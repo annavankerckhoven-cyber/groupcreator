@@ -14,7 +14,7 @@ import OptimizerWorker from "@/workers/optimizer.worker?worker";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/runs/$runId")({
   head: () => ({ meta: [{ title: "Run — Group Creator" }] }),
-  validateSearch: z.object({ autostart: z.number().optional() }),
+  validateSearch: z.object({ autostart: z.coerce.number().optional().catch(undefined) }),
   component: RunPage,
 });
 
@@ -76,12 +76,20 @@ function RunPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, autostart]);
 
+  async function markRunError(message: string) {
+    const { error } = await supabase.from("runs").update({ status: "error" }).eq("id", runId);
+    if (error) toast.error(`${message}: ${error.message}`);
+    await qc.invalidateQueries({ queryKey: ["run", runId] });
+    refetch();
+  }
+
   async function startRun() {
     if (!data) return;
     const nameById = new Map(data.students.map((s) => [s.id, s.name]));
     const activeIds = data.students.map((s) => s.id).filter((sid) => !data.absent.has(sid));
     if (activeIds.length < data.project.group_size) {
       toast.error("Not enough present students to form a group.");
+      await markRunError("Run could not start");
       startedRef.current = false;
       return;
     }
@@ -92,18 +100,23 @@ function RunPage() {
 
     setRunning(true);
     setProgress({ elapsedMs: 0, iterations: 0, bestScore: 0 });
-    await supabase.from("runs").update({ status: "running" }).eq("id", runId);
-    qc.invalidateQueries({ queryKey: ["run", runId] });
+    const { error: statusError } = await supabase.from("runs").update({ status: "running" }).eq("id", runId);
+    if (statusError) {
+      toast.error(`Failed to start run: ${statusError.message}`);
+      setRunning(false);
+      startedRef.current = false;
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["run", runId] });
 
     let worker: Worker;
     try {
       worker = new OptimizerWorker();
     } catch (err) {
       toast.error("Failed to start optimizer: " + (err as Error).message);
-      await supabase.from("runs").update({ status: "error" }).eq("id", runId);
+      await markRunError("Optimizer failed to start");
       setRunning(false);
       startedRef.current = false;
-      refetch();
       return;
     }
     workerRef.current = worker;
@@ -117,11 +130,10 @@ function RunPage() {
 
     worker.onerror = async (e) => {
       toast.error("Optimizer crashed: " + (e.message || "unknown error"));
-      await supabase.from("runs").update({ status: "error" }).eq("id", runId);
+      await markRunError("Optimizer crashed");
       setRunning(false);
       worker.terminate();
       startedRef.current = false;
-      refetch();
     };
 
     worker.onmessage = async (e: MessageEvent<WorkerOutbound>) => {
@@ -129,15 +141,17 @@ function RunPage() {
       if (msg.type === "progress") setProgress({ elapsedMs: msg.elapsedMs, iterations: msg.iterations, bestScore: msg.bestScore });
       else if (msg.type === "error") {
         toast.error(msg.error);
-        await supabase.from("runs").update({ status: "error" }).eq("id", runId);
+        await markRunError("Optimizer failed");
         setRunning(false);
         worker.terminate();
+        startedRef.current = false;
       } else if (msg.type === "done") {
         try {
           await persistResults(msg.result, nameById);
           toast.success("Run complete");
         } catch (err) {
           toast.error((err as Error).message);
+          await markRunError("Results could not be saved");
         } finally {
           setRunning(false);
           worker.terminate();
@@ -215,15 +229,19 @@ function RunPage() {
         </Button>
       </div>
 
-      {(status === "pending" || status === "error") && !running && (
+      {(status === "pending" || status === "running" || status === "error") && !running && (
         <Card>
           <CardContent className="flex flex-col items-start gap-3 py-6">
             <div className="flex items-start gap-2 text-amber-900 dark:text-amber-200">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <p className="text-sm">Don't close this tab while the run is computing. The optimization runs in your browser.</p>
+              <p className="text-sm">
+                {status === "running"
+                  ? "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results."
+                  : "Don't close this tab while the run is computing. The optimization runs in your browser."}
+              </p>
             </div>
             <Button onClick={() => { startedRef.current = true; void startRun(); }}>
-              <Play className="mr-1.5 h-4 w-4" /> Start run
+              <Play className="mr-1.5 h-4 w-4" /> {status === "running" || status === "error" ? "Restart run" : "Start run"}
             </Button>
           </CardContent>
         </Card>
