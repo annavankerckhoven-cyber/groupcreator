@@ -10,6 +10,7 @@ import { Heart, Play, AlertTriangle, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import type { Edge, OptimizerInput, TopResult } from "@/lib/optimizer";
 import type { WorkerOutbound } from "@/workers/optimizer.worker";
+import OptimizerWorker from "@/workers/optimizer.worker?worker";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/runs/$runId")({
   head: () => ({ meta: [{ title: "Run — Group Creator" }] }),
@@ -81,6 +82,7 @@ function RunPage() {
     const activeIds = data.students.map((s) => s.id).filter((sid) => !data.absent.has(sid));
     if (activeIds.length < data.project.group_size) {
       toast.error("Not enough present students to form a group.");
+      startedRef.current = false;
       return;
     }
     const activeSet = new Set(activeIds);
@@ -91,8 +93,19 @@ function RunPage() {
     setRunning(true);
     setProgress({ elapsedMs: 0, iterations: 0, bestScore: 0 });
     await supabase.from("runs").update({ status: "running" }).eq("id", runId);
+    qc.invalidateQueries({ queryKey: ["run", runId] });
 
-    const worker = new Worker(new URL("../../workers/optimizer.worker.ts", import.meta.url), { type: "module" });
+    let worker: Worker;
+    try {
+      worker = new OptimizerWorker();
+    } catch (err) {
+      toast.error("Failed to start optimizer: " + (err as Error).message);
+      await supabase.from("runs").update({ status: "error" }).eq("id", runId);
+      setRunning(false);
+      startedRef.current = false;
+      refetch();
+      return;
+    }
     workerRef.current = worker;
     const input: OptimizerInput = {
       studentIds: activeIds,
@@ -100,6 +113,15 @@ function RunPage() {
       sizePolicy: data.project.size_policy as "plus" | "minus",
       edges,
       timeLimitMs: data.run.time_limit_seconds * 1000,
+    };
+
+    worker.onerror = async (e) => {
+      toast.error("Optimizer crashed: " + (e.message || "unknown error"));
+      await supabase.from("runs").update({ status: "error" }).eq("id", runId);
+      setRunning(false);
+      worker.terminate();
+      startedRef.current = false;
+      refetch();
     };
 
     worker.onmessage = async (e: MessageEvent<WorkerOutbound>) => {
