@@ -91,7 +91,7 @@ function ProjectPage() {
                   className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30"
                 >
                   <button
-                    aria-label={r.is_favorite ? "Add to favorites" : "Remove from favorites"}
+                    aria-label={r.is_favorite ? "Remove from favorites" : "Add to favorites"}
                     disabled={favoriteLoading === r.id}
                     onClick={async (e) => {
                       e.preventDefault();
@@ -164,7 +164,7 @@ function ProjectPage() {
                   setConfirmOpen(false);
                   setRunToDelete(null);
                 }
-              }}>{deleting ? "Deleting…" : "Confirm"}</Button>
+              }}>Confirm</Button>
             </div>
           </DialogFooter>
         </DialogContent>
