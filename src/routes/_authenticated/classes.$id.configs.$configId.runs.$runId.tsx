@@ -229,15 +229,19 @@ function RunPage() {
         </Button>
       </div>
 
-      {(status === "pending" || status === "error") && !running && (
+      {(status === "pending" || status === "running" || status === "error") && !running && (
         <Card>
           <CardContent className="flex flex-col items-start gap-3 py-6">
             <div className="flex items-start gap-2 text-amber-900 dark:text-amber-200">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <p className="text-sm">Don't close this tab while the run is computing. The optimization runs in your browser.</p>
+              <p className="text-sm">
+                {status === "running"
+                  ? "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results."
+                  : "Don't close this tab while the run is computing. The optimization runs in your browser."}
+              </p>
             </div>
             <Button onClick={() => { startedRef.current = true; void startRun(); }}>
-              <Play className="mr-1.5 h-4 w-4" /> Start run
+              <Play className="mr-1.5 h-4 w-4" /> {status === "running" || status === "error" ? "Restart run" : "Start run"}
             </Button>
           </CardContent>
         </Card>
