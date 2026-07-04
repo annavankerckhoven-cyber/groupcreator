@@ -233,6 +233,7 @@ export type Database = {
           completed_at: string | null
           config_id: string
           created_at: string
+          error_message: string | null
           id: string
           is_favorite: boolean
           status: string
@@ -242,6 +243,7 @@ export type Database = {
           completed_at?: string | null
           config_id: string
           created_at?: string
+          error_message?: string | null
           id?: string
           is_favorite?: boolean
           status?: string
@@ -251,6 +253,7 @@ export type Database = {
           completed_at?: string | null
           config_id?: string
           created_at?: string
+          error_message?: string | null
           id?: string
           is_favorite?: boolean
           status?: string

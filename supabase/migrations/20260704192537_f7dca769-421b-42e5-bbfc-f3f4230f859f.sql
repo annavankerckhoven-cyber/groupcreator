@@ -1,0 +1,1 @@
+ALTER TABLE public.runs ADD COLUMN IF NOT EXISTS error_message text;
