@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Sparkles, Heart, Mail } from "lucide-react";
+import { Users, Sparkles, Heart, Mail, Coffee, Home, CircleUserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -31,27 +31,36 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-6">
         <div className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
             <Users className="h-4 w-4" />
           </div>
           <span className="text-lg font-semibold tracking-tight">Group Creator</span>
         </div>
-        <Button asChild variant="outline">
-          <a
-            href="https://www.buymeacoffee.com/annavankerckhoven"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Buy me a coffee
-          </a>
-        </Button>
-        <Button asChild variant="default">
-          <Link to={signedIn ? "/dashboard" : "/auth"}>
-            {signedIn ? "Go to dashboard" : "Log in / Sign up"}
-          </Link>
-        </Button>
+
+        <div className="ml-auto flex items-center gap-2">
+          <Button asChild variant="outline" className="shrink-0">
+            <a
+              href="https://www.buymeacoffee.com/annavankerckhoven"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2"
+              aria-label="Buy me a coffee"
+            >
+              <Coffee className="h-4 w-4" />
+              <span className="hidden sm:inline">Buy me a coffee</span>
+            </a>
+          </Button>
+          <Button asChild variant="default" className="shrink-0">
+            <Link to={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center gap-2">
+              {signedIn ? <Home className="h-4 w-4" /> : <CircleUserRound className="h-4 w-4" />}
+              <span className="hidden sm:inline">
+                {signedIn ? "Go to dashboard" : "Log in / Sign up"}
+              </span>
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-6">
