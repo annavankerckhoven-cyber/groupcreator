@@ -54,17 +54,17 @@ function HowItWorksPage() {
 
             <section className="space-y-2">
               <h2 className="text-2xl font-semibold">4. Run the grouping process</h2>
-              <h3 className="text-2xl font-semibold">How to start a run</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">How to start a run</h3>
               <p className="text-base leading-7 text-muted-foreground">
                 Open the project page and start a new run. Indicate which students are currently absent (if applicable), so they won't be added to any groups. The application will compute possible group distributions using the student preferences. Indicate the time the run should take. The longer the run, the more distributions are evaluated, increasing the changes of finding the optimal results. Once a run has comleted, you can review the results.
               </p>
-              <h3 className="text-2xl font-semibold">Algoritm used to find optimal distributions</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Algorithm used to find optimal distributions</h3>
               <p className="text-base leading-7 text-muted-foreground">
                 During the run, many distributions are generated using an algoritm specialized for large optimalization problems. To give an illustration: to divide a group of 20 people into groups of 4, there are 2.546.168.625 possible distributions. The algorithm will evaluate as much as possible distributions (optimized based on the students responses) within the time limit you set, and store the best ones.
                 Therefore a longer run gives you a better chance of finding the optimal distribution, but even a short run will give you good results. 
                 While running you can see the score of the best distribution found so far. The score is a measure of how well the student preferences are respected. The final results will also show the score of each of the best distribution found.
               </p>
-              <h3 className="text-2xl font-semibold">Distribution scores</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Distribution scores</h3>
               <p className="text-base leading-7 text-muted-foreground">
                 The score of a distribution is calculated as follows:
               </p>
