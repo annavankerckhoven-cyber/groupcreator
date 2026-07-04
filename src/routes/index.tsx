@@ -40,7 +40,7 @@ function Index() {
         </div>
 
         <div className="ml-auto flex flex-nowrap items-center gap-2">
-          <Button asChild variant={signedIn ? "default" : "outline"} className="shrink-0 whitespace-nowrap">
+          <Button asChild variant="outline" className="shrink-0 whitespace-nowrap">
             <a
               href="https://www.buymeacoffee.com/annavankerckhoven"
               target="_blank"
