@@ -37,15 +37,18 @@ function StudentForm() {
     queryFn: () => getForm({ data: { token, studentId: studentId || undefined } }),
   });
 
-  // Hydrate prefs when student selection or data changes
+  // Start from neutral preferences so prior submissions are never exposed in the UI.
   useEffect(() => {
-    if (!data?.ok || !studentId) return;
+    if (!data?.ok || !studentId) {
+      setPrefs(new Map());
+      return;
+    }
+
     const m = new Map<string, Pref>();
     for (const s of data.students) {
       if (s.id === studentId) continue;
       m.set(s.id, "neutral");
     }
-    for (const p of data.myPrefs) m.set(p.target_student_id, p.kind);
     setPrefs(m);
   }, [studentId, data]);
 
@@ -130,12 +133,6 @@ function StudentForm() {
                 ))}
               </SelectContent>
             </Select>
-            {studentId && submittedIds.has(studentId) && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                You've submitted before — your previous answers are loaded below. You can change
-                them and resubmit.
-              </p>
-            )}
           </CardContent>
         </Card>
 

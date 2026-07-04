@@ -36,29 +36,12 @@ export const getPublicForm = createServerFn({ method: "GET" })
       .select("student_id, submitted_at")
       .eq("class_id", classId);
 
-    let myPrefs: { target_student_id: string; kind: "with" | "avoid" }[] = [];
-    if (data.studentId) {
-      const { data: sub } = await sb
-        .from("submissions")
-        .select("id")
-        .eq("class_id", classId)
-        .eq("student_id", data.studentId)
-        .maybeSingle();
-      if (sub) {
-        const { data: prefs } = await sb
-          .from("preferences")
-          .select("target_student_id, kind")
-          .eq("submission_id", sub.id);
-        myPrefs = (prefs ?? []) as { target_student_id: string; kind: "with" | "avoid" }[];
-      }
-    }
-
     return {
       ok: true as const,
       className,
       students: students ?? [],
       submissions: submissions ?? [],
-      myPrefs,
+      myPrefs: [],
     };
   });
 
