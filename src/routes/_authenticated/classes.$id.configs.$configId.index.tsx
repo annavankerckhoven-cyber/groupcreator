@@ -195,9 +195,6 @@ function RunCardLink({
         className="block pr-12"
       >
         <div className="space-y-1">
-          <div className="flex min-h-5 items-center gap-1.5 font-medium">
-            {run.is_favorite && <Heart className="h-4 w-4 fill-primary text-primary" />}
-          </div>
           <div className="text-xs text-muted-foreground">
             {new Date(run.created_at).toLocaleString()}
           </div>
@@ -217,7 +214,11 @@ function RunCardLink({
         aria-label={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
         title={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
         disabled={favoriteLoading}
-        onClick={onToggleFavorite}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onToggleFavorite();
+        }}
         className="absolute right-3 top-3 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 disabled:opacity-50"
       >
         <Heart
