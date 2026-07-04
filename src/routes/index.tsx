@@ -80,12 +80,12 @@ function Index() {
             <Button asChild size="lg">
               <Link to={signedIn ? "/dashboard" : "/auth"}>Get started — completely free</Link>
             </Button>
-            <a
-              href="#how"
+            <Link
+              to="/how"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               How it works →
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -93,7 +93,7 @@ function Index() {
           {[
             {
               title: "Create a class",
-              body: "Paste your roster or import a CSV/Excel file. Done in 30 seconds.",
+              body: "Enter student names or import a CSV/Excel file. Done in 30 seconds.",
             },
             {
               title: "Share a form",
