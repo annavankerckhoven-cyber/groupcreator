@@ -39,21 +39,21 @@ function Index() {
           <span className="text-lg font-semibold tracking-tight">Group Creator</span>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <Button asChild variant="outline" className="shrink-0">
+        <div className="ml-auto flex flex-nowrap items-center gap-2">
+          <Button asChild variant={signedIn ? "default" : "outline"} className="shrink-0 whitespace-nowrap">
             <a
               href="https://www.buymeacoffee.com/annavankerckhoven"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
+              className="inline-flex items-center gap-2 whitespace-nowrap"
               aria-label="Buy me a coffee"
             >
               <Coffee className="h-4 w-4" />
               <span className="hidden sm:inline">Buy me a coffee</span>
             </a>
           </Button>
-          <Button asChild variant="default" className="shrink-0">
-            <Link to={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center gap-2">
+          <Button asChild variant="default" className="shrink-0 whitespace-nowrap">
+            <Link to={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center gap-2 whitespace-nowrap">
               {signedIn ? <Home className="h-4 w-4" /> : <CircleUserRound className="h-4 w-4" />}
               <span className="hidden sm:inline">
                 {signedIn ? "Go to dashboard" : "Log in / Sign up"}
