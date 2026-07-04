@@ -12,13 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -43,7 +36,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [pasted, setPasted] = useState("");
   const [parsedRows, setParsedRows] = useState<Record<string, string>[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
-  const [pickedColumn, setPickedColumn] = useState<string>("");
+  const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   function reset() {
@@ -51,7 +44,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     setPasted("");
     setParsedRows([]);
     setColumns([]);
-    setPickedColumn("");
+    setSelectedCells([]);
   }
 
   function handleFile(file: File) {
@@ -66,7 +59,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
           const cols = Object.keys(rows[0]);
           setParsedRows(rows);
           setColumns(cols);
-          setPickedColumn(cols[0]);
+          setSelectedCells([]);
         },
         error: (err) => toast.error("Parse error: " + err.message),
       });
@@ -82,7 +75,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
           const cols = Object.keys(rows[0]);
           setParsedRows(rows);
           setColumns(cols);
-          setPickedColumn(cols[0]);
+          setSelectedCells([]);
         } catch (err) {
           toast.error("Could not read file");
         }
@@ -93,9 +86,21 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     }
   }
 
+  function toggleCell(rowIndex: number, column: string) {
+    const key = `${rowIndex}:${column}`;
+    setSelectedCells((prev) =>
+      prev.includes(key) ? prev.filter((cell) => cell !== key) : [...prev, key],
+    );
+  }
+
   function namesFromImport(): string[] {
-    if (!pickedColumn) return [];
-    return parsedRows.map((r) => String(r[pickedColumn] ?? "").trim()).filter(Boolean);
+    return selectedCells
+      .map((key) => {
+        const [rowIndex, column] = key.split(":");
+        const row = parsedRows[Number(rowIndex)];
+        return String(row?.[column] ?? "").trim();
+      })
+      .filter(Boolean);
   }
 
   function namesFromPaste(): string[] {
@@ -147,7 +152,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>New class</DialogTitle>
-          <DialogDescription>Name your class and add your student roster.</DialogDescription>
+          <DialogDescription>Name your class and add your students.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
@@ -198,25 +203,55 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
             {columns.length > 0 && (
               <>
                 <div className="space-y-1.5">
-                  <Label>Which column has the names?</Label>
-                  <Select value={pickedColumn} onValueChange={setPickedColumn}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {columns.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Click the cells that contain student names</Label>
+                  <div className="max-h-72 overflow-auto rounded-md border border-border bg-card p-2">
+                    <table className="min-w-full border-collapse text-left text-xs">
+                      <thead>
+                        <tr>
+                          {columns.map((column) => (
+                            <th key={column} className="border border-border bg-muted/50 px-2 py-1 font-medium text-muted-foreground">
+                              {column}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsedRows.slice(0, 20).map((row, rowIndex) => (
+                          <tr key={`${rowIndex}`}>
+                            {columns.map((column) => {
+                              const value = String(row[column] ?? "").trim();
+                              const key = `${rowIndex}:${column}`;
+                              const selected = selectedCells.includes(key);
+                              return (
+                                <td key={column} className="border border-border p-1">
+                                  <button
+                                    type="button"
+                                    className={`block w-full rounded px-2 py-1 text-left ${
+                                      selected
+                                        ? "bg-primary text-primary-foreground"
+                                        : value
+                                          ? "bg-background hover:bg-muted"
+                                          : "bg-muted/40 text-muted-foreground"
+                                    }`}
+                                    onClick={() => value && toggleCell(rowIndex, column)}
+                                    disabled={!value}
+                                  >
+                                    {value || "—"}
+                                  </button>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <div className="rounded-md border border-border bg-card p-3 text-xs">
                   <div className="mb-1 font-medium text-muted-foreground">
-                    Preview — {namesFromImport().length} students
+                    Selected — {namesFromImport().length} students
                   </div>
-                  <div className="max-h-32 overflow-auto text-foreground">
+                  <div className="max-h-24 overflow-auto text-foreground">
                     {namesFromImport().slice(0, 30).join(", ")}
                     {namesFromImport().length > 30 ? "…" : ""}
                   </div>

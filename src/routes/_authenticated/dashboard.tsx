@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Users, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, Users, Trash2 } from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 import { toast } from "sonner";
 
@@ -98,7 +98,6 @@ function Dashboard() {
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between text-lg">
                         {c.name}
-                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                       </CardTitle>
                       <CardDescription>
                         {count} student{count === 1 ? "" : "s"}
@@ -109,7 +108,7 @@ function Dashboard() {
                 <button
                   type="button"
                   aria-label={`Delete ${c.name}`}
-                  title={`Delete ${c.name}`}
+                  title={`Delete class ${c.name}`}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();

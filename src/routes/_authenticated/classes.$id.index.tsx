@@ -153,7 +153,7 @@ function ClassDetail() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Roster</CardTitle>
+          <CardTitle className="text-base">Students</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border">
