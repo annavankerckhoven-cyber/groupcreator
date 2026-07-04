@@ -32,7 +32,7 @@ function AuthLayout() {
             <span className="text-lg font-semibold tracking-tight">Group Creator</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="shrink-0 whitespace-nowrap">
+            <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
               <a
                 href="https://www.buymeacoffee.com/annavankerckhoven"
                 target="_blank"

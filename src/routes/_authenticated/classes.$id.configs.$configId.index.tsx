@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Play, Heart, AlertTriangle, Trash, Eye } from "lucide-react";
+import { Plus, Play, Heart, AlertTriangle, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/")({
@@ -228,7 +228,7 @@ function RunCardLink({
         onClick={onDelete}
         className="absolute right-3 top-8 z-10 rounded-md p-1 text-destructive transition-opacity hover:bg-destructive/10 focus:opacity-100"
       >
-        <Trash className="h-4 w-4" />
+        <Trash2 className="h-4 w-4" />
       </button>
       </Link>
       {run.status === "completed" && run.favorite_distribution_id && (

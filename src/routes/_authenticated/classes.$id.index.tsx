@@ -36,6 +36,9 @@ function ClassDetail() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [projectOpen, setProjectOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
@@ -74,6 +77,23 @@ function ClassDetail() {
     await supabase.from("submissions").delete().eq("class_id", id).eq("student_id", studentId);
     qc.invalidateQueries({ queryKey: ["class", id] });
     toast.success("Submission cleared");
+  }
+
+  async function deleteProject() {
+    if (!projectToDelete) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("group_configs").delete().eq("id", projectToDelete);
+      if (error) throw error;
+      toast.success("Project deleted");
+      await qc.invalidateQueries({ queryKey: ["class", id] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
+      setProjectToDelete(null);
+    }
   }
 
   if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">Loading…</p>;
@@ -186,26 +206,77 @@ function ClassDetail() {
             <ul className="divide-y divide-border">
               {data.projects.map((p) => (
                 <li key={p.id}>
-                  <Link
-                    to="/classes/$id/configs/$configId"
-                    params={{ id, configId: p.id }}
-                    className="flex items-center justify-between py-3 hover:bg-muted/40 -mx-2 px-2 rounded-md"
-                  >
-                    <div>
-                      <div className="font-medium">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Groups of {p.group_size} ·{" "}
-                        {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
+                  <div className="flex items-center justify-between rounded-md px-2 py-3 hover:bg-muted/40">
+                    <Link
+                      to="/classes/$id/configs/$configId"
+                      params={{ id, configId: p.id }}
+                      className="flex flex-1 items-center justify-between"
+                    >
+                      <div>
+                        <div className="font-medium">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Groups of {p.group_size} ·{" "}
+                          {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
+                        </div>
                       </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </Link>
+                    </Link>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${p.name}`}
+                      title={`Delete ${p.name}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setProjectToDelete(p.id);
+                        setConfirmOpen(true);
+                      }}
+                      className="ml-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmOpen(false);
+            setProjectToDelete(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Delete project</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this project? Its runs and distributions will be removed as well.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={deleting}
+                onClick={() => {
+                  setConfirmOpen(false);
+                  setProjectToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" disabled={deleting} onClick={deleteProject}>
+                {deleting ? "Deleting…" : "Delete"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <NewProjectDialog
         open={projectOpen}
