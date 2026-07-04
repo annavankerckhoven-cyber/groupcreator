@@ -63,11 +63,13 @@ export const getPublicForm = createServerFn({ method: "GET" })
   });
 
 export const submitPublicForm = createServerFn({ method: "POST" })
-  .inputValidator((data: {
-    token: string;
-    studentId: string;
-    preferences: { targetId: string; kind: "with" | "avoid" }[];
-  }) => data)
+  .inputValidator(
+    (data: {
+      token: string;
+      studentId: string;
+      preferences: { targetId: string; kind: "with" | "avoid" }[];
+    }) => data,
+  )
   .handler(async ({ data }) => {
     const sb = serverAdmin();
     const { data: link } = await sb

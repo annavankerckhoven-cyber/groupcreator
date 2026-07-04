@@ -26,7 +26,11 @@ function RunPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const [progress, setProgress] = useState<{ elapsedMs: number; iterations: number; bestScore: number } | null>(null);
+  const [progress, setProgress] = useState<{
+    elapsedMs: number;
+    iterations: number;
+    bestScore: number;
+  } | null>(null);
   const [running, setRunning] = useState(false);
   const startedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
@@ -35,37 +39,69 @@ function RunPage() {
     queryKey: ["run", runId],
     queryFn: async () => {
       const [run, absent, students, project, subs, dists] = await Promise.all([
-        supabase.from("runs").select("id, status, time_limit_seconds, is_favorite, completed_at").eq("id", runId).single(),
+        supabase
+          .from("runs")
+          .select("id, status, time_limit_seconds, is_favorite, completed_at")
+          .eq("id", runId)
+          .single(),
         supabase.from("run_absent").select("student_id").eq("run_id", runId),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
-        supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
+        supabase
+          .from("group_configs")
+          .select("id, name, group_size, size_policy")
+          .eq("id", configId)
+          .single(),
         supabase.from("submissions").select("id, student_id").eq("class_id", id),
-        supabase.from("run_distributions").select("id, rank, score, is_favorite").eq("run_id", runId).order("rank"),
+        supabase
+          .from("run_distributions")
+          .select("id, rank, score, is_favorite")
+          .eq("run_id", runId)
+          .order("rank"),
       ]);
       const submissionIds = (subs.data ?? []).map((s) => s.id);
       const prefs = submissionIds.length
-        ? (await supabase.from("preferences").select("submission_id, target_student_id, kind").in("submission_id", submissionIds)).data ?? []
+        ? ((
+            await supabase
+              .from("preferences")
+              .select("submission_id, target_student_id, kind")
+              .in("submission_id", submissionIds)
+          ).data ?? [])
         : [];
       const subById = new Map((subs.data ?? []).map((s) => [s.id, s.student_id]));
 
       let distGroups: { distribution_id: string; group_index: number; student_id: string }[] = [];
       if ((dists.data ?? []).length) {
         const distIds = (dists.data ?? []).map((d) => d.id);
-        distGroups = (await supabase.from("run_distribution_groups").select("distribution_id, group_index, student_id").in("distribution_id", distIds)).data ?? [];
+        distGroups =
+          (
+            await supabase
+              .from("run_distribution_groups")
+              .select("distribution_id, group_index, student_id")
+              .in("distribution_id", distIds)
+          ).data ?? [];
       }
       return {
         run: run.data!,
         absent: new Set((absent.data ?? []).map((r) => r.student_id)),
         students: students.data ?? [],
         project: project.data!,
-        prefs: prefs.map((p) => ({ from: subById.get(p.submission_id)!, target: p.target_student_id, kind: p.kind as "with" | "avoid" })),
+        prefs: prefs.map((p) => ({
+          from: subById.get(p.submission_id)!,
+          target: p.target_student_id,
+          kind: p.kind as "with" | "avoid",
+        })),
         distributions: dists.data ?? [],
         distGroups,
       };
     },
   });
 
-  useEffect(() => () => { workerRef.current?.terminate(); }, []);
+  useEffect(
+    () => () => {
+      workerRef.current?.terminate();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!data || startedRef.current) return;
@@ -100,7 +136,10 @@ function RunPage() {
 
     setRunning(true);
     setProgress({ elapsedMs: 0, iterations: 0, bestScore: 0 });
-    const { error: statusError } = await supabase.from("runs").update({ status: "running" }).eq("id", runId);
+    const { error: statusError } = await supabase
+      .from("runs")
+      .update({ status: "running" })
+      .eq("id", runId);
     if (statusError) {
       toast.error(`Failed to start run: ${statusError.message}`);
       setRunning(false);
@@ -138,7 +177,12 @@ function RunPage() {
 
     worker.onmessage = async (e: MessageEvent<WorkerOutbound>) => {
       const msg = e.data;
-      if (msg.type === "progress") setProgress({ elapsedMs: msg.elapsedMs, iterations: msg.iterations, bestScore: msg.bestScore });
+      if (msg.type === "progress")
+        setProgress({
+          elapsedMs: msg.elapsedMs,
+          iterations: msg.iterations,
+          bestScore: msg.bestScore,
+        });
       else if (msg.type === "error") {
         toast.error(msg.error);
         await markRunError("Optimizer failed");
@@ -168,16 +212,27 @@ function RunPage() {
     await supabase.from("run_distributions").delete().eq("run_id", runId);
     for (let i = 0; i < results.length; i++) {
       const r = results[i];
-      const { data: dist, error } = await supabase.from("run_distributions").insert({ run_id: runId, rank: i + 1, score: r.score }).select("id").single();
+      const { data: dist, error } = await supabase
+        .from("run_distributions")
+        .insert({ run_id: runId, rank: i + 1, score: r.score })
+        .select("id")
+        .single();
       if (error || !dist) throw error ?? new Error("Insert failed");
       const rows: { distribution_id: string; group_index: number; student_id: string }[] = [];
-      r.groups.forEach((g, gi) => g.forEach((sid) => rows.push({ distribution_id: dist.id, group_index: gi, student_id: sid })));
+      r.groups.forEach((g, gi) =>
+        g.forEach((sid) =>
+          rows.push({ distribution_id: dist.id, group_index: gi, student_id: sid }),
+        ),
+      );
       if (rows.length) {
         const { error: rgErr } = await supabase.from("run_distribution_groups").insert(rows);
         if (rgErr) throw rgErr;
       }
     }
-    await supabase.from("runs").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", runId);
+    await supabase
+      .from("runs")
+      .update({ status: "completed", completed_at: new Date().toISOString() })
+      .eq("id", runId);
   }
 
   async function toggleRunFavorite() {
@@ -191,7 +246,8 @@ function RunPage() {
 
   async function toggleDistFavorite(distId: string, current: boolean) {
     const next = !current;
-    if (next) await supabase.from("run_distributions").update({ is_favorite: false }).eq("run_id", runId);
+    if (next)
+      await supabase.from("run_distributions").update({ is_favorite: false }).eq("run_id", runId);
     await supabase.from("run_distributions").update({ is_favorite: next }).eq("id", distId);
     qc.invalidateQueries({ queryKey: ["run", runId] });
   }
@@ -215,16 +271,23 @@ function RunPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <Link to="/classes/$id/configs/$configId" params={{ id, configId }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
+          <Link
+            to="/classes/$id/configs/$configId"
+            params={{ id, configId }}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+          >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to project
           </Link>
           <h1 className="mt-2 text-2xl font-semibold">Run</h1>
           <p className="text-sm text-muted-foreground">
-            {data.project.name} · {timeSec}s time limit · {data.absent.size} absent · status: {status}
+            {data.project.name} · {timeSec}s time limit · {data.absent.size} absent · status:{" "}
+            {status}
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={toggleRunFavorite}>
-          <Heart className={`mr-1.5 h-4 w-4 ${data.run.is_favorite ? "fill-primary text-primary" : ""}`} />
+          <Heart
+            className={`mr-1.5 h-4 w-4 ${data.run.is_favorite ? "fill-primary text-primary" : ""}`}
+          />
           {data.run.is_favorite ? "Favorite run" : "Mark as favorite"}
         </Button>
       </div>
@@ -240,8 +303,14 @@ function RunPage() {
                   : "Don't close this tab while the run is computing. The optimization runs in your browser."}
               </p>
             </div>
-            <Button onClick={() => { startedRef.current = true; void startRun(); }}>
-              <Play className="mr-1.5 h-4 w-4" /> {status === "running" || status === "error" ? "Restart run" : "Start run"}
+            <Button
+              onClick={() => {
+                startedRef.current = true;
+                void startRun();
+              }}
+            >
+              <Play className="mr-1.5 h-4 w-4" />{" "}
+              {status === "running" || status === "error" ? "Restart run" : "Start run"}
             </Button>
           </CardContent>
         </Card>
@@ -256,7 +325,9 @@ function RunPage() {
           <CardContent className="space-y-3">
             <Progress value={pct} />
             <div className="flex justify-between text-xs tabular-nums text-muted-foreground">
-              <span>{Math.floor((progress?.elapsedMs ?? 0) / 1000)}s / {timeSec}s</span>
+              <span>
+                {Math.floor((progress?.elapsedMs ?? 0) / 1000)}s / {timeSec}s
+              </span>
               <span>{progress?.iterations ?? 0} iterations</span>
               <span>Best score: {progress?.bestScore ?? 0}</span>
             </div>
@@ -274,14 +345,32 @@ function RunPage() {
                 <Card key={d.id}>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="text-base">#{d.rank} · Score {d.score}</CardTitle>
+                      <CardTitle className="text-base">
+                        #{d.rank} · Score {d.score}
+                      </CardTitle>
                       <CardDescription>{groups.length} groups</CardDescription>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => toggleDistFavorite(d.id, d.is_favorite)} aria-label="Favorite distribution">
-                        <Heart className={`h-4 w-4 ${d.is_favorite ? "fill-primary text-primary" : ""}`} />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleDistFavorite(d.id, d.is_favorite)}
+                        aria-label="Favorite distribution"
+                      >
+                        <Heart
+                          className={`h-4 w-4 ${d.is_favorite ? "fill-primary text-primary" : ""}`}
+                        />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => navigate({ to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present", params: { id, configId, runId, distId: d.id } })}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate({
+                            to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
+                            params: { id, configId, runId, distId: d.id },
+                          })
+                        }
+                      >
                         <Eye className="mr-1.5 h-4 w-4" /> View
                       </Button>
                     </div>
@@ -290,10 +379,14 @@ function RunPage() {
                     <div className="space-y-2">
                       {groups.map((g, gi) => (
                         <div key={gi} className="rounded-md border border-border p-2.5">
-                          <div className="mb-1 text-xs font-medium text-muted-foreground">Group {gi + 1}</div>
+                          <div className="mb-1 text-xs font-medium text-muted-foreground">
+                            Group {gi + 1}
+                          </div>
                           <div className="flex flex-wrap gap-1.5">
                             {g.map((sid) => (
-                              <span key={sid} className="rounded-full bg-muted px-2 py-0.5 text-xs">{nameById.get(sid) ?? sid}</span>
+                              <span key={sid} className="rounded-full bg-muted px-2 py-0.5 text-xs">
+                                {nameById.get(sid) ?? sid}
+                              </span>
                             ))}
                           </div>
                         </div>

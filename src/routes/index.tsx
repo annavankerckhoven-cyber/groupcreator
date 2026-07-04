@@ -9,9 +9,15 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Group Creator — Smarter group making" },
-      { name: "description", content: "Free tool for teachers to create classroom groups based on student preferences." },
+      {
+        name: "description",
+        content: "Free tool for teachers to create classroom groups based on student preferences.",
+      },
       { property: "og:title", content: "Group Creator — Smarter group making" },
-      { property: "og:description", content: "Free tool for teachers to create classroom groups based on student preferences." },
+      {
+        property: "og:description",
+        content: "Free tool for teachers to create classroom groups based on student preferences.",
+      },
     ],
   }),
   component: Index,
@@ -33,7 +39,11 @@ function Index() {
           <span className="text-lg font-semibold tracking-tight">Group Creator</span>
         </div>
         <Button asChild variant="outline">
-          <a href="https://www.buymeacoffee.com/annavankerckhoven" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://www.buymeacoffee.com/annavankerckhoven"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Buy me a coffee
           </a>
         </Button>
@@ -54,14 +64,17 @@ function Index() {
             Making group work work.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Let your students quietly say who they'd like to work with — and who they really shouldn't.
-            Group Creator turns those answers into balanced groups.
+            Let your students quietly say who they'd like to work with — and who they really
+            shouldn't. Group Creator turns those answers into balanced groups.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
               <Link to={signedIn ? "/dashboard" : "/auth"}>Get started — completely free</Link>
             </Button>
-            <a href="#how" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <a
+              href="#how"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
               How it works →
             </a>
           </div>
@@ -69,9 +82,18 @@ function Index() {
 
         <section id="how" className="grid gap-6 py-12 md:grid-cols-3">
           {[
-            { title: "Create a class", body: "Paste your roster or import a CSV/Excel file. Done in 30 seconds." },
-            { title: "Share a form", body: "Students pick who they'd like to work with — and who not. Anonymous to peers." },
-            { title: "Generate groups", body: "Set a group size and hit go. Hard avoids are respected, friendships honored." },
+            {
+              title: "Create a class",
+              body: "Paste your roster or import a CSV/Excel file. Done in 30 seconds.",
+            },
+            {
+              title: "Share a form",
+              body: "Students pick who they'd like to work with — and who not. Anonymous to peers.",
+            },
+            {
+              title: "Generate groups",
+              body: "Set a group size and hit go. Hard avoids are respected, friendships honored.",
+            },
           ].map((step, i) => (
             <Card key={i}>
               <CardContent className="pt-6">
@@ -90,7 +112,8 @@ function Index() {
               <h3 className="mb-2 text-lg font-semibold">Contact & suggestions</h3>
               <p className="text-sm text-muted-foreground">
                 Did you encounter an issue, or do you have ideas to improve this application?
-                {"Reach out to\u00a0"}<span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
+                {"Reach out to\u00a0"}
+                <span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
               </p>
             </CardContent>
           </Card>

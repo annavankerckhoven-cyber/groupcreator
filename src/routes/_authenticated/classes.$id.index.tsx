@@ -7,8 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Copy, Link as LinkIcon, Trash2, Plus, CheckCircle2, Circle, ChevronRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Copy,
+  Link as LinkIcon,
+  Trash2,
+  Plus,
+  CheckCircle2,
+  Circle,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/")({
@@ -30,10 +45,18 @@ function ClassDetail() {
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("share_links").select("token").eq("class_id", id).limit(1).maybeSingle(),
         supabase.from("submissions").select("student_id, submitted_at").eq("class_id", id),
-        supabase.from("group_configs").select("id, name, group_size, size_policy").eq("class_id", id).order("created_at", { ascending: false }),
+        supabase
+          .from("group_configs")
+          .select("id, name, group_size, size_policy")
+          .eq("class_id", id)
+          .order("created_at", { ascending: false }),
       ]);
       return {
-        cls: cls.data, students: students.data ?? [], link: link.data, submissions: subs.data ?? [], projects: projects.data ?? [],
+        cls: cls.data,
+        students: students.data ?? [],
+        link: link.data,
+        submissions: subs.data ?? [],
+        projects: projects.data ?? [],
       };
     },
   });
@@ -63,13 +86,20 @@ function ClassDetail() {
     <div className="space-y-8">
       <div className="flex items-end justify-between">
         <div>
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← All classes</Link>
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+            ← All classes
+          </Link>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">{data.cls.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {submittedSet.size} of {data.students.length} students have submitted
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={deleteClass} className="text-destructive hover:text-destructive">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={deleteClass}
+          className="text-destructive hover:text-destructive"
+        >
           <Trash2 className="mr-1.5 h-4 w-4" /> Delete class
         </Button>
       </div>
@@ -77,13 +107,23 @@ function ClassDetail() {
       {shareUrl && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base"><LinkIcon className="h-4 w-4" /> Student link</CardTitle>
-            <CardDescription>Share this with your students. They open it, pick their name, and fill the form.</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LinkIcon className="h-4 w-4" /> Student link
+            </CardTitle>
+            <CardDescription>
+              Share this with your students. They open it, pick their name, and fill the form.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
               <Input readOnly value={shareUrl} className="font-mono text-xs" />
-              <Button variant="outline" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Link copied"); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(shareUrl);
+                  toast.success("Link copied");
+                }}
+              >
                 <Copy className="mr-1.5 h-4 w-4" /> Copy
               </Button>
             </div>
@@ -115,7 +155,9 @@ function ClassDetail() {
                     )}
                   </div>
                   {done && (
-                    <Button variant="ghost" size="sm" onClick={() => resetSubmission(s.id)}>Reset</Button>
+                    <Button variant="ghost" size="sm" onClick={() => resetSubmission(s.id)}>
+                      Reset
+                    </Button>
                   )}
                 </li>
               );
@@ -128,9 +170,14 @@ function ClassDetail() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base">Projects</CardTitle>
-            <CardDescription>Each project is one way of dividing the class — set the group size, then make runs to compute groups.</CardDescription>
+            <CardDescription>
+              Each project is one way of dividing the class — set the group size, then make runs to
+              compute groups.
+            </CardDescription>
           </div>
-          <Button size="sm" onClick={() => setProjectOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New project</Button>
+          <Button size="sm" onClick={() => setProjectOpen(true)}>
+            <Plus className="mr-1.5 h-4 w-4" /> New project
+          </Button>
         </CardHeader>
         <CardContent>
           {data.projects.length === 0 ? (
@@ -147,7 +194,8 @@ function ClassDetail() {
                     <div>
                       <div className="font-medium">{p.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        Groups of {p.group_size} · {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
+                        Groups of {p.group_size} ·{" "}
+                        {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
                       </div>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -170,10 +218,15 @@ function ClassDetail() {
 }
 
 function NewProjectDialog({
-  open, onOpenChange, classId, onCreated,
+  open,
+  onOpenChange,
+  classId,
+  onCreated,
 }: {
-  open: boolean; onOpenChange: (o: boolean) => void;
-  classId: string; onCreated: () => void;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  classId: string;
+  onCreated: () => void;
 }) {
   const [name, setName] = useState("");
   const [size, setSize] = useState(4);
@@ -194,7 +247,9 @@ function NewProjectDialog({
       toast.success("Project created");
       onCreated();
       onOpenChange(false);
-      setName(""); setSize(4); setPolicy("plus");
+      setName("");
+      setSize(4);
+      setPolicy("plus");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -207,27 +262,56 @@ function NewProjectDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>New project</DialogTitle>
-          <DialogDescription>Set the group size; you'll create runs to compute groups on the project page.</DialogDescription>
+          <DialogDescription>
+            Set the group size; you'll create runs to compute groups on the project page.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="cn">Name</Label>
-            <Input id="cn" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Project 1" />
+            <Input
+              id="cn"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Project 1"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="gs">Students per group</Label>
-            <Input id="gs" type="number" min={2} value={size} onChange={(e) => setSize(parseInt(e.target.value) || 0)} />
+            <Input
+              id="gs"
+              type="number"
+              min={2}
+              value={size}
+              onChange={(e) => setSize(parseInt(e.target.value) || 0)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>If it doesn't divide evenly</Label>
-            <RadioGroup value={policy} onValueChange={(v) => setPolicy(v as "plus" | "minus")} className="mt-1.5 space-y-1.5">
-              <div className="flex items-center gap-2"><RadioGroupItem value="plus" id="p-plus" /><Label htmlFor="p-plus" className="font-normal">Some groups with 1 additional person</Label></div>
-              <div className="flex items-center gap-2"><RadioGroupItem value="minus" id="p-minus" /><Label htmlFor="p-minus" className="font-normal">Some groups with 1 fewer person</Label></div>
+            <RadioGroup
+              value={policy}
+              onValueChange={(v) => setPolicy(v as "plus" | "minus")}
+              className="mt-1.5 space-y-1.5"
+            >
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="plus" id="p-plus" />
+                <Label htmlFor="p-plus" className="font-normal">
+                  Some groups with 1 additional person
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="minus" id="p-minus" />
+                <Label htmlFor="p-minus" className="font-normal">
+                  Some groups with 1 fewer person
+                </Label>
+              </div>
             </RadioGroup>
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={loading} onClick={create}>{loading ? "Creating…" : "Create project"}</Button>
+          <Button disabled={loading} onClick={create}>
+            {loading ? "Creating…" : "Create project"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
