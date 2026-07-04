@@ -87,16 +87,6 @@ function StudentForm() {
             <p className="mt-1 text-sm text-muted-foreground">
               Your preferences have been saved. You can close this tab.
             </p>
-            <Button
-              variant="ghost"
-              className="mt-4"
-              onClick={() => {
-                setShowSuccess(false);
-                setStudentId("");
-              }}
-            >
-              Submit as a different student
-            </Button>
           </CardContent>
         </Card>
       </div>
@@ -128,7 +118,6 @@ function StudentForm() {
                 {data.students.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}
-                    {submittedIds.has(s.id) ? " ✓" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
