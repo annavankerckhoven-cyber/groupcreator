@@ -185,7 +185,7 @@ function RunCardLink({
     run.status === "running" ? "text-amber-600" :
     run.status === "error" ? "text-destructive" : "text-muted-foreground";
 
-  const statusLabel = run.status === "completed" ? "Succeeded. Click to view results." : run.status;
+  const statusLabel = run.status === "completed" ? "Succeeded. Click to view distributions." : run.status;
 
   return (
     <div className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30">
@@ -211,27 +211,11 @@ function RunCardLink({
             <p className="line-clamp-2 pt-1 text-xs text-destructive">{run.error_message}</p>
           )}
         </div>
-      </Link>
-      {run.status === "completed" && run.favorite_distribution_id && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="absolute bottom-3 left-4 z-10"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigate({
-              to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
-              params: { id: classId, configId, runId: run.id, distId: run.favorite_distribution_id! },
-            });
-          }}
-        >
-          <Eye className="mr-1.5 h-4 w-4" /> View favorite distribution
-        </Button>
-      )}
+      
       <button
         type="button"
         aria-label={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
+        title={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
         disabled={favoriteLoading}
         onClick={onToggleFavorite}
         className="absolute right-3 top-3 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 disabled:opacity-50"
@@ -244,11 +228,31 @@ function RunCardLink({
       <button
         type="button"
         aria-label="Delete run"
+        title="Delete run"
         onClick={onDelete}
         className="absolute right-3 top-12 z-10 rounded-md p-1 text-destructive transition-opacity hover:bg-destructive/10 focus:opacity-100"
       >
         <Trash className="h-4 w-4" />
       </button>
+      </Link>
+      {run.status === "completed" && run.favorite_distribution_id && (
+        <button
+          type="button"
+          aria-label="View favorite distribution"
+          title="View favorite distribution"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate({
+              to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
+              params: { id: classId, configId, runId: run.id, distId: run.favorite_distribution_id! },
+            });
+          }}
+          className="absolute right-3 top-12 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 focus:opacity-100"
+        >
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        </button>
+      )}
     </div>
   );
 }
