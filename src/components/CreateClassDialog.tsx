@@ -1,18 +1,35 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { Upload } from "lucide-react";
 
-interface Props { open: boolean; onOpenChange: (o: boolean) => void; onCreated?: (classId: string) => void }
+interface Props {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  onCreated?: (classId: string) => void;
+}
 
 function randomToken() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -30,7 +47,11 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [loading, setLoading] = useState(false);
 
   function reset() {
-    setName(""); setPasted(""); setParsedRows([]); setColumns([]); setPickedColumn("");
+    setName("");
+    setPasted("");
+    setParsedRows([]);
+    setColumns([]);
+    setPickedColumn("");
   }
 
   function handleFile(file: File) {
@@ -78,7 +99,10 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   }
 
   function namesFromPaste(): string[] {
-    return pasted.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    return pasted
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
   async function create(names: string[]) {
@@ -113,7 +137,13 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) reset();
+        onOpenChange(o);
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>New class</DialogTitle>
@@ -122,7 +152,12 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
         <div className="space-y-2">
           <Label htmlFor="cname">Class name</Label>
-          <Input id="cname" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Biology 9A" />
+          <Input
+            id="cname"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Biology 9A"
+          />
         </div>
 
         <Tabs defaultValue="paste" className="mt-2">
@@ -165,14 +200,22 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                 <div className="space-y-1.5">
                   <Label>Which column has the names?</Label>
                   <Select value={pickedColumn} onValueChange={setPickedColumn}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {columns.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      {columns.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="rounded-md border border-border bg-card p-3 text-xs">
-                  <div className="mb-1 font-medium text-muted-foreground">Preview — {namesFromImport().length} students</div>
+                  <div className="mb-1 font-medium text-muted-foreground">
+                    Preview — {namesFromImport().length} students
+                  </div>
                   <div className="max-h-32 overflow-auto text-foreground">
                     {namesFromImport().slice(0, 30).join(", ")}
                     {namesFromImport().length > 30 ? "…" : ""}

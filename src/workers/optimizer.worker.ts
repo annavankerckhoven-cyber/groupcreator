@@ -1,5 +1,10 @@
 /// <reference lib="webworker" />
-import { runOptimizer, type OptimizerInput, type TopResult, type ProgressMsg } from "../lib/optimizer";
+import {
+  runOptimizer,
+  type OptimizerInput,
+  type TopResult,
+  type ProgressMsg,
+} from "../lib/optimizer";
 
 export type WorkerInbound = OptimizerInput;
 export type WorkerOutbound =

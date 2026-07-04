@@ -4,7 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Users, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { getPublicForm, submitPublicForm } from "@/lib/public-form.functions";
@@ -75,8 +81,17 @@ function StudentForm() {
           <CardContent className="flex flex-col items-center py-10 text-center">
             <CheckCircle2 className="mb-3 h-10 w-10 text-primary" />
             <h2 className="text-xl font-semibold">Thanks!</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Your preferences have been saved. You can close this tab.</p>
-            <Button variant="ghost" className="mt-4" onClick={() => { setShowSuccess(false); setStudentId(""); }}>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your preferences have been saved. You can close this tab.
+            </p>
+            <Button
+              variant="ghost"
+              className="mt-4"
+              onClick={() => {
+                setShowSuccess(false);
+                setStudentId("");
+              }}
+            >
               Submit as a different student
             </Button>
           </CardContent>
@@ -95,21 +110,29 @@ function StudentForm() {
         <Card>
           <CardHeader>
             <CardTitle>Pick your name</CardTitle>
-            <CardDescription>Your answers stay private — your classmates can't see them.</CardDescription>
+            <CardDescription>
+              Your answers stay private — your classmates can't see them.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Select value={studentId} onValueChange={setStudentId}>
-              <SelectTrigger><SelectValue placeholder="Select your name" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your name" />
+              </SelectTrigger>
               <SelectContent>
                 {data.students.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.name}{submittedIds.has(s.id) ? " ✓" : ""}
+                    {s.name}
+                    {submittedIds.has(s.id) ? " ✓" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {studentId && submittedIds.has(studentId) && (
-              <p className="mt-2 text-xs text-muted-foreground">You've submitted before — your previous answers are loaded below. You can change them and resubmit.</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                You've submitted before — your previous answers are loaded below. You can change
+                them and resubmit.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -118,42 +141,60 @@ function StudentForm() {
           <Card>
             <CardHeader>
               <CardTitle>For each classmate</CardTitle>
-              <CardDescription>Choose whether you'd like to work with them. "Doesn't matter" is the default.</CardDescription>
+              <CardDescription>
+                Choose whether you'd like to work with them. "Doesn't matter" is the default.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border">
-                {data.students.filter((s) => s.id !== studentId).map((s) => {
-                  const v = prefs.get(s.id) ?? "neutral";
-                  return (
-                    <li key={s.id} className="flex items-center justify-between gap-3 py-3">
-                      <span className="font-medium">{s.name}</span>
-                      <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
-                        {(["with", "neutral", "avoid"] as Pref[]).map((opt) => {
-                          const label = opt === "with" ? "Together" : opt === "neutral" ? "Doesn't matter" : "Not together";
-                          const active = v === opt;
-                          const color = opt === "with" ? "bg-primary text-primary-foreground" : opt === "avoid" ? "bg-destructive text-destructive-foreground" : "bg-secondary text-secondary-foreground";
-                          return (
-                            <button
-                              key={opt}
-                              type="button"
-                              className={`px-3 py-1.5 transition-colors ${active ? color : "bg-card text-muted-foreground hover:bg-muted"}`}
-                              onClick={() => {
-                                const next = new Map(prefs);
-                                next.set(s.id, opt);
-                                setPrefs(next);
-                              }}
-                            >
-                              {label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </li>
-                  );
-                })}
+                {data.students
+                  .filter((s) => s.id !== studentId)
+                  .map((s) => {
+                    const v = prefs.get(s.id) ?? "neutral";
+                    return (
+                      <li key={s.id} className="flex items-center justify-between gap-3 py-3">
+                        <span className="font-medium">{s.name}</span>
+                        <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
+                          {(["with", "neutral", "avoid"] as Pref[]).map((opt) => {
+                            const label =
+                              opt === "with"
+                                ? "Together"
+                                : opt === "neutral"
+                                  ? "Doesn't matter"
+                                  : "Not together";
+                            const active = v === opt;
+                            const color =
+                              opt === "with"
+                                ? "bg-primary text-primary-foreground"
+                                : opt === "avoid"
+                                  ? "bg-destructive text-destructive-foreground"
+                                  : "bg-secondary text-secondary-foreground";
+                            return (
+                              <button
+                                key={opt}
+                                type="button"
+                                className={`px-3 py-1.5 transition-colors ${active ? color : "bg-card text-muted-foreground hover:bg-muted"}`}
+                                onClick={() => {
+                                  const next = new Map(prefs);
+                                  next.set(s.id, opt);
+                                  setPrefs(next);
+                                }}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </li>
+                    );
+                  })}
               </ul>
               <div className="mt-6">
-                <Button className="w-full" disabled={submitMut.isPending} onClick={() => submitMut.mutate()}>
+                <Button
+                  className="w-full"
+                  disabled={submitMut.isPending}
+                  onClick={() => submitMut.mutate()}
+                >
                   {submitMut.isPending ? "Saving…" : "Submit"}
                 </Button>
               </div>

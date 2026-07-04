@@ -4,9 +4,16 @@
 // Mutual likes/dislikes count twice naturally because there will be two directed edges.
 
 export type Kind = "with" | "avoid";
-export interface Edge { a: string; b: string; kind: Kind }
+export interface Edge {
+  a: string;
+  b: string;
+  kind: Kind;
+}
 export type Distribution = string[][];
-export interface TopResult { score: number; groups: Distribution }
+export interface TopResult {
+  score: number;
+  groups: Distribution;
+}
 
 export interface OptimizerInput {
   studentIds: string[];
@@ -16,7 +23,11 @@ export interface OptimizerInput {
   timeLimitMs: number;
 }
 
-export interface ProgressMsg { elapsedMs: number; iterations: number; bestScore: number }
+export interface ProgressMsg {
+  elapsedMs: number;
+  iterations: number;
+  bestScore: number;
+}
 export type ProgressFn = (m: ProgressMsg) => void;
 
 /** Plan group sizes from N students, target size S, and policy. */
@@ -56,10 +67,10 @@ export function computeGroupSizes(n: number, size: number, policy: "plus" | "min
 }
 
 interface Adj {
-  likes: number[][];       // likes[i] = ids that i wants to be with
-  dislikes: number[][];    // dislikes[i] = ids that i wants to avoid
-  likedBy: number[][];     // likedBy[i] = ids that want to be with i
-  dislikedBy: number[][];  // dislikedBy[i] = ids that want to avoid i
+  likes: number[][]; // likes[i] = ids that i wants to be with
+  dislikes: number[][]; // dislikes[i] = ids that i wants to avoid
+  likedBy: number[][]; // likedBy[i] = ids that want to be with i
+  dislikedBy: number[][]; // dislikedBy[i] = ids that want to avoid i
 }
 
 function buildAdj(ids: string[], edges: Edge[]): Adj {
@@ -70,16 +81,24 @@ function buildAdj(ids: string[], edges: Edge[]): Adj {
   const likedBy: number[][] = Array.from({ length: N }, () => []);
   const dislikedBy: number[][] = Array.from({ length: N }, () => []);
   for (const e of edges) {
-    const a = idx.get(e.a); const b = idx.get(e.b);
+    const a = idx.get(e.a);
+    const b = idx.get(e.b);
     if (a == null || b == null || a === b) continue;
     if (e.kind === "with") {
-      likes[a].push(b); likedBy[b].push(a);
+      likes[a].push(b);
+      likedBy[b].push(a);
     } else {
-      dislikes[a].push(b); dislikedBy[b].push(a);
+      dislikes[a].push(b);
+      dislikedBy[b].push(a);
     }
   }
   const dedupe = (arr: number[][]) => arr.map((row) => Array.from(new Set(row)));
-  return { likes: dedupe(likes), dislikes: dedupe(dislikes), likedBy: dedupe(likedBy), dislikedBy: dedupe(dislikedBy) };
+  return {
+    likes: dedupe(likes),
+    dislikes: dedupe(dislikes),
+    likedBy: dedupe(likedBy),
+    dislikedBy: dedupe(dislikedBy),
+  };
 }
 
 function scoreGroup(group: number[], adj: Adj): number {
@@ -101,10 +120,10 @@ function scoreDistribution(dist: number[][], adj: Adj): number {
 /** Change in total score from adding student `s` to a group whose current members are in `set`. */
 function deltaScore(s: number, set: Set<number>, adj: Adj): number {
   let d = 0;
-  for (const x of adj.likes[s]) if (set.has(x)) d += 1;          // s's own gain
-  for (const x of adj.dislikes[s]) if (set.has(x)) d -= 20;      // s's own loss
-  for (const x of adj.likedBy[s]) if (set.has(x)) d += 1;        // existing members gain
-  for (const x of adj.dislikedBy[s]) if (set.has(x)) d -= 20;    // existing members lose
+  for (const x of adj.likes[s]) if (set.has(x)) d += 1; // s's own gain
+  for (const x of adj.dislikes[s]) if (set.has(x)) d -= 20; // s's own loss
+  for (const x of adj.likedBy[s]) if (set.has(x)) d += 1; // existing members gain
+  for (const x of adj.dislikedBy[s]) if (set.has(x)) d -= 20; // existing members lose
   return d;
 }
 
@@ -120,7 +139,10 @@ function probTable(numGroups: number): number[] {
 function pickByProb(probs: number[], rand: () => number): number {
   const r = rand();
   let acc = 0;
-  for (let i = 0; i < probs.length; i++) { acc += probs[i]; if (r < acc) return i; }
+  for (let i = 0; i < probs.length; i++) {
+    acc += probs[i];
+    if (r < acc) return i;
+  }
   return probs.length - 1;
 }
 
@@ -132,7 +154,12 @@ function shuffle<T>(arr: T[], rand: () => number): void {
 }
 
 /** Greedy placement of `students` into fresh groups with the given target sizes. */
-function greedyPlace(students: number[], sizes: number[], adj: Adj, rand: () => number): number[][] {
+function greedyPlace(
+  students: number[],
+  sizes: number[],
+  adj: Adj,
+  rand: () => number,
+): number[][] {
   const groups: number[][] = sizes.map(() => []);
   const sets: Set<number>[] = sizes.map(() => new Set());
   const probs = probTable(sizes.length);
@@ -165,7 +192,12 @@ function randomPlace(students: number[], sizes: number[], rand: () => number): n
 /** Canonical key — order of groups and students within each group is irrelevant. */
 function canonical(dist: number[][]): string {
   return dist
-    .map((g) => g.slice().sort((a, b) => a - b).join(","))
+    .map((g) =>
+      g
+        .slice()
+        .sort((a, b) => a - b)
+        .join(","),
+    )
     .sort()
     .join("|");
 }
@@ -178,11 +210,15 @@ function mutate(parent: number[][], sizes: number[], adj: Adj, rand: () => numbe
   const worstIndices = scored.slice(0, Math.min(numWorst, parent.length)).map((x) => x.i);
   const worstSet = new Set(worstIndices);
   const removed: number[] = [];
-  const next: number[][] = parent.map((g, i) => (worstSet.has(i) ? (removed.push(...g), []) : g.slice()));
+  const next: number[][] = parent.map((g, i) =>
+    worstSet.has(i) ? (removed.push(...g), []) : g.slice(),
+  );
   shuffle(removed, rand);
   const worstSizes = worstIndices.map((i) => sizes[i]);
   const rebuilt = greedyPlace(removed, worstSizes, adj, rand);
-  worstIndices.forEach((origIdx, k) => { next[origIdx] = rebuilt[k]; });
+  worstIndices.forEach((origIdx, k) => {
+    next[origIdx] = rebuilt[k];
+  });
   return next;
 }
 
@@ -204,17 +240,23 @@ export function runOptimizer(input: OptimizerInput, onProgress?: ProgressFn): To
     for (const i of all) {
       const k = importance[i];
       const arr = buckets.get(k);
-      if (arr) arr.push(i); else buckets.set(k, [i]);
+      if (arr) arr.push(i);
+      else buckets.set(k, [i]);
     }
     const keys = Array.from(buckets.keys()).sort((a, b) => b - a);
     const out: number[] = [];
-    for (const k of keys) { const g = buckets.get(k)!; shuffle(g, rand); out.push(...g); }
+    for (const k of keys) {
+      const g = buckets.get(k)!;
+      shuffle(g, rand);
+      out.push(...g);
+    }
     return out;
   }
 
   const makeImportance = () => greedyPlace(importanceOrder(), sizes, adj, rand);
   const makeRandomGreedy = () => {
-    const s = all.slice(); shuffle(s, rand);
+    const s = all.slice();
+    shuffle(s, rand);
     return greedyPlace(s, sizes, adj, rand);
   };
   const makeRandom = () => randomPlace(all, sizes, rand);
@@ -243,7 +285,10 @@ export function runOptimizer(input: OptimizerInput, onProgress?: ProgressFn): To
     const unique: number[][][] = [];
     for (const d of combined) {
       const k = canonical(d);
-      if (!seen.has(k)) { seen.add(k); unique.push(d); }
+      if (!seen.has(k)) {
+        seen.add(k);
+        unique.push(d);
+      }
     }
 
     const next: number[][][] = unique.slice();

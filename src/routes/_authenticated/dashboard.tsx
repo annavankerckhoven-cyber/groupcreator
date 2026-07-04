@@ -32,7 +32,9 @@ function Dashboard() {
       <div className="mb-8 flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Your classes</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Create a class, then share the link with students.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create a class, then share the link with students.
+          </p>
         </div>
         <Button onClick={() => setOpen(true)}>
           <Plus className="mr-1.5 h-4 w-4" /> New class
@@ -57,14 +59,11 @@ function Dashboard() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {classes.map((c) => {
-            const count = Array.isArray(c.students) ? (c.students[0] as { count: number } | undefined)?.count ?? 0 : 0;
+            const count = Array.isArray(c.students)
+              ? ((c.students[0] as { count: number } | undefined)?.count ?? 0)
+              : 0;
             return (
-              <Link
-                key={c.id}
-                to="/classes/$id"
-                params={{ id: c.id }}
-                className="group"
-              >
+              <Link key={c.id} to="/classes/$id" params={{ id: c.id }} className="group">
                 <Card className="h-full transition-shadow hover:shadow-md">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between text-lg">
@@ -82,7 +81,11 @@ function Dashboard() {
         </div>
       )}
 
-      <CreateClassDialog open={open} onOpenChange={setOpen} onCreated={() => qc.invalidateQueries({ queryKey: ["classes"] })} />
+      <CreateClassDialog
+        open={open}
+        onOpenChange={setOpen}
+        onCreated={() => qc.invalidateQueries({ queryKey: ["classes"] })}
+      />
     </div>
   );
 }

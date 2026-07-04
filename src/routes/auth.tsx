@@ -55,7 +55,9 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">← Back home</Link>
+      <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">
+        ← Back home
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome to Group Creator</CardTitle>
@@ -70,11 +72,23 @@ function AuthPage() {
               <form onSubmit={signIn} className="space-y-3 pt-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="email-in">Email</Label>
-                  <Input id="email-in" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    id="email-in"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="pw-in">Password</Label>
-                  <Input id="pw-in" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input
+                    id="pw-in"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
@@ -85,15 +99,33 @@ function AuthPage() {
               <form onSubmit={signUp} className="space-y-3 pt-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="name-up">Your name</Label>
-                  <Input id="name-up" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ms. Rivera" />
+                  <Input
+                    id="name-up"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ms. Rivera"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="email-up">Email</Label>
-                  <Input id="email-up" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    id="email-up"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="pw-up">Password</Label>
-                  <Input id="pw-up" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input
+                    id="pw-up"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Creating…" : "Create account"}
