@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Play, Heart, AlertTriangle, Trash } from "lucide-react";
+import { Plus, Play, Heart, AlertTriangle, Trash, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/")({
@@ -23,6 +23,7 @@ type RunCard = {
   status: string;
   is_favorite: boolean;
   error_message: string | null;
+  favorite_distribution_id: string | null;
 };
 
 function ProjectPage() {
@@ -55,7 +56,7 @@ function ProjectPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["project", configId],
     queryFn: async () => {
-      const [proj, students, runs] = await Promise.all([
+      const [proj, students, runs, favoriteDists] = await Promise.all([
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase
@@ -63,13 +64,24 @@ function ProjectPage() {
           .select("id, created_at, time_limit_seconds, status, is_favorite, error_message")
           .eq("config_id", configId)
           .order("created_at", { ascending: false }),
+        supabase.from("run_distributions").select("run_id, id").eq("is_favorite", true),
       ]);
 
       if (proj.error) throw proj.error;
       if (students.error) throw students.error;
       if (runs.error) throw runs.error;
+      if (favoriteDists.error) throw favoriteDists.error;
 
-      return { project: proj.data, students: students.data ?? [], runs: (runs.data ?? []) as RunCard[] };
+      const favoriteByRunId = new Map((favoriteDists.data ?? []).map((d) => [d.run_id, d.id]));
+
+      return {
+        project: proj.data,
+        students: students.data ?? [],
+        runs: (runs.data ?? []).map((run) => ({
+          ...run,
+          favorite_distribution_id: favoriteByRunId.get(run.id) ?? null,
+        })) as RunCard[],
+      };
     },
   });
 
@@ -167,6 +179,7 @@ function RunCardLink({
   onToggleFavorite: () => void;
   onDelete: () => void;
 }) {
+  const navigate = useNavigate();
   const statusClass =
     run.status === "completed" ? "text-green-600 dark:text-green-400" :
     run.status === "running" ? "text-amber-600" :
@@ -199,6 +212,23 @@ function RunCardLink({
           )}
         </div>
       </Link>
+      {run.status === "completed" && run.favorite_distribution_id && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="absolute bottom-3 left-4 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate({
+              to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
+              params: { id: classId, configId, runId: run.id, distId: run.favorite_distribution_id! },
+            });
+          }}
+        >
+          <Eye className="mr-1.5 h-4 w-4" /> View favorite distribution
+        </Button>
+      )}
       <button
         type="button"
         aria-label={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
