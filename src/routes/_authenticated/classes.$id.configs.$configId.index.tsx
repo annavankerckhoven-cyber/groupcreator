@@ -38,11 +38,6 @@ function ProjectPage() {
   async function toggleRunFavorite(runId: string, nextFavorite: boolean) {
     setFavoriteLoading(runId);
     try {
-      if (nextFavorite) {
-        const { error: clearError } = await supabase.from("runs").update({ is_favorite: false }).eq("config_id", configId);
-        if (clearError) throw clearError;
-      }
-
       const { error } = await supabase.from("runs").update({ is_favorite: nextFavorite }).eq("id", runId);
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["project", configId] });
