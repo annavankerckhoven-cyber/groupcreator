@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Sparkles, Users, ClipboardList, WandSparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/how")({
   head: () => ({ meta: [{ title: "How it works — Group Creator" }] }),
@@ -16,58 +15,56 @@ function HowItWorksPage() {
           <ArrowLeft className="h-4 w-4" /> Back to home
         </Link>
 
-        <section className="space-y-6">
+        <section className="space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            How Group Creator works
+            User guide
           </div>
 
           <div className="space-y-3">
             <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-              Make group work feel fair, simple, and calm.
+              Group Creator — instructions manual
             </h1>
             <p className="max-w-3xl text-lg text-muted-foreground">
-              Group Creator helps teachers build balanced classroom groups from student preferences.
-              Students can share who they want to work with and who they would rather avoid, and the app turns that information into thoughtful group suggestions.
+              This page explains how to create a class, collect student preferences, and turn them into balanced groups.
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Users className="h-5 w-5" />
-                </div>
-                <h2 className="mb-2 font-semibold">1. Create a class</h2>
-                <p className="text-sm text-muted-foreground">
-                  Add your students manually or import them via an Excel or CSV file to create a class.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="space-y-6">
+            <section className="space-y-2">
+              <h2 className="text-2xl font-semibold">1. Create a class</h2>
+              <p className="text-base leading-7 text-muted-foreground">
+                Start from the dashboard. Choose New class, give the class a name, and add your students. You can type names manually or import them from a CSV or Excel file. If you import a file, review the preview and select the cells that contain the student names.
+              </p>
+            </section>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <ClipboardList className="h-5 w-5" />
-                </div>
-                <h2 className="mb-2 font-semibold">2. Share a student form</h2>
-                <p className="text-sm text-muted-foreground">
-                  Students submit who they want to work with and who they prefer not to work with, anonymously to peers.
-                </p>
-              </CardContent>
-            </Card>
+            <section className="space-y-2">
+              <h2 className="text-2xl font-semibold">2. Share the student form</h2>
+              <p className="text-base leading-7 text-muted-foreground">
+                After the class is created, open the class page and copy the student link. Send that link to students so they can submit who they would like to work with and who they would rather avoid. Their answers are kept anonymous to their peers.
+              </p>
+            </section>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <WandSparkles className="h-5 w-5" />
-                </div>
-                <h2 className="mb-2 font-semibold">3. Generate balanced groups</h2>
-                <p className="text-sm text-muted-foreground">
-                  Set your preferred group size and let the app generate groupings that honor positive preferences and avoid conflicts.
-                </p>
-              </CardContent>
-            </Card>
+            <section className="space-y-2">
+              <h2 className="text-2xl font-semibold">3. Create a project</h2>
+              <p className="text-base leading-7 text-muted-foreground">
+                Inside a class, create a project for the way you want to divide the class. Set the target group size and choose the size policy that fits your classroom situation.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h2 className="text-2xl font-semibold">4. Run the grouping process</h2>
+              <p className="text-base leading-7 text-muted-foreground">
+                Open the project page and start a new run. The application will compute possible group distributions using the student preferences. You can review the results and keep the runs that work best for you.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h2 className="text-2xl font-semibold">5. Use the results</h2>
+              <p className="text-base leading-7 text-muted-foreground">
+                Once a run is complete, you can inspect the generated groups and use them as a basis for classroom organization. You can also mark favorite runs or distributions to keep the most useful outcomes easy to find.
+              </p>
+            </section>
           </div>
 
           <div className="flex flex-wrap gap-3 pt-2">

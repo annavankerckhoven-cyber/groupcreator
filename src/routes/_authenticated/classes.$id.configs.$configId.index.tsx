@@ -183,7 +183,7 @@ function RunCardLink({
   const statusLabel = run.status === "completed" ? "Succeeded. Click to view distributions." : run.status;
 
   return (
-    <div className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30">
+    <div className="relative group min-h-[170px] rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30">
       <Link
         to="/classes/$id/configs/$configId/runs/$runId"
         params={{ id: classId, configId, runId: run.id }}
