@@ -168,7 +168,7 @@ function RunCardLink({
   onDelete: () => void;
 }) {
   const statusClass =
-    run.status === "completed" ? "text-primary" :
+    run.status === "completed" ? "text-green-600 dark:text-green-400" :
     run.status === "running" ? "text-amber-600" :
     run.status === "error" ? "text-destructive" : "text-muted-foreground";
 
