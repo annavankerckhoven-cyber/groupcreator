@@ -234,7 +234,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
             />
             <DialogFooter>
               <Button disabled={loading} onClick={() => create(namesFromPaste())}>
-                {loading ? "Creating…" : `Create class (${namesFromPaste().length})`}
+                {loading ? "Creating…" : `Create class with ${namesFromPaste().length} students`}
               </Button>
             </DialogFooter>
           </TabsContent>
