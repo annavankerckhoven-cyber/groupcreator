@@ -111,7 +111,9 @@ function StudentForm() {
           <CardHeader>
             <CardTitle>Pick your name</CardTitle>
             <CardDescription>
-              Your answers stay private — your classmates can't see them.
+              Your answers stay private — nobody can see them. Not even your teacher.
+              <br />
+              <strong>It is advised not to enter too many preferences.</strong> The fewer preferences you enter, the more likely they are to be respected.
             </CardDescription>
           </CardHeader>
           <CardContent>
