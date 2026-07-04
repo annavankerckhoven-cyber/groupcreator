@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, LogOut, Coffee } from "lucide-react";
+import { Users, LogOut, Coffee, CircleHelp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -32,6 +32,12 @@ function AuthLayout() {
             <span className="text-lg font-semibold tracking-tight">Group Creator</span>
           </Link>
           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
+              <Link to="/how" className="inline-flex items-center gap-2">
+                <CircleHelp className="h-4 w-4" />
+                <span className="hidden sm:inline">Help</span>
+              </Link>
+            </Button>
             <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
               <a
                 href="https://www.buymeacoffee.com/annavankerckhoven"
