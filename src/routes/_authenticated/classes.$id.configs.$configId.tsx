@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Play, Heart, AlertTriangle, ArrowRight, Trash } from "lucide-react";
+import { Plus, Play, Heart, AlertTriangle, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
@@ -93,7 +93,7 @@ function ProjectPage() {
                   <button
                     aria-label={r.is_favorite ? "Remove from favorites" : "Add to favorites"}
                     disabled={favoriteLoading === r.id}
-                    onClick={async (e) => {
+                    onClick={async (e: React.MouseEvent<HTMLButtonElement>) => {
                       e.preventDefault();
                       e.stopPropagation();
                       await toggleRunFavorite(r.id, !r.is_favorite);
@@ -107,7 +107,7 @@ function ProjectPage() {
                   </button>
                   <button
                     aria-label="Delete run"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRunToDelete(r.id); setConfirmOpen(true); }}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.preventDefault(); e.stopPropagation(); setRunToDelete(r.id); setConfirmOpen(true); }}
                     className="absolute right-3 top-12 z-10 rounded-md p-1 text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
                   >
                     <Trash className="h-4 w-4" />
