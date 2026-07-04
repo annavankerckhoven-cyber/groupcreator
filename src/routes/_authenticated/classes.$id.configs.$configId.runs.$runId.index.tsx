@@ -214,12 +214,17 @@ function RunPage() {
   }
 
   async function toggleDistFavorite(distId: string, current: boolean) {
-    const next = !current;
-    if (next) {
-      const { error: clearError } = await supabase.from("run_distributions").update({ is_favorite: false }).eq("run_id", runId);
-      if (clearError) return toast.error(clearError.message);
+    if (current) {
+      const { error } = await supabase.from("run_distributions").update({ is_favorite: false }).eq("id", distId);
+      if (error) return toast.error(error.message);
+      qc.invalidateQueries({ queryKey: ["run", runId] });
+      return;
     }
-    const { error } = await supabase.from("run_distributions").update({ is_favorite: next }).eq("id", distId);
+
+    const { error: clearError } = await supabase.from("run_distributions").update({ is_favorite: false }).eq("run_id", runId);
+    if (clearError) return toast.error(clearError.message);
+
+    const { error } = await supabase.from("run_distributions").update({ is_favorite: true }).eq("id", distId);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["run", runId] });
   }
