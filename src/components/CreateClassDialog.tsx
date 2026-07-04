@@ -37,6 +37,9 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [parsedRows, setParsedRows] = useState<Record<string, string>[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
+  const [dragging, setDragging] = useState(false);
+  const [selectionStart, setSelectionStart] = useState<{ row: number; column: string } | null>(null);
+  const [selectionCurrent, setSelectionCurrent] = useState<{ row: number; column: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
   function reset() {
@@ -45,6 +48,9 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     setParsedRows([]);
     setColumns([]);
     setSelectedCells([]);
+    setDragging(false);
+    setSelectionStart(null);
+    setSelectionCurrent(null);
   }
 
   function handleFile(file: File) {
@@ -91,6 +97,52 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     setSelectedCells((prev) =>
       prev.includes(key) ? prev.filter((cell) => cell !== key) : [...prev, key],
     );
+  }
+
+  function selectRange(start: { row: number; column: string }, end: { row: number; column: string }) {
+    const startRow = Math.min(start.row, end.row);
+    const endRow = Math.max(start.row, end.row);
+    const startColIndex = columns.indexOf(start.column);
+    const endColIndex = columns.indexOf(end.column);
+    const minCol = Math.min(startColIndex, endColIndex);
+    const maxCol = Math.max(startColIndex, endColIndex);
+
+    const nextSelection: string[] = [];
+    for (let rowIndex = startRow; rowIndex <= endRow; rowIndex += 1) {
+      for (let colIndex = minCol; colIndex <= maxCol; colIndex += 1) {
+        const column = columns[colIndex];
+        if (column) nextSelection.push(`${rowIndex}:${column}`);
+      }
+    }
+    setSelectedCells(nextSelection);
+  }
+
+  function handleCellMouseDown(rowIndex: number, column: string) {
+    setDragging(true);
+    setSelectionStart({ row: rowIndex, column });
+    setSelectionCurrent({ row: rowIndex, column });
+  }
+
+  function handleCellMouseEnter(rowIndex: number, column: string) {
+    if (!dragging) return;
+    setSelectionCurrent({ row: rowIndex, column });
+  }
+
+  function handleTableMouseUp() {
+    if (!dragging || !selectionStart || !selectionCurrent) {
+      if (selectionStart) {
+        toggleCell(selectionStart.row, selectionStart.column);
+      }
+      setDragging(false);
+      setSelectionStart(null);
+      setSelectionCurrent(null);
+      return;
+    }
+
+    selectRange(selectionStart, selectionCurrent);
+    setDragging(false);
+    setSelectionStart(null);
+    setSelectionCurrent(null);
   }
 
   function namesFromImport(): string[] {
@@ -149,7 +201,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
         onOpenChange(o);
       }}
     >
-      <DialogContent className="max-w-lg">
+      <DialogContent className="h-[95vh] max-h-[95vh] w-[95vw] max-w-[95vw] overflow-hidden">
         <DialogHeader>
           <DialogTitle>New class</DialogTitle>
           <DialogDescription>Name your class and add your students.</DialogDescription>
@@ -203,9 +255,12 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
             {columns.length > 0 && (
               <>
                 <div className="space-y-1.5">
-                  <Label>Click the cells that contain student names</Label>
-                  <div className="max-h-72 overflow-auto rounded-md border border-border bg-card p-2">
-                    <table className="min-w-full border-collapse text-left text-xs">
+                  <Label>Drag across the cells that contain student names</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Click and drag to select a rectangular region. A single click toggles one cell.
+                  </p>
+                  <div className="max-h-[55vh] overflow-auto rounded-md border border-border bg-card p-2">
+                    <table className="min-w-full border-collapse text-left text-xs" onMouseUp={handleTableMouseUp}>
                       <thead>
                         <tr>
                           {columns.map((column) => (
@@ -216,7 +271,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                         </tr>
                       </thead>
                       <tbody>
-                        {parsedRows.slice(0, 20).map((row, rowIndex) => (
+                        {parsedRows.slice(0, 80).map((row, rowIndex) => (
                           <tr key={`${rowIndex}`}>
                             {columns.map((column) => {
                               const value = String(row[column] ?? "").trim();
@@ -233,7 +288,9 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                                           ? "bg-background hover:bg-muted"
                                           : "bg-muted/40 text-muted-foreground"
                                     }`}
-                                    onClick={() => value && toggleCell(rowIndex, column)}
+                                    onMouseDown={() => value && handleCellMouseDown(rowIndex, column)}
+                                    onMouseEnter={() => handleCellMouseEnter(rowIndex, column)}
+                                    onMouseUp={handleTableMouseUp}
                                     disabled={!value}
                                   >
                                     {value || "—"}
