@@ -40,11 +40,19 @@ function ClassDetail() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const [cloneProjectOpen, setCloneProjectOpen] = useState(false);
+  const [projectToClone, setProjectToClone] = useState<{
+    id: string;
+    name: string;
+    group_size: number;
+    size_policy: string;
+  } | null>(null);
+  const [selectedClassesForClone, setSelectedClassesForClone] = useState<Set<string>>(new Set());
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
     queryFn: async () => {
-      const [cls, students, link, subs, projects] = await Promise.all([
+      const [cls, students, link, subs, projects, allClasses] = await Promise.all([
         supabase.from("classes").select("id, name").eq("id", id).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("share_links").select("token").eq("class_id", id).limit(1).maybeSingle(),
@@ -54,6 +62,7 @@ function ClassDetail() {
           .select("id, name, group_size, size_policy")
           .eq("class_id", id)
           .order("created_at", { ascending: false }),
+        supabase.from("classes").select("id, name").order("name"),
       ]);
       return {
         cls: cls.data,
@@ -61,6 +70,7 @@ function ClassDetail() {
         link: link.data,
         submissions: subs.data ?? [],
         projects: projects.data ?? [],
+        allClasses: allClasses.data ?? [],
       };
     },
   });
@@ -94,6 +104,28 @@ function ClassDetail() {
       setDeleting(false);
       setConfirmOpen(false);
       setProjectToDelete(null);
+    }
+  }
+
+  async function cloneProject() {
+    if (!projectToClone || selectedClassesForClone.size === 0) return;
+    try {
+      const newProjects = Array.from(selectedClassesForClone).map((classId) => ({
+        class_id: classId,
+        name: projectToClone.name,
+        group_size: projectToClone.group_size,
+        size_policy: projectToClone.size_policy,
+      }));
+
+      const { error } = await supabase.from("group_configs").insert(newProjects);
+      if (error) throw error;
+      toast.success("Project cloned to selected classes");
+      setCloneProjectOpen(false);
+      setProjectToClone(null);
+      setSelectedClassesForClone(new Set());
+      await qc.invalidateQueries({ queryKey: ["class", id] });
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 
@@ -226,6 +258,21 @@ function ClassDetail() {
                     </Link>
                     <button
                       type="button"
+                      aria-label={`Clone ${p.name}`}
+                      title={`Clone ${p.name} to other classes`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setProjectToClone(p);
+                        setSelectedClassesForClone(new Set());
+                        setCloneProjectOpen(true);
+                      }}
+                      className="ml-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
                       aria-label={`Delete ${p.name}`}
                       title={`Delete ${p.name}`}
                       onClick={(e) => {
@@ -276,6 +323,69 @@ function ClassDetail() {
               </Button>
               <Button variant="destructive" disabled={deleting} onClick={deleteProject}>
                 {deleting ? "Deleting…" : "Delete"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={cloneProjectOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCloneProjectOpen(false);
+            setProjectToClone(null);
+            setSelectedClassesForClone(new Set());
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Clone project</DialogTitle>
+            <DialogDescription>
+              Select the classes to which you want to clone "{projectToClone?.name}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
+            {data?.allClasses
+              .filter((c) => c.id !== id)
+              .map((c) => (
+                <label key={c.id} className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedClassesForClone.has(c.id)}
+                    onChange={(e) => {
+                      const next = new Set(selectedClassesForClone);
+                      if (e.target.checked) {
+                        next.add(c.id);
+                      } else {
+                        next.delete(c.id);
+                      }
+                      setSelectedClassesForClone(next);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm">{c.name}</span>
+                </label>
+              ))}
+          </div>
+          <DialogFooter>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setCloneProjectOpen(false);
+                  setProjectToClone(null);
+                  setSelectedClassesForClone(new Set());
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={selectedClassesForClone.size === 0}
+                onClick={cloneProject}
+              >
+                Clone
               </Button>
             </div>
           </DialogFooter>

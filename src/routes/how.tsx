@@ -51,7 +51,7 @@ function HowItWorksPage() {
             <section className="space-y-2">
               <h2 className="text-2xl font-semibold">3. Create a project</h2>
               <p className="text-base leading-7 text-muted-foreground">
-                Inside a class, create a project. Set the target group size. If the number of students is not divisible by the group size, you can choose whether some groups should have one extra student or one less.
+                Inside a class, create a project. Set the target group size. If the number of students is not divisible by the group size, you can choose whether some groups should have one extra student or one less. You can copy a created project to multiple classes using the clone feature.
               </p>
             </section>
 
