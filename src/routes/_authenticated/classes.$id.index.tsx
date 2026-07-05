@@ -184,22 +184,26 @@ function ClassDetail() {
             </div>
           ) : (
             <div
-              className="mt-2 flex items-end gap-2 cursor-pointer group"
+              className={`mt-2 flex items-end gap-2 ${!isArchived ? "cursor-pointer group" : ""}`}
               onClick={() => {
-                setEditingClassName(true);
-                setNewClassName(data?.cls?.name || "");
+                if (!isArchived) {
+                  setEditingClassName(true);
+                  setNewClassName(data?.cls?.name || "");
+                }
               }}
-              title="Click to edit class name"
+              title={isArchived ? "" : "Click to edit class name"}
             >
-              <h1 className="text-3xl font-semibold tracking-tight group-hover:text-muted-foreground">
+              <h1 className={`text-3xl font-semibold tracking-tight ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
                 {data?.cls?.name}
                 {isArchived && (
-                  <span className="ml-3 rounded-md bg-muted px-2 py-0.5 align-middle text-xs font-medium text-muted-foreground">
+                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                     Archived
                   </span>
                 )}
               </h1>
-              <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              {!isArchived && (
+                <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
             </div>
           )}
         </div>

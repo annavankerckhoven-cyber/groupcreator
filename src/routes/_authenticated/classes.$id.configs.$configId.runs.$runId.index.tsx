@@ -37,13 +37,14 @@ function RunPage() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["run", runId],
     queryFn: async () => {
-      const [run, absent, students, project, subs, dists] = await Promise.all([
+      const [run, absent, students, project, subs, dists, cls] = await Promise.all([
         supabase.from("runs").select("id, name, status, time_limit_seconds, is_favorite, completed_at, error_message").eq("id", runId).single(),
         supabase.from("run_absent").select("student_id").eq("run_id", runId),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("submissions").select("id, student_id").eq("class_id", id),
         supabase.from("run_distributions").select("id, rank, score, is_favorite").eq("run_id", runId).order("rank"),
+        supabase.from("classes").select("archived_at").eq("id", id).single(),
       ]);
 
       if (run.error) throw run.error;
@@ -74,6 +75,7 @@ function RunPage() {
         absent: new Set((absent.data ?? []).map((r) => r.student_id)),
         students: students.data ?? [],
         project: project.data!,
+        classArchived: !!cls.data?.archived_at,
         prefs: prefs
           .map((p) => ({ from: subById.get(p.submission_id), target: p.target_student_id, kind: p.kind as "with" | "avoid" }))
           .filter((p): p is { from: string; target: string; kind: "with" | "avoid" } => Boolean(p.from)),
@@ -250,6 +252,7 @@ function RunPage() {
 
   if (isLoading || !data) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
+  const isArchived = data.classArchived;
   const nameById = new Map(data.students.map((s) => [s.id, s.name]));
   const groupsByDist = new Map<string, string[][]>();
   for (const row of data.distGroups) {
@@ -285,17 +288,26 @@ function RunPage() {
             </div>
           ) : (
             <div
-              className="mt-2 flex items-end gap-2 cursor-pointer group"
+              className={`mt-2 flex items-end gap-2 ${!isArchived ? "cursor-pointer group" : ""}`}
               onClick={() => {
-                setEditingRunName(true);
-                setNewRunName(data?.run.name || "Run");
+                if (!isArchived) {
+                  setEditingRunName(true);
+                  setNewRunName(data?.run.name || "Run");
+                }
               }}
-              title="Click to edit run name"
+              title={isArchived ? "" : "Click to edit run name"}
             >
-              <h1 className="text-2xl font-semibold group-hover:text-muted-foreground">
+              <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
                 {data?.run.name || "Run"}
+                {isArchived && (
+                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                    Archived
+                  </span>
+                )}
               </h1>
-              <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              {!isArchived && (
+                <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
             </div>
           )}
           <p className="text-sm text-muted-foreground">
