@@ -397,7 +397,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                 disabled={loading || !name.trim() || namesFromImport().length === 0}
                 onClick={() => create(namesFromImport())}
               >
-                {loading ? "Creating…" : `Create class (${namesFromImport().length} students)`}
+                {loading ? "Creating…" : `Create class with ${namesFromImport().length} students`}
               </Button>
             </DialogFooter>
           </TabsContent>
