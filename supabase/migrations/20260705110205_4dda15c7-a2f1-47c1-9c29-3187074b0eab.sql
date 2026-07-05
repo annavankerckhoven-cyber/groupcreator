@@ -1,0 +1,1 @@
+ALTER TABLE public.runs DROP CONSTRAINT runs_time_limit_seconds_check; ALTER TABLE public.runs ADD CONSTRAINT runs_time_limit_seconds_check CHECK (time_limit_seconds >= 5 AND time_limit_seconds <= 180);
