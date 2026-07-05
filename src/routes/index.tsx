@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Sparkles, Heart, Mail, Coffee, Home, CircleUserRound } from "lucide-react";
+import { Sparkles, Mail } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -31,37 +32,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-6">
-        <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
-            <Users className="h-4 w-4" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">Group Creator</span>
-        </div>
-
-        <div className="ml-auto flex flex-nowrap items-center gap-2">
-          <Button asChild variant="outline" className="shrink-0 whitespace-nowrap">
-            <a
-              href="https://www.buymeacoffee.com/annavankerckhoven"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 whitespace-nowrap"
-              aria-label="Buy me a coffee"
-            >
-              <Coffee className="h-4 w-4" />
-              <span className="hidden sm:inline">Buy me a coffee</span>
-            </a>
-          </Button>
-          <Button asChild variant="default" className="shrink-0 whitespace-nowrap">
-            <Link to={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center gap-2 whitespace-nowrap">
-              {signedIn ? <Home className="h-4 w-4" /> : <CircleUserRound className="h-4 w-4" />}
-              <span className="hidden sm:inline">
-                {signedIn ? "Go to dashboard" : "Log in / Sign up"}
-              </span>
-            </Link>
-          </Button>
-        </div>
-      </header>
+      <PageHeader />
 
       <main className="mx-auto max-w-6xl px-6">
         <section className="py-20 text-center">

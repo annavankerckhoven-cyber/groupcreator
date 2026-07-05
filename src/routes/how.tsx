@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 
 export const Route = createFileRoute("/how")({
   head: () => ({ meta: [{ title: "How it works — Group Creator" }] }),
@@ -10,6 +11,8 @@ export const Route = createFileRoute("/how")({
 function HowItWorksPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageHeader />
+
       <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-12">
 
         <section className="space-y-8">
