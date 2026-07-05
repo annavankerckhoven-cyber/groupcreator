@@ -319,7 +319,7 @@ function NewRunDialog({
   onCreated: () => void;
 }) {
   const [absent, setAbsent] = useState<Set<string>>(new Set());
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(5);
   const [name, setName] = useState(defaultName);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();

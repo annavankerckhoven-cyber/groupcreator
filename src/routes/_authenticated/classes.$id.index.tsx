@@ -275,7 +275,7 @@ function ClassDetail() {
                       onClick={() => deleteStudent(s.id, s.name)}
                       className="text-destructive hover:text-destructive"
                       aria-label={`Delete ${s.name}`}
-                      title={`Delete ${s.name}`}
+                      title={`Delete ${s.name} from this class`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

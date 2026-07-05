@@ -277,10 +277,16 @@ export function runOptimizer(input: OptimizerInput, onProgress?: ProgressFn): To
     scored.sort((a, b) => b.s - a.s);
     bestScore = scored[0]?.s ?? -Infinity;
 
-    const survivors = scored.slice(0, 80).map((x) => x.d);
+    const survivors = scored.slice(0, 50).map((x) => x.d);
     const children = survivors.map((p) => mutate(p, sizes, adj, rand));
 
     const combined = [...survivors, ...children];
+    
+    // Add new importance-based and random greedy distributions before deduplication
+    for (let i = 0; i < 20; i++) combined.push(makeImportance());
+    for (let i = 0; i < 100; i++) combined.push(makeRandomGreedy());
+
+    // Remove duplicates after adding new distributions
     const seen = new Set<string>();
     const unique: number[][][] = [];
     for (const d of combined) {
@@ -292,8 +298,6 @@ export function runOptimizer(input: OptimizerInput, onProgress?: ProgressFn): To
     }
 
     const next: number[][][] = unique.slice();
-    for (let i = 0; i < 30; i++) next.push(makeImportance());
-    for (let i = 0; i < 30; i++) next.push(makeRandomGreedy());
     while (next.length < 250) next.push(makeRandom());
     pop = next.slice(0, 250);
 
