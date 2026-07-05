@@ -107,6 +107,8 @@ function scoreGroup(group: number[], adj: Adj): number {
   for (const m of group) {
     for (const x of adj.likes[m]) if (set.has(x)) s += 1;
     for (const x of adj.dislikes[m]) if (set.has(x)) s -= 20;
+    // Subtract 3 points if student has liked peers but none are in the group
+    if (adj.likes[m].length > 0 && adj.likes[m].every((x) => !set.has(x))) s -= 3;
   }
   return s;
 }
