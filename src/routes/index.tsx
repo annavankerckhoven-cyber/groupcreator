@@ -85,20 +85,6 @@ function Index() {
           ))}
         </section>
 
-        <section className="grid gap-6 py-12 md:grid-cols-2">
-          <Card>
-            <CardContent className="pt-6">
-              <Mail className="mb-3 h-5 w-5 text-primary" />
-              <h3 className="mb-2 text-lg font-semibold">Contact & suggestions</h3>
-              <p className="text-sm text-muted-foreground">
-                Did you encounter an issue, or do you have ideas to improve this application?
-                {"Reach out to\u00a0"}
-                <span className="font-medium text-foreground">annavankerckhoven@gmail.com</span>.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-
         <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Group Creator.
         </footer>
