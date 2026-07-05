@@ -257,17 +257,23 @@ function RunCardLink({
 }
 
 function NewRunDialog({
-  open, onOpenChange, classId, configId, students, onCreated,
+  open, onOpenChange, classId, configId, students, defaultName, onCreated,
 }: {
   open: boolean; onOpenChange: (o: boolean) => void;
   classId: string; configId: string;
   students: { id: string; name: string }[];
+  defaultName: string;
   onCreated: () => void;
 }) {
   const [absent, setAbsent] = useState<Set<string>>(new Set());
   const [seconds, setSeconds] = useState(10);
+  const [name, setName] = useState(defaultName);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (open) setName(defaultName);
+  }, [open, defaultName]);
 
   function toggle(id: string) {
     const next = new Set(absent);
@@ -280,7 +286,7 @@ function NewRunDialog({
     try {
       const { data: run, error } = await supabase
         .from("runs")
-        .insert({ config_id: configId, time_limit_seconds: seconds, status: "pending", error_message: null })
+        .insert({ config_id: configId, name: name.trim() || defaultName, time_limit_seconds: seconds, status: "pending", error_message: null })
         .select("id")
         .single();
       if (error || !run) throw error ?? new Error("Failed to create run");
@@ -312,6 +318,10 @@ function NewRunDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
+          <div>
+            <Label htmlFor="run-name">Run name</Label>
+            <Input id="run-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
+          </div>
           <div>
             <Label>Absent students (excluded from this run)</Label>
             <div className="mt-2 max-h-56 space-y-1.5 overflow-auto rounded-md border border-border p-3">
