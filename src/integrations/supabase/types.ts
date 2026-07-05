@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       classes: {
         Row: {
+          archived_at: string | null
           created_at: string
           id: string
           name: string
@@ -23,6 +24,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           id?: string
           name: string
@@ -30,6 +32,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -374,6 +377,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      classes_archive_housekeeping: { Args: never; Returns: undefined }
       owns_class: { Args: { _class_id: string }; Returns: boolean }
       owns_config: { Args: { _config_id: string }; Returns: boolean }
       owns_distribution: { Args: { _dist_id: string }; Returns: boolean }

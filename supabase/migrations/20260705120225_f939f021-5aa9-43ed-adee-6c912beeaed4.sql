@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.classes_archive_housekeeping() FROM PUBLIC, anon, authenticated;

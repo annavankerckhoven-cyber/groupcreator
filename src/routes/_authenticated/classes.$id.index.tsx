@@ -55,7 +55,7 @@ function ClassDetail() {
     queryKey: ["class", id],
     queryFn: async () => {
       const [cls, students, link, subs, projects, allClasses] = await Promise.all([
-        supabase.from("classes").select("id, name").eq("id", id).single(),
+        supabase.from("classes").select("id, name, archived_at").eq("id", id).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("share_links").select("token").eq("class_id", id).limit(1).maybeSingle(),
         supabase.from("submissions").select("student_id, submitted_at").eq("class_id", id),
@@ -64,7 +64,7 @@ function ClassDetail() {
           .select("id, name, group_size, size_policy")
           .eq("class_id", id)
           .order("created_at", { ascending: false }),
-        supabase.from("classes").select("id, name").order("name"),
+        supabase.from("classes").select("id, name, archived_at").order("name"),
       ]);
       return {
         cls: cls.data,
@@ -160,6 +160,7 @@ function ClassDetail() {
   const shareUrl = data.link ? `${window.location.origin}/s/${data.link.token}` : "";
   const submittedSet = new Set(data.submissions.map((s) => s.student_id));
   const submittedAt = new Map(data.submissions.map((s) => [s.student_id, s.submitted_at]));
+  const isArchived = !!data.cls.archived_at;
 
   return (
     <div className="space-y-8">
@@ -192,6 +193,11 @@ function ClassDetail() {
             >
               <h1 className="text-3xl font-semibold tracking-tight group-hover:text-muted-foreground">
                 {data?.cls?.name}
+                {isArchived && (
+                  <span className="ml-3 rounded-md bg-muted px-2 py-0.5 align-middle text-xs font-medium text-muted-foreground">
+                    Archived
+                  </span>
+                )}
               </h1>
               <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -293,9 +299,11 @@ function ClassDetail() {
               compute groups.
             </CardDescription>
           </div>
-          <Button size="sm" onClick={() => setProjectOpen(true)}>
-            <Plus className="mr-1.5 h-4 w-4" /> New project
-          </Button>
+          {!isArchived && (
+            <Button size="sm" onClick={() => setProjectOpen(true)}>
+              <Plus className="mr-1.5 h-4 w-4" /> New project
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {data.projects.length === 0 ? (
@@ -410,7 +418,7 @@ function ClassDetail() {
           </DialogHeader>
           <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
             {data?.allClasses
-              .filter((c) => c.id !== id)
+              .filter((c) => c.id !== id && !c.archived_at)
               .map((c) => (
                 <label key={c.id} className="flex cursor-pointer items-center gap-2">
                   <input
