@@ -306,7 +306,7 @@ function RunPage() {
                 )}
               </h1>
               {!isArchived && (
-                <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -mt-1" />
               )}
             </div>
           )}

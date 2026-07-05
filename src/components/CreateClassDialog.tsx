@@ -272,12 +272,13 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
         <div className="overflow-y-auto flex-1">
           <div className="space-y-2 px-6">
-            <Label htmlFor="cname">Class name</Label>
+            <Label htmlFor="cname">Class name <span className="text-red-500">*</span></Label>
             <Input
               id="cname"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Biology 9A"
+              required
             />
           </div>
 
@@ -297,7 +298,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
               placeholder={"Alice\nBilal\nChen\nDamia"}
             />
             <DialogFooter>
-              <Button disabled={loading} onClick={() => create(namesFromPaste())}>
+              <Button disabled={loading || !name.trim()} onClick={() => create(namesFromPaste())}>
                 {loading ? "Creating…" : `Create class with ${namesFromPaste().length} students`}
               </Button>
             </DialogFooter>
@@ -321,7 +322,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                 <div className="space-y-1.5">
                   <Label>Select the cells containing student names</Label>
                   <p className="text-xs text-muted-foreground">
-                    Click to select one cell. Drag to select a range. Shift+Click to extend selection. Ctrl+Click to toggle individual cells.
+                    Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.
                   </p>
                   <div ref={tableContainerRef} className="rounded-md border border-border bg-card p-2">
                     <table className="min-w-full border-collapse text-left text-xs select-none" onMouseUp={handleTableMouseUp} onMouseLeave={() => { if (dragging) { setDragging(false); } }}>
@@ -393,10 +394,10 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
             <DialogFooter>
               <Button
-                disabled={loading || namesFromImport().length === 0}
+                disabled={loading || !name.trim() || namesFromImport().length === 0}
                 onClick={() => create(namesFromImport())}
               >
-                {loading ? "Creating…" : `Create class (${namesFromImport().length})`}
+                {loading ? "Creating…" : `Create class (${namesFromImport().length} students)`}
               </Button>
             </DialogFooter>
           </TabsContent>

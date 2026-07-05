@@ -39,6 +39,9 @@ function ClassDetail() {
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [confirmStudentDeleteOpen, setConfirmStudentDeleteOpen] = useState(false);
+  const [deletingStudent, setDeletingStudent] = useState(false);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [cloneProjectOpen, setCloneProjectOpen] = useState(false);
   const [projectToClone, setProjectToClone] = useState<{
@@ -85,19 +88,26 @@ function ClassDetail() {
     navigate({ to: "/dashboard" });
   }
 
-  async function resetSubmission(studentId: string) {
-    if (!confirm("Reset this student's submission? Their preferences will be cleared.")) return;
-    await supabase.from("submissions").delete().eq("class_id", id).eq("student_id", studentId);
-    qc.invalidateQueries({ queryKey: ["class", id] });
-    toast.success("Submission cleared");
+  function openDeleteStudentConfirm(studentId: string, studentName: string) {
+    setStudentToDelete({ id: studentId, name: studentName });
+    setConfirmStudentDeleteOpen(true);
   }
 
-  async function deleteStudent(studentId: string, studentName: string) {
-    if (!confirm(`Delete ${studentName}? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.`)) return;
-    const { error } = await supabase.from("students").delete().eq("id", studentId);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["class", id] });
-    toast.success("Student deleted");
+  async function confirmDeleteStudent() {
+    if (!studentToDelete) return;
+    setDeletingStudent(true);
+    try {
+      const { error } = await supabase.from("students").delete().eq("id", studentToDelete.id);
+      if (error) throw error;
+      toast.success("Student deleted");
+      await qc.invalidateQueries({ queryKey: ["class", id] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setDeletingStudent(false);
+      setConfirmStudentDeleteOpen(false);
+      setStudentToDelete(null);
+    }
   }
 
   async function deleteProject() {
@@ -202,7 +212,7 @@ function ClassDetail() {
                 )}
               </h1>
               {!isArchived && (
-                <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -mt-1" />
               )}
             </div>
           )}
@@ -281,7 +291,7 @@ function ClassDetail() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => deleteStudent(s.id, s.name)}
+                      onClick={() => openDeleteStudentConfirm(s.id, s.name)}
                       className="text-muted-foreground hover:text-muted-foreground"
                       aria-label={`Delete ${s.name}`}
                       title={`Delete ${s.name} from this class`}
@@ -468,6 +478,42 @@ function ClassDetail() {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={confirmStudentDeleteOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmStudentDeleteOpen(false);
+            setStudentToDelete(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Delete student</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {studentToDelete?.name}? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={deletingStudent}
+                onClick={() => {
+                  setConfirmStudentDeleteOpen(false);
+                  setStudentToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" disabled={deletingStudent} onClick={confirmDeleteStudent}>
+                {deletingStudent ? "Deleting…" : "Delete"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <NewProjectDialog
         open={projectOpen}
         onOpenChange={setProjectOpen}
@@ -536,22 +582,24 @@ function NewProjectDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="cn">Name</Label>
+            <Label htmlFor="cn">Name <span className="text-red-500">*</span></Label>
             <Input
               id="cn"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Project 1"
+              required
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="gs">Students per group</Label>
+            <Label htmlFor="gs">Students per group <span className="text-red-500">*</span></Label>
             <Input
               id="gs"
               type="number"
               min={2}
               value={size}
               onChange={(e) => setSize(parseInt(e.target.value) || 0)}
+              required
             />
           </div>
           <div className="space-y-1.5">
@@ -577,7 +625,7 @@ function NewProjectDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={loading} onClick={create}>
+          <Button disabled={loading || !name.trim() || size < 2} onClick={create}>
             {loading ? "Creating…" : "Create project"}
           </Button>
         </DialogFooter>

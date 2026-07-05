@@ -141,7 +141,7 @@ function Dashboard() {
             <div className="mb-4">
               <h2 className="text-xl font-semibold tracking-tight">Active classes</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Active classes are moved to Archive by default after 1 year.
+                Active classes are moved to Archive automatically after 1 year.
               </p>
             </div>
             {active.length === 0 ? (
@@ -197,7 +197,7 @@ function Dashboard() {
             <DialogTitle>Delete class</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this class? All of its projects, runs, distributions,
-              and student form responses will be removed.
+              and student form responses will be deleted.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
