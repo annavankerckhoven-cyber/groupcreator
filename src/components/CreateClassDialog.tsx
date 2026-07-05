@@ -166,24 +166,26 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     if (!dragging) return;
     setSelectionCurrent({ row: rowIndex, column });
 
-    // Auto-scroll when dragging near boundaries
+    // Auto-scroll the modal when dragging near boundaries
     if (tableContainerRef.current) {
-      const container = tableContainerRef.current;
-      const scrollTop = container.scrollTop;
-      const clientHeight = container.clientHeight;
-      const scrollHeight = container.scrollHeight;
-      const scrollThreshold = 50;
+      const modalContent = tableContainerRef.current.closest(".overflow-y-auto");
+      if (modalContent) {
+        const scrollTop = modalContent.scrollTop;
+        const clientHeight = modalContent.clientHeight;
+        const scrollHeight = modalContent.scrollHeight;
+        const scrollThreshold = 120; // Larger threshold to keep selection active
 
-      // Check if we're dragging near the top
-      const rect = (event?.target as HTMLElement)?.getBoundingClientRect?.();
-      if (rect) {
-        const distFromTop = rect.top - container.getBoundingClientRect().top;
-        const distFromBottom = container.getBoundingClientRect().bottom - rect.bottom;
+        const rect = (event?.target as HTMLElement)?.getBoundingClientRect?.();
+        if (rect) {
+          const modalRect = modalContent.getBoundingClientRect();
+          const distFromTop = rect.top - modalRect.top;
+          const distFromBottom = modalRect.bottom - rect.bottom;
 
-        if (distFromTop < scrollThreshold && scrollTop > 0) {
-          container.scrollTop = Math.max(0, scrollTop - 10);
-        } else if (distFromBottom < scrollThreshold && scrollTop < scrollHeight - clientHeight) {
-          container.scrollTop = Math.min(scrollHeight - clientHeight, scrollTop + 10);
+          if (distFromTop < scrollThreshold && scrollTop > 0) {
+            modalContent.scrollTop = Math.max(0, scrollTop - 15);
+          } else if (distFromBottom < scrollThreshold && scrollTop < scrollHeight - clientHeight) {
+            modalContent.scrollTop = Math.min(scrollHeight - clientHeight, scrollTop + 15);
+          }
         }
       }
     }
@@ -318,7 +320,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                   <p className="text-xs text-muted-foreground">
                     Click to select one cell. Drag to select a range. Shift+Click to extend selection. Ctrl+Click to toggle individual cells.
                   </p>
-                  <div ref={tableContainerRef} className="rounded-md border border-border bg-card p-2 max-h-96 overflow-y-auto">
+                  <div ref={tableContainerRef} className="rounded-md border border-border bg-card p-2">
                     <table className="min-w-full border-collapse text-left text-xs select-none" onMouseUp={handleTableMouseUp} onMouseLeave={() => { if (dragging) { setDragging(false); } }}>
                       <thead>
                         <tr>
