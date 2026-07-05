@@ -97,7 +97,7 @@ function Index() {
             },
             {
               title: "Share a form",
-              body: "Students pick who they'd like to work with — and who not. Anonymous to peers.",
+              body: "Students pick who they'd like to work with — and who not, completely anonymous.",
             },
             {
               title: "Generate groups",
