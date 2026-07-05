@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/classes/$id/configs/$confi
 
 type RunCard = {
   id: string;
+  name: string;
   created_at: string;
   time_limit_seconds: number;
   status: string;
@@ -56,7 +58,7 @@ function ProjectPage() {
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase
           .from("runs")
-          .select("id, created_at, time_limit_seconds, status, is_favorite, error_message")
+          .select("id, name, created_at, time_limit_seconds, status, is_favorite, error_message")
           .eq("config_id", configId)
           .order("created_at", { ascending: false }),
         supabase.from("run_distributions").select("run_id, id").eq("is_favorite", true),
@@ -72,7 +74,7 @@ function ProjectPage() {
       return {
         project: proj.data,
         students: students.data ?? [],
-        runs: (runs.data ?? []).map((run) => ({
+        runs: (runs.data ?? []).map((run, idx, arr) => ({
           ...run,
           favorite_distribution_id: favoriteByRunId.get(run.id) ?? null,
         })) as RunCard[],
@@ -158,6 +160,7 @@ function ProjectPage() {
         classId={id}
         configId={configId}
         students={data.students}
+        defaultName={`Run ${data.runs.length + 1}`}
         onCreated={() => qc.invalidateQueries({ queryKey: ["project", configId] })}
       />
     </div>
@@ -190,6 +193,7 @@ function RunCardLink({
         className="block pr-12"
       >
         <div className="space-y-1">
+          {run.name && <div className="pr-6 text-sm font-medium">{run.name}</div>}
           <div className="text-xs text-muted-foreground">
             {new Date(run.created_at).toLocaleString()}
           </div>
@@ -254,17 +258,23 @@ function RunCardLink({
 }
 
 function NewRunDialog({
-  open, onOpenChange, classId, configId, students, onCreated,
+  open, onOpenChange, classId, configId, students, defaultName, onCreated,
 }: {
   open: boolean; onOpenChange: (o: boolean) => void;
   classId: string; configId: string;
   students: { id: string; name: string }[];
+  defaultName: string;
   onCreated: () => void;
 }) {
   const [absent, setAbsent] = useState<Set<string>>(new Set());
   const [seconds, setSeconds] = useState(10);
+  const [name, setName] = useState(defaultName);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (open) setName(defaultName);
+  }, [open, defaultName]);
 
   function toggle(id: string) {
     const next = new Set(absent);
@@ -277,7 +287,7 @@ function NewRunDialog({
     try {
       const { data: run, error } = await supabase
         .from("runs")
-        .insert({ config_id: configId, time_limit_seconds: seconds, status: "pending", error_message: null })
+        .insert({ config_id: configId, name: name.trim() || defaultName, time_limit_seconds: seconds, status: "pending", error_message: null })
         .select("id")
         .single();
       if (error || !run) throw error ?? new Error("Failed to create run");
@@ -309,6 +319,10 @@ function NewRunDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
+          <div>
+            <Label htmlFor="run-name">Run name</Label>
+            <Input id="run-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
+          </div>
           <div>
             <Label>Absent students (excluded from this run)</Label>
             <div className="mt-2 max-h-56 space-y-1.5 overflow-auto rounded-md border border-border p-3">
