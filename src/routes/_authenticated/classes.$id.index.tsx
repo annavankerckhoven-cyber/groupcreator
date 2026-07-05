@@ -263,21 +263,23 @@ function ClassDetail() {
                       </span>
                     )}
                   </div>
-                  {done && (
-                    <Button variant="ghost" size="sm" onClick={() => resetSubmission(s.id)}>
-                      Reset
+                  <div className="flex items-center gap-1">
+                    {done && (
+                      <Button variant="ghost" size="sm" onClick={() => resetSubmission(s.id)}>
+                        Reset
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteStudent(s.id, s.name)}
+                      className="text-destructive hover:text-destructive"
+                      aria-label={`Delete ${s.name}`}
+                      title={`Delete ${s.name}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteStudent(s.id, s.name)}
-                    className="text-destructive hover:text-destructive"
-                    aria-label={`Delete ${s.name}`}
-                    title={`Delete ${s.name}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </div>
                 </li>
               );
             })}
