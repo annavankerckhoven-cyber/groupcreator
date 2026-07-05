@@ -92,6 +92,14 @@ function ClassDetail() {
     toast.success("Submission cleared");
   }
 
+  async function deleteStudent(studentId: string, studentName: string) {
+    if (!confirm(`Delete ${studentName}? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.`)) return;
+    const { error } = await supabase.from("students").delete().eq("id", studentId);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["class", id] });
+    toast.success("Student deleted");
+  }
+
   async function deleteProject() {
     if (!projectToDelete) return;
     setDeleting(true);
@@ -260,6 +268,16 @@ function ClassDetail() {
                       Reset
                     </Button>
                   )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteStudent(s.id, s.name)}
+                    className="text-destructive hover:text-destructive"
+                    aria-label={`Delete ${s.name}`}
+                    title={`Delete ${s.name}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </li>
               );
             })}
