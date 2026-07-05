@@ -122,7 +122,7 @@ function ProjectPage() {
           </div>
         ) : (
           <div
-            className="mt-2 flex items-center gap-2 cursor-pointer group"
+            className="mt-2 flex items-end gap-2 cursor-pointer group"
             onClick={() => {
               setEditingProjectName(true);
               setNewProjectName(project.name || "");
@@ -282,7 +282,7 @@ function RunCardLink({
           e.stopPropagation();
           onDelete();
         }}
-        className="absolute right-3 top-10 z-10 rounded-md p-1 text-destructive transition-opacity hover:bg-destructive/10 focus:opacity-100"
+        className="absolute right-3 top-10 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted focus:opacity-100"
       >
         <Trash2 className="h-4 w-4" />
       </button>

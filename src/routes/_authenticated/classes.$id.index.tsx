@@ -183,7 +183,7 @@ function ClassDetail() {
             </div>
           ) : (
             <div
-              className="mt-2 flex items-center gap-2 cursor-pointer group"
+              className="mt-2 flex items-end gap-2 cursor-pointer group"
               onClick={() => {
                 setEditingClassName(true);
                 setNewClassName(data?.cls?.name || "");
@@ -196,15 +196,12 @@ function ClassDetail() {
               <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           )}
-          <p className="mt-1 text-sm text-muted-foreground">
-            {submittedSet.size} of {data.students.length} students have submitted
-          </p>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={deleteClass}
-          className="text-destructive hover:text-destructive"
+          className="text-muted-foreground hover:text-muted-foreground"
         >
           <Trash2 className="mr-1.5 h-4 w-4" /> Delete class
         </Button>
@@ -239,7 +236,12 @@ function ClassDetail() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Students</CardTitle>
+          <div>
+            <CardTitle className="text-base">Students</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {submittedSet.size} of {data.students.length} students have submitted
+            </p>
+          </div>
           <Button size="sm" onClick={() => setAddStudentOpen(true)}>
             <Plus className="mr-1.5 h-4 w-4" /> Add student
           </Button>
@@ -264,16 +266,11 @@ function ClassDetail() {
                     )}
                   </div>
                   <div className="flex items-center gap-1">
-                    {done && (
-                      <Button variant="ghost" size="sm" onClick={() => resetSubmission(s.id)}>
-                        Reset
-                      </Button>
-                    )}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => deleteStudent(s.id, s.name)}
-                      className="text-destructive hover:text-destructive"
+                      className="text-muted-foreground hover:text-muted-foreground"
                       aria-label={`Delete ${s.name}`}
                       title={`Delete ${s.name} from this class`}
                     >
@@ -346,7 +343,7 @@ function ClassDetail() {
                         setProjectToDelete(p.id);
                         setConfirmOpen(true);
                       }}
-                      className="ml-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                      className="ml-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

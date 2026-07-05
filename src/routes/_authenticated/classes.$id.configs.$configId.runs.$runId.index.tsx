@@ -285,7 +285,7 @@ function RunPage() {
             </div>
           ) : (
             <div
-              className="mt-2 flex items-center gap-2 cursor-pointer group"
+              className="mt-2 flex items-end gap-2 cursor-pointer group"
               onClick={() => {
                 setEditingRunName(true);
                 setNewRunName(data?.run.name || "Run");

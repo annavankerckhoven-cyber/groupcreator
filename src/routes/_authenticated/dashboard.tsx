@@ -115,7 +115,7 @@ function Dashboard() {
                     setClassToDelete(c.id);
                     setConfirmOpen(true);
                   }}
-                  className="absolute right-3 top-3 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                  className="absolute right-3 top-3 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
