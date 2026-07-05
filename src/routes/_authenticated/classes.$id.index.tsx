@@ -259,7 +259,7 @@ function ClassDetail() {
           <div>
             <CardTitle className="text-base">Students</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              {submittedSet.size} of {data.students.length} students have submitted
+              {submittedSet.size} of {data.students.length} students have submitted their preferences.
             </p>
           </div>
           {!isArchived && (
@@ -278,7 +278,7 @@ function ClassDetail() {
                     {done ? (
                       <CheckCircle2 className="h-4 w-4 text-primary" />
                     ) : (
-                      <Circle className="h-4 w-4 text-muted-foreground" />
+                      <Circle className="h-4 w-4 text-destructive fill-destructive" />
                     )}
                     <span>{s.name}</span>
                     {done && (
