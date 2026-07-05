@@ -22,7 +22,7 @@ import {
   Plus,
   CheckCircle2,
   Circle,
-  ChevronRight,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -48,6 +48,8 @@ function ClassDetail() {
     size_policy: string;
   } | null>(null);
   const [selectedClassesForClone, setSelectedClassesForClone] = useState<Set<string>>(new Set());
+  const [editingClassName, setEditingClassName] = useState(false);
+  const [newClassName, setNewClassName] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
@@ -129,6 +131,22 @@ function ClassDetail() {
     }
   }
 
+  async function saveClassName() {
+    if (!newClassName.trim() || !data?.cls) return;
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .update({ name: newClassName.trim() })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Class name updated");
+      setEditingClassName(false);
+      await qc.invalidateQueries({ queryKey: ["class", id] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
   if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   const shareUrl = data.link ? `${window.location.origin}/s/${data.link.token}` : "";
@@ -142,7 +160,34 @@ function ClassDetail() {
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
             ← All classes
           </Link>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">{data.cls.name}</h1>
+          {editingClassName ? (
+            <div className="mt-2">
+              <Input
+                value={newClassName}
+                onChange={(e) => setNewClassName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setEditingClassName(false);
+                }}
+                onBlur={saveClassName}
+                autoFocus
+                className="text-2xl font-semibold"
+              />
+            </div>
+          ) : (
+            <div
+              className="mt-2 flex items-center gap-2 cursor-pointer group"
+              onClick={() => {
+                setEditingClassName(true);
+                setNewClassName(data?.cls?.name || "");
+              }}
+              title="Click to edit class name"
+            >
+              <h1 className="text-3xl font-semibold tracking-tight group-hover:text-muted-foreground">
+                {data?.cls?.name}
+              </h1>
+              <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          )}
           <p className="mt-1 text-sm text-muted-foreground">
             {submittedSet.size} of {data.students.length} students have submitted
           </p>

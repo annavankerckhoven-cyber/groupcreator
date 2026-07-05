@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Play, Heart, AlertTriangle, Trash2, Eye } from "lucide-react";
+import { Plus, Play, Heart, AlertTriangle, Trash2, Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/")({
@@ -36,6 +36,8 @@ function ProjectPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState<string | null>(null);
+  const [editingProjectName, setEditingProjectName] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
 
   async function toggleRunFavorite(runId: string, nextFavorite: boolean) {
     setFavoriteLoading(runId);
@@ -47,6 +49,22 @@ function ProjectPage() {
       toast.error((e as Error).message);
     } finally {
       setFavoriteLoading(null);
+    }
+  }
+
+  async function saveProjectName() {
+    if (!newProjectName.trim() || !data?.project) return;
+    try {
+      const { error } = await supabase
+        .from("group_configs")
+        .update({ name: newProjectName.trim() })
+        .eq("id", configId);
+      if (error) throw error;
+      toast.success("Project name updated");
+      setEditingProjectName(false);
+      await qc.invalidateQueries({ queryKey: ["project", configId] });
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 
@@ -89,7 +107,34 @@ function ProjectPage() {
     <div className="space-y-6">
       <div>
         <Link to="/classes/$id" params={{ id }} className="text-sm text-muted-foreground hover:underline">← Back to class</Link>
-        <h1 className="mt-2 text-2xl font-semibold">{project.name}</h1>
+        {editingProjectName ? (
+          <div className="mt-2">
+            <Input
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setEditingProjectName(false);
+              }}
+              onBlur={saveProjectName}
+              autoFocus
+              className="text-2xl font-semibold"
+            />
+          </div>
+        ) : (
+          <div
+            className="mt-2 flex items-center gap-2 cursor-pointer group"
+            onClick={() => {
+              setEditingProjectName(true);
+              setNewProjectName(project.name || "");
+            }}
+            title="Click to edit project name"
+          >
+            <h1 className="text-2xl font-semibold group-hover:text-muted-foreground">
+              {project.name}
+            </h1>
+            <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        )}
         <p className="text-sm text-muted-foreground">
           Groups of {project.group_size} · {project.size_policy === "plus" ? "some groups with 1 additional person" : "some groups with 1 fewer person"}
         </p>

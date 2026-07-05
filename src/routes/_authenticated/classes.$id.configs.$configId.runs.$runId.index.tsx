@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Play, AlertTriangle, Eye, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Heart, Play, AlertTriangle, Eye, ArrowLeft, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { Edge, OptimizerInput, TopResult } from "@/lib/optimizer";
 import type { WorkerOutbound } from "@/workers/optimizer.worker";
@@ -28,6 +29,8 @@ function RunPage() {
 
   const [progress, setProgress] = useState<{ elapsedMs: number; iterations: number; bestScore: number } | null>(null);
   const [running, setRunning] = useState(false);
+  const [editingRunName, setEditingRunName] = useState(false);
+  const [newRunName, setNewRunName] = useState("");
   const startedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
 
@@ -35,7 +38,7 @@ function RunPage() {
     queryKey: ["run", runId],
     queryFn: async () => {
       const [run, absent, students, project, subs, dists] = await Promise.all([
-        supabase.from("runs").select("id, status, time_limit_seconds, is_favorite, completed_at, error_message").eq("id", runId).single(),
+        supabase.from("runs").select("id, name, status, time_limit_seconds, is_favorite, completed_at, error_message").eq("id", runId).single(),
         supabase.from("run_absent").select("student_id").eq("run_id", runId),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
@@ -229,6 +232,22 @@ function RunPage() {
     qc.invalidateQueries({ queryKey: ["run", runId] });
   }
 
+  async function saveRunName() {
+    if (!newRunName.trim() || !data?.run) return;
+    try {
+      const { error } = await supabase
+        .from("runs")
+        .update({ name: newRunName.trim() })
+        .eq("id", runId);
+      if (error) throw error;
+      toast.success("Run name updated");
+      setEditingRunName(false);
+      await qc.invalidateQueries({ queryKey: ["run", runId] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
   if (isLoading || !data) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   const nameById = new Map(data.students.map((s) => [s.id, s.name]));
@@ -251,7 +270,34 @@ function RunPage() {
           <Link to="/classes/$id/configs/$configId" params={{ id, configId }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
             <ArrowLeft className="h-3.5 w-3.5" /> Back to project
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold">Run</h1>
+          {editingRunName ? (
+            <div className="mt-2">
+              <Input
+                value={newRunName}
+                onChange={(e) => setNewRunName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setEditingRunName(false);
+                }}
+                onBlur={saveRunName}
+                autoFocus
+                className="text-2xl font-semibold"
+              />
+            </div>
+          ) : (
+            <div
+              className="mt-2 flex items-center gap-2 cursor-pointer group"
+              onClick={() => {
+                setEditingRunName(true);
+                setNewRunName(data?.run.name || "Run");
+              }}
+              title="Click to edit run name"
+            >
+              <h1 className="text-2xl font-semibold group-hover:text-muted-foreground">
+                {data?.run.name || "Run"}
+              </h1>
+              <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          )}
           <p className="text-sm text-muted-foreground">
             {data.project.name} · {timeSec}s time limit · {data.absent.size} absent · status: {status}
           </p>
