@@ -39,6 +39,7 @@ function ClassDetail() {
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
@@ -152,8 +153,11 @@ function ClassDetail() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Students</CardTitle>
+          <Button size="sm" onClick={() => setAddStudentOpen(true)}>
+            <Plus className="mr-1.5 h-4 w-4" /> Add student
+          </Button>
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border">
@@ -284,6 +288,13 @@ function ClassDetail() {
         classId={id}
         onCreated={() => qc.invalidateQueries({ queryKey: ["class", id] })}
       />
+
+      <AddStudentDialog
+        open={addStudentOpen}
+        onOpenChange={setAddStudentOpen}
+        classId={id}
+        onCreated={() => qc.invalidateQueries({ queryKey: ["class", id] })}
+      />
     </div>
   );
 }
@@ -382,6 +393,84 @@ function NewProjectDialog({
         <DialogFooter>
           <Button disabled={loading} onClick={create}>
             {loading ? "Creating…" : "Create project"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddStudentDialog({
+  open,
+  onOpenChange,
+  classId,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  classId: string;
+  onCreated: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function addStudent() {
+    if (!name.trim()) return toast.error("Enter a student name");
+    setLoading(true);
+    try {
+      const { data: student, error } = await supabase
+        .from("students")
+        .insert({ class_id: classId, name: name.trim(), sort_order: 0 })
+        .select("id")
+        .single();
+      if (error || !student) throw error ?? new Error("Failed to add student");
+      toast.success("Student added");
+      onCreated();
+      onOpenChange(false);
+      setName("");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Add student</DialogTitle>
+          <DialogDescription>
+            Add a new student to the class. They will be included in future group distributions.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="student-name">Student name</Label>
+            <Input
+              id="student-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. John Smith"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") addStudent();
+              }}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            disabled={loading}
+            onClick={() => {
+              onOpenChange(false);
+              setName("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button disabled={loading} onClick={addStudent}>
+            {loading ? "Adding…" : "Add student"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -34,7 +34,7 @@ function HowItWorksPage() {
             <section className="space-y-2">
               <h2 className="text-2xl font-semibold">1. Create a class</h2>
               <p className="text-base leading-7 text-muted-foreground">
-                Start from the dashboard. Choose New class, give the class a name, and add your students. You can type names manually or import them from a CSV or Excel file. If you import a file, review the preview and select the cells that contain the student names.
+                Start from the dashboard. Choose New class, give the class a name, and add your students. You can type names manually or import them from a CSV or Excel file. If you import a file, review the preview and select the cells that contain the student names. Students can still be added or deleted after creating the class if needed.
               </p>
             </section>
 
