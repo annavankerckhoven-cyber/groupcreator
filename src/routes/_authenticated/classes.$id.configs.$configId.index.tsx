@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/classes/$id/configs/$confi
 
 type RunCard = {
   id: string;
+  name: string;
   created_at: string;
   time_limit_seconds: number;
   status: string;
@@ -56,7 +58,7 @@ function ProjectPage() {
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase
           .from("runs")
-          .select("id, created_at, time_limit_seconds, status, is_favorite, error_message")
+          .select("id, name, created_at, time_limit_seconds, status, is_favorite, error_message")
           .eq("config_id", configId)
           .order("created_at", { ascending: false }),
         supabase.from("run_distributions").select("run_id, id").eq("is_favorite", true),
@@ -72,7 +74,7 @@ function ProjectPage() {
       return {
         project: proj.data,
         students: students.data ?? [],
-        runs: (runs.data ?? []).map((run) => ({
+        runs: (runs.data ?? []).map((run, idx, arr) => ({
           ...run,
           favorite_distribution_id: favoriteByRunId.get(run.id) ?? null,
         })) as RunCard[],
@@ -158,6 +160,7 @@ function ProjectPage() {
         classId={id}
         configId={configId}
         students={data.students}
+        defaultName={`Run ${data.runs.length + 1}`}
         onCreated={() => qc.invalidateQueries({ queryKey: ["project", configId] })}
       />
     </div>
