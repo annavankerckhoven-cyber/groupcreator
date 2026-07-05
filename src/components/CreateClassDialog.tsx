@@ -117,6 +117,17 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     }
   }
 
+  function selectColumn(column: string) {
+    const columnCells: string[] = [];
+    for (let rowIndex = 0; rowIndex < parsedRows.length; rowIndex++) {
+      const value = String(parsedRows[rowIndex]?.[column] ?? "").trim();
+      if (value) {
+        columnCells.push(`${rowIndex}:${column}`);
+      }
+    }
+    setSelectedCells(columnCells);
+  }
+
   function selectRange(start: { row: number; column: string }, end: { row: number; column: string }) {
     const startRow = Math.min(start.row, end.row);
     const endRow = Math.max(start.row, end.row);
@@ -275,12 +286,17 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                   <p className="text-xs text-muted-foreground">
                     Click to select one cell. Drag to select a range. Shift+Click to extend selection. Ctrl+Click to toggle individual cells.
                   </p>
-                  <div className="max-h-[40vh] overflow-auto rounded-md border border-border bg-card p-2">
+                  <div className="rounded-md border border-border bg-card p-2">
                     <table className="min-w-full border-collapse text-left text-xs select-none" onMouseUp={handleTableMouseUp} onMouseLeave={() => { if (dragging) { setDragging(false); } }}>
                       <thead>
                         <tr>
                           {columns.map((column) => (
-                            <th key={column} className="border border-border bg-muted/50 px-2 py-1 font-medium text-muted-foreground">
+                            <th 
+                              key={column} 
+                              onClick={() => selectColumn(column)}
+                              className="border border-border bg-muted/50 px-2 py-1 font-medium text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
+                              title="Click to select all values in this column"
+                            >
                               {column}
                             </th>
                           ))}
