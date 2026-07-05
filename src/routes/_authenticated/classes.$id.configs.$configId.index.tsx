@@ -166,7 +166,7 @@ function ProjectPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base">Runs</CardTitle>
-            <CardDescription>Each run computes 5 group distributions.</CardDescription>
+            <CardDescription>Each run computes max. 5 group distributions.</CardDescription>
           </div>
           {!isArchived && (
             <Button size="sm" onClick={() => setRunOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New run</Button>
@@ -183,6 +183,7 @@ function ProjectPage() {
                   run={r}
                   classId={id}
                   configId={configId}
+                  students={data.students}
                   favoriteLoading={favoriteLoading === r.id}
                   onToggleFavorite={() => toggleRunFavorite(r.id, !r.is_favorite)}
                   onDelete={() => { setRunToDelete(r.id); setConfirmOpen(true); }}
@@ -237,16 +238,29 @@ function ProjectPage() {
 }
 
 function RunCardLink({
-  run, classId, configId, favoriteLoading, onToggleFavorite, onDelete,
+  run, classId, configId, students, favoriteLoading, onToggleFavorite, onDelete,
 }: {
   run: RunCard;
   classId: string;
   configId: string;
+  students: { id: string; name: string }[];
   favoriteLoading: boolean;
   onToggleFavorite: () => void;
   onDelete: () => void;
 }) {
   const navigate = useNavigate();
+  const { data: absentData } = useQuery({
+    queryKey: ["run_absent", run.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("run_absent").select("student_id").eq("run_id", run.id);
+      return data ?? [];
+    },
+  });
+
+  const studentById = new Map(students.map((s) => [s.id, s.name]));
+  const absentStudentNames = (absentData ?? [])
+    .map((row: any) => studentById.get(row.student_id))
+    .filter(Boolean);
   const statusClass =
     run.status === "completed" ? "text-green-600 dark:text-green-400" :
     run.status === "running" ? "text-amber-600" :
@@ -271,6 +285,7 @@ function RunCardLink({
           </div>
           <div className="text-xs text-muted-foreground">
             {run.status === "completed" ? `${run.time_limit_seconds}s time limit · Best score: ${run.best_score}` : `${run.time_limit_seconds}s time limit`}
+            {absentStudentNames.length > 0 && ` · Absent: ${absentStudentNames.join(", ")}`}
           </div>
           <div className="text-xs">
             <span className={statusClass}>{statusLabel}</span>

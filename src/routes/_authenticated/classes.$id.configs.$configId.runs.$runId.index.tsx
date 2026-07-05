@@ -313,6 +313,11 @@ function RunPage() {
           <p className="text-sm text-muted-foreground">
             {data.project.name} · {timeSec}s time limit · {data.absent.size} absent · status: {status}
           </p>
+          {data.absent.size > 0 && (
+            <p className="text-sm text-destructive">
+              Absent students: {Array.from(data.absent).map((id) => nameById.get(id)).filter(Boolean).join(", ")}
+            </p>
+          )}
         </div>
         <Button variant="ghost" size="sm" onClick={toggleRunFavorite}>
           <Heart className={`mr-1.5 h-4 w-4 ${data.run.is_favorite ? "fill-primary text-primary" : ""}`} />
