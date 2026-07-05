@@ -90,6 +90,12 @@ function HowItWorksPage() {
             <Button asChild size="lg">
               <Link to="/auth">Get started</Link>
             </Button>
+            <Button variant="outline" size="lg" asChild>
+              <a href="https://github.com/annavankerckhoven-cyber/groupcreator/issues" target="_blank" rel="noopener noreferrer">Report an issue</a>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <a href="https://github.com/annavankerckhoven-cyber/groupcreator/discussions" target="_blank" rel="noopener noreferrer">Suggest a new feature</a>
+            </Button>
           </div>
         </section>
       </main>
