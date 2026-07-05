@@ -26,6 +26,7 @@ type RunCard = {
   is_favorite: boolean;
   error_message: string | null;
   favorite_distribution_id: string | null;
+  best_score: number | null;
 };
 
 function ProjectPage() {
@@ -71,7 +72,7 @@ function ProjectPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["project", configId],
     queryFn: async () => {
-      const [proj, students, runs, favoriteDists, cls] = await Promise.all([
+      const [proj, students, runs, favoriteDists, cls, distributions] = await Promise.all([
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase
@@ -81,6 +82,7 @@ function ProjectPage() {
           .order("created_at", { ascending: false }),
         supabase.from("run_distributions").select("run_id, id").eq("is_favorite", true),
         supabase.from("classes").select("archived_at").eq("id", id).single(),
+        supabase.from("run_distributions").select("run_id, score").order("score", { ascending: false }),
       ]);
 
       if (proj.error) throw proj.error;
@@ -89,6 +91,13 @@ function ProjectPage() {
       if (favoriteDists.error) throw favoriteDists.error;
 
       const favoriteByRunId = new Map((favoriteDists.data ?? []).map((d) => [d.run_id, d.id]));
+      const bestScoreByRunId = new Map<string, number>();
+      (distributions.data ?? []).forEach((d) => {
+        const current = bestScoreByRunId.get(d.run_id) ?? Number.NEGATIVE_INFINITY;
+        if (d.score > current) {
+          bestScoreByRunId.set(d.run_id, d.score);
+        }
+      });
 
       return {
         project: proj.data,
@@ -97,7 +106,8 @@ function ProjectPage() {
         runs: (runs.data ?? []).map((run, idx, arr) => ({
           ...run,
           favorite_distribution_id: favoriteByRunId.get(run.id) ?? null,
-        })) as RunCard[],
+          best_score: bestScoreByRunId.get(run.id) ?? null,
+        })) as (RunCard & { best_score: number | null })[],
       };
     },
   });
@@ -260,7 +270,7 @@ function RunCardLink({
             {new Date(run.created_at).toLocaleString()}
           </div>
           <div className="text-xs text-muted-foreground">
-            {run.time_limit_seconds}s time limit
+            {run.status === "completed" ? `${run.time_limit_seconds}s time limit · Best score: ${run.best_score}` : `${run.time_limit_seconds}s time limit`}
           </div>
           <div className="text-xs">
             <span className={statusClass}>{statusLabel}</span>
