@@ -71,7 +71,7 @@ function ProjectPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["project", configId],
     queryFn: async () => {
-      const [proj, students, runs, favoriteDists] = await Promise.all([
+      const [proj, students, runs, favoriteDists, cls] = await Promise.all([
         supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase
@@ -80,6 +80,7 @@ function ProjectPage() {
           .eq("config_id", configId)
           .order("created_at", { ascending: false }),
         supabase.from("run_distributions").select("run_id, id").eq("is_favorite", true),
+        supabase.from("classes").select("archived_at").eq("id", id).single(),
       ]);
 
       if (proj.error) throw proj.error;
@@ -92,6 +93,7 @@ function ProjectPage() {
       return {
         project: proj.data,
         students: students.data ?? [],
+        classArchived: !!cls.data?.archived_at,
         runs: (runs.data ?? []).map((run, idx, arr) => ({
           ...run,
           favorite_distribution_id: favoriteByRunId.get(run.id) ?? null,
@@ -102,6 +104,7 @@ function ProjectPage() {
 
   if (isLoading || !data || !data.project) return <div className="text-sm text-muted-foreground">Loading…</div>;
   const project = data.project;
+  const isArchived = data.classArchived;
 
   return (
     <div className="space-y-6">
@@ -146,7 +149,9 @@ function ProjectPage() {
             <CardTitle className="text-base">Runs</CardTitle>
             <CardDescription>Each run computes 5 group distributions.</CardDescription>
           </div>
-          <Button size="sm" onClick={() => setRunOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New run</Button>
+          {!isArchived && (
+            <Button size="sm" onClick={() => setRunOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New run</Button>
+          )}
         </CardHeader>
         <CardContent>
           {data.runs.length === 0 ? (
