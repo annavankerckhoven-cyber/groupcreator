@@ -284,7 +284,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
           <Tabs defaultValue="paste" className="mt-2 px-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="paste">Type / paste</TabsTrigger>
+            <TabsTrigger value="paste">Enter manually</TabsTrigger>
             <TabsTrigger value="import">Import file</TabsTrigger>
           </TabsList>
 
