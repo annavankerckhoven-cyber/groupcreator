@@ -16,7 +16,7 @@ export function PageHeader() {
         <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
           <Users className="h-4 w-4" />
         </div>
-        <span className="text-lg font-semibold tracking-tight">Group Creator</span>
+        <span className="hidden sm:inline text-lg font-semibold tracking-tight">Group Creator</span>
       </Link>
 
       <div className="ml-auto flex flex-nowrap items-center gap-2">

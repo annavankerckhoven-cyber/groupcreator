@@ -29,7 +29,7 @@ function AuthLayout() {
             <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
               <Users className="h-4 w-4" />
             </div>
-            <span className="text-lg font-semibold tracking-tight">Group Creator</span>
+            <span className="hidden sm:inline text-lg font-semibold tracking-tight">Group Creator</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
