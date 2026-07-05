@@ -99,6 +99,24 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     );
   }
 
+  function handleCellClick(rowIndex: number, column: string, ctrlKey: boolean, shiftKey: boolean) {
+    if (shiftKey && selectedCells.length > 0) {
+      // Shift+Click: extend selection to range
+      const lastKey = selectedCells[selectedCells.length - 1];
+      const [lastRow, lastCol] = lastKey.split(":");
+      selectRange(
+        { row: parseInt(lastRow), column: lastCol },
+        { row: rowIndex, column }
+      );
+    } else if (ctrlKey) {
+      // Ctrl+Click: toggle individual cell
+      toggleCell(rowIndex, column);
+    } else {
+      // Regular click: select only this cell
+      setSelectedCells([`${rowIndex}:${column}`]);
+    }
+  }
+
   function selectRange(start: { row: number; column: string }, end: { row: number; column: string }) {
     const startRow = Math.min(start.row, end.row);
     const endRow = Math.max(start.row, end.row);
@@ -130,9 +148,6 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
   function handleTableMouseUp() {
     if (!dragging || !selectionStart || !selectionCurrent) {
-      if (selectionStart) {
-        toggleCell(selectionStart.row, selectionStart.column);
-      }
       setDragging(false);
       setSelectionStart(null);
       setSelectionCurrent(null);
@@ -201,23 +216,24 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
         onOpenChange(o);
       }}
     >
-      <DialogContent className="h-[95vh] max-h-[95vh] w-[95vw] max-w-[95vw] overflow-hidden">
+      <DialogContent className="h-[95vh] max-h-[95vh] w-[95vw] max-w-[95vw] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>New class</DialogTitle>
           <DialogDescription>Name your class and add your students.</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <Label htmlFor="cname">Class name</Label>
-          <Input
-            id="cname"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Biology 9A"
-          />
-        </div>
+        <div className="overflow-y-auto flex-1">
+          <div className="space-y-2 px-6">
+            <Label htmlFor="cname">Class name</Label>
+            <Input
+              id="cname"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Biology 9A"
+            />
+          </div>
 
-        <Tabs defaultValue="paste" className="mt-2">
+          <Tabs defaultValue="paste" className="mt-2 px-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="paste">Type / paste</TabsTrigger>
             <TabsTrigger value="import">Import file</TabsTrigger>
@@ -255,12 +271,12 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
             {columns.length > 0 && (
               <>
                 <div className="space-y-1.5">
-                  <Label>Drag across the cells that contain student names</Label>
+                  <Label>Select the cells containing student names</Label>
                   <p className="text-xs text-muted-foreground">
-                    Click and drag to select a rectangular region. A single click toggles one cell.
+                    Click to select one cell. Drag to select a range. Shift+Click to extend selection. Ctrl+Click to toggle individual cells.
                   </p>
-                  <div className="max-h-[55vh] overflow-auto rounded-md border border-border bg-card p-2">
-                    <table className="min-w-full border-collapse text-left text-xs" onMouseUp={handleTableMouseUp}>
+                  <div className="max-h-[40vh] overflow-auto rounded-md border border-border bg-card p-2">
+                    <table className="min-w-full border-collapse text-left text-xs select-none" onMouseUp={handleTableMouseUp} onMouseLeave={() => { if (dragging) { setDragging(false); } }}>
                       <thead>
                         <tr>
                           {columns.map((column) => (
@@ -277,20 +293,26 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                               const value = String(row[column] ?? "").trim();
                               const key = `${rowIndex}:${column}`;
                               const selected = selectedCells.includes(key);
+                              const isInDragRange = dragging && selectionStart && selectionCurrent
+                                ? (rowIndex >= Math.min(selectionStart.row, selectionCurrent.row) && 
+                                   rowIndex <= Math.max(selectionStart.row, selectionCurrent.row) &&
+                                   columns.indexOf(column) >= Math.min(columns.indexOf(selectionStart.column), columns.indexOf(selectionCurrent.column)) &&
+                                   columns.indexOf(column) <= Math.max(columns.indexOf(selectionStart.column), columns.indexOf(selectionCurrent.column)))
+                                : false;
                               return (
                                 <td key={column} className="border border-border p-1">
                                   <button
                                     type="button"
-                                    className={`block w-full rounded px-2 py-1 text-left ${
-                                      selected
+                                    className={`block w-full rounded px-2 py-1 text-left cursor-cell transition-colors ${
+                                      selected || isInDragRange
                                         ? "bg-primary text-primary-foreground"
                                         : value
                                           ? "bg-background hover:bg-muted"
                                           : "bg-muted/40 text-muted-foreground"
                                     }`}
                                     onMouseDown={() => value && handleCellMouseDown(rowIndex, column)}
-                                    onMouseEnter={() => handleCellMouseEnter(rowIndex, column)}
-                                    onMouseUp={handleTableMouseUp}
+                                    onMouseEnter={() => value && handleCellMouseEnter(rowIndex, column)}
+                                    onClick={(e) => value && handleCellClick(rowIndex, column, e.ctrlKey || e.metaKey, e.shiftKey)}
                                     disabled={!value}
                                   >
                                     {value || "—"}
@@ -326,6 +348,11 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
             </DialogFooter>
           </TabsContent>
         </Tabs>
+        </div>
+
+        <div className="border-t px-6 py-4">
+          {/* Footer buttons moved here - but only shown in import tab */}
+        </div>
       </DialogContent>
     </Dialog>
   );
