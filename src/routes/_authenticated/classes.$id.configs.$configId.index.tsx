@@ -193,6 +193,7 @@ function RunCardLink({
         className="block pr-12"
       >
         <div className="space-y-1">
+          {run.name && <div className="pr-6 text-sm font-medium">{run.name}</div>}
           <div className="text-xs text-muted-foreground">
             {new Date(run.created_at).toLocaleString()}
           </div>
