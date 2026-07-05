@@ -186,7 +186,7 @@ function RunCardLink({
   const statusLabel = run.status === "completed" ? "Succeeded. Click to view distributions." : run.status;
 
   return (
-    <div className="relative group min-h-[170px] rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30">
+    <div className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30">
       <Link
         to="/classes/$id/configs/$configId/runs/$runId"
         params={{ id: classId, configId, runId: run.id }}
@@ -229,7 +229,11 @@ function RunCardLink({
         type="button"
         aria-label="Delete run"
         title="Delete run"
-        onClick={onDelete}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete();
+        }}
         className="absolute right-3 top-10 z-10 rounded-md p-1 text-destructive transition-opacity hover:bg-destructive/10 focus:opacity-100"
       >
         <Trash2 className="h-4 w-4" />
