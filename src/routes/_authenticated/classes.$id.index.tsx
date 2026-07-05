@@ -248,9 +248,11 @@ function ClassDetail() {
               {submittedSet.size} of {data.students.length} students have submitted
             </p>
           </div>
-          <Button size="sm" onClick={() => setAddStudentOpen(true)}>
-            <Plus className="mr-1.5 h-4 w-4" /> Add student
-          </Button>
+          {!isArchived && (
+            <Button size="sm" onClick={() => setAddStudentOpen(true)}>
+              <Plus className="mr-1.5 h-4 w-4" /> Add student
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border">
@@ -418,7 +420,7 @@ function ClassDetail() {
           </DialogHeader>
           <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
             {data?.allClasses
-              .filter((c) => c.id !== id && !c.archived_at)
+              .filter((c) => !c.archived_at && c.id !== id)
               .map((c) => (
                 <label key={c.id} className="flex cursor-pointer items-center gap-2">
                   <input

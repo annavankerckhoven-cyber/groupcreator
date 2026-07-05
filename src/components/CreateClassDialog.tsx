@@ -156,10 +156,13 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     return nextSelection;
   }
 
-  function handleCellMouseDown(rowIndex: number, column: string) {
-    setDragging(true);
-    setSelectionStart({ row: rowIndex, column });
-    setSelectionCurrent({ row: rowIndex, column });
+  function handleCellMouseDown(rowIndex: number, column: string, e: React.MouseEvent) {
+    // Only start drag if no modifier keys are pressed
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      setDragging(true);
+      setSelectionStart({ row: rowIndex, column });
+      setSelectionCurrent({ row: rowIndex, column });
+    }
   }
 
   function handleCellMouseEnter(rowIndex: number, column: string) {
@@ -360,7 +363,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                                           ? "bg-background hover:bg-muted"
                                           : "bg-muted/40 text-muted-foreground"
                                     }`}
-                                    onMouseDown={() => value && handleCellMouseDown(rowIndex, column)}
+                                    onMouseDown={(e) => value && handleCellMouseDown(rowIndex, column, e)}
                                     onMouseEnter={() => value && handleCellMouseEnter(rowIndex, column)}
                                     onClick={(e) => value && handleCellClick(rowIndex, column, e.ctrlKey || e.metaKey, e.shiftKey)}
                                     disabled={!value}
