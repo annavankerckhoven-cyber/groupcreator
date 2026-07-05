@@ -183,7 +183,10 @@ function RunCardLink({
     run.status === "running" ? "text-amber-600" :
     run.status === "error" ? "text-destructive" : "text-muted-foreground";
 
-  const statusLabel = run.status === "completed" ? "Succeeded. Click to view distributions." : run.status;
+  const statusLabel = 
+    run.status === "completed" ? "Succeeded. Click to view distributions." :
+    run.status === "running" ? "In progress" :
+    run.status;
 
   return (
     <div className="relative group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-slate-400 hover:bg-muted/30">
