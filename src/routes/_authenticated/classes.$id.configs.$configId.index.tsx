@@ -306,7 +306,7 @@ function RunCardLink({
           e.stopPropagation();
           onDelete();
         }}
-        className="absolute right-3 top-10 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted focus:opacity-100"
+        className="absolute right-3 top-12 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted focus:opacity-100"
       >
         <Trash2 className="h-4 w-4" />
       </button>
@@ -324,7 +324,7 @@ function RunCardLink({
               params: { id: classId, configId, runId: run.id, distId: run.favorite_distribution_id! },
             });
           }}
-          className="absolute right-3 top-18 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 focus:opacity-100"
+          className="absolute right-3 top-20 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 focus:opacity-100"
         >
           <Eye className="h-4 w-4 text-muted-foreground" />
         </button>
