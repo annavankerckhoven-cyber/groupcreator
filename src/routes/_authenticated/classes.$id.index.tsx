@@ -270,7 +270,7 @@ function ClassDetail() {
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border">
-            {data.students.map((s) => {
+            {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => {
               const done = submittedSet.has(s.id);
               return (
                 <li key={s.id} className="flex items-center justify-between py-2.5">

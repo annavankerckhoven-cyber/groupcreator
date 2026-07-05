@@ -135,8 +135,9 @@ function StudentForm() {
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border">
-                {data.students
+                {[...data.students]
                   .filter((s) => s.id !== studentId)
+                  .sort((a, b) => a.name.localeCompare(b.name))
                   .map((s) => {
                     const v = prefs.get(s.id) ?? "neutral";
                     return (
