@@ -294,9 +294,11 @@ function ClassDetail() {
               compute groups.
             </CardDescription>
           </div>
-          <Button size="sm" onClick={() => setProjectOpen(true)}>
-            <Plus className="mr-1.5 h-4 w-4" /> New project
-          </Button>
+          {!isArchived && (
+            <Button size="sm" onClick={() => setProjectOpen(true)}>
+              <Plus className="mr-1.5 h-4 w-4" /> New project
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {data.projects.length === 0 ? (
@@ -411,7 +413,7 @@ function ClassDetail() {
           </DialogHeader>
           <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
             {data?.allClasses
-              .filter((c) => c.id !== id)
+              .filter((c) => c.id !== id && !c.archived_at)
               .map((c) => (
                 <label key={c.id} className="flex cursor-pointer items-center gap-2">
                   <input
