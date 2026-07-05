@@ -160,6 +160,7 @@ function ClassDetail() {
   const shareUrl = data.link ? `${window.location.origin}/s/${data.link.token}` : "";
   const submittedSet = new Set(data.submissions.map((s) => s.student_id));
   const submittedAt = new Map(data.submissions.map((s) => [s.student_id, s.submitted_at]));
+  const isArchived = !!data.cls.archived_at;
 
   return (
     <div className="space-y-8">
