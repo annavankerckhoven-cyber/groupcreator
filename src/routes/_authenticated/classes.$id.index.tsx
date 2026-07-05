@@ -283,7 +283,7 @@ function ClassDetail() {
                     <span>{s.name}</span>
                     {done && (
                       <span className="text-xs text-muted-foreground">
-                        — submitted {new Date(submittedAt.get(s.id)!).toLocaleDateString()}
+                        — submitted on {new Date(submittedAt.get(s.id)!).toLocaleDateString()}
                       </span>
                     )}
                   </div>
