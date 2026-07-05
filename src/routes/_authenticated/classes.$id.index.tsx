@@ -55,7 +55,7 @@ function ClassDetail() {
     queryKey: ["class", id],
     queryFn: async () => {
       const [cls, students, link, subs, projects, allClasses] = await Promise.all([
-        supabase.from("classes").select("id, name").eq("id", id).single(),
+        supabase.from("classes").select("id, name, archived_at").eq("id", id).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("share_links").select("token").eq("class_id", id).limit(1).maybeSingle(),
         supabase.from("submissions").select("student_id, submitted_at").eq("class_id", id),
@@ -64,7 +64,7 @@ function ClassDetail() {
           .select("id, name, group_size, size_policy")
           .eq("class_id", id)
           .order("created_at", { ascending: false }),
-        supabase.from("classes").select("id, name").order("name"),
+        supabase.from("classes").select("id, name, archived_at").order("name"),
       ]);
       return {
         cls: cls.data,
