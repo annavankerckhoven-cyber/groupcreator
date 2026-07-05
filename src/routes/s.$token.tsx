@@ -106,7 +106,7 @@ function StudentForm() {
             <CardDescription>
               Your answers stay private — nobody can see them. Not even your teacher.
               <br />
-              <strong>It is advised not to enter too many preferences.</strong> The fewer preferences you enter, the more likely they are to be respected.
+              <strong>It is advised not to enter too many "Not together" preferences.</strong> The fewer "Not together" preferences you enter, the more likely they are to be respected.
             </CardDescription>
           </CardHeader>
           <CardContent>
