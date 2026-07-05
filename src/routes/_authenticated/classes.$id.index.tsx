@@ -193,6 +193,11 @@ function ClassDetail() {
             >
               <h1 className="text-3xl font-semibold tracking-tight group-hover:text-muted-foreground">
                 {data?.cls?.name}
+                {isArchived && (
+                  <span className="ml-3 rounded-md bg-muted px-2 py-0.5 align-middle text-xs font-medium text-muted-foreground">
+                    Archived
+                  </span>
+                )}
               </h1>
               <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
