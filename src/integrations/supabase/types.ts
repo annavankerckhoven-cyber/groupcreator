@@ -16,25 +16,31 @@ export type Database = {
     Tables: {
       classes: {
         Row: {
+          activated_at: string
           archived_at: string | null
           created_at: string
           id: string
+          labels: string[]
           name: string
           owner_id: string
           updated_at: string
         }
         Insert: {
+          activated_at?: string
           archived_at?: string | null
           created_at?: string
           id?: string
+          labels?: string[]
           name: string
           owner_id: string
           updated_at?: string
         }
         Update: {
+          activated_at?: string
           archived_at?: string | null
           created_at?: string
           id?: string
+          labels?: string[]
           name?: string
           owner_id?: string
           updated_at?: string
