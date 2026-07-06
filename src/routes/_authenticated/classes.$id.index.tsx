@@ -528,6 +528,8 @@ function ClassDetail() {
             setCloneProjectOpen(false);
             setProjectToClone(null);
             setSelectedClassesForClone(new Set());
+            setSelectedLabelsForClone(new Set());
+            setCloneMode("class");
           }
         }}
       >
@@ -535,32 +537,132 @@ function ClassDetail() {
           <DialogHeader>
             <DialogTitle>Clone project</DialogTitle>
             <DialogDescription>
-              Select the classes to which you want to clone "{projectToClone?.name}".
+              Choose where to clone "{projectToClone?.name}". Only active classes are available as targets.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
-            {data?.allClasses
-              .filter((c) => !c.archived_at && c.id !== id)
-              .map((c) => (
-                <label key={c.id} className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedClassesForClone.has(c.id)}
-                    onChange={(e) => {
-                      const next = new Set(selectedClassesForClone);
-                      if (e.target.checked) {
-                        next.add(c.id);
-                      } else {
-                        next.delete(c.id);
-                      }
-                      setSelectedClassesForClone(next);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  <span className="text-sm">{c.name}</span>
-                </label>
-              ))}
-          </div>
+          <Tabs value={cloneMode} onValueChange={(v) => setCloneMode(v as "class" | "label")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="class">Select by class name</TabsTrigger>
+              <TabsTrigger value="label">Select by label</TabsTrigger>
+            </TabsList>
+            <TabsContent value="class" className="pt-3">
+              {cloneClassTargets.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No other active classes.</p>
+              ) : (
+                <>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedClassesForClone.size === cloneClassTargets.length &&
+                          cloneClassTargets.length > 0
+                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedClassesForClone(new Set(cloneClassTargets.map((c) => c.id)));
+                          } else {
+                            setSelectedClassesForClone(new Set());
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      Select all
+                    </label>
+                    <span className="text-xs text-muted-foreground">
+                      {selectedClassesForClone.size} selected
+                    </span>
+                  </div>
+                  <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
+                    {cloneClassTargets.map((c) => (
+                      <label key={c.id} className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedClassesForClone.has(c.id)}
+                          onChange={(e) => {
+                            const next = new Set(selectedClassesForClone);
+                            if (e.target.checked) next.add(c.id);
+                            else next.delete(c.id);
+                            setSelectedClassesForClone(next);
+                          }}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <span className="text-sm">{c.name}</span>
+                        {(c.labels ?? []).length > 0 && (
+                          <span className="ml-1 flex flex-wrap gap-1">
+                            {(c.labels ?? []).map((l) => (
+                              <span
+                                key={l}
+                                className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-secondary-foreground"
+                              >
+                                {l}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            <TabsContent value="label" className="pt-3">
+              {availableActiveClassLabels.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No labels available on other active classes.
+                </p>
+              ) : (
+                <>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedLabelsForClone.size === availableActiveClassLabels.length &&
+                          availableActiveClassLabels.length > 0
+                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedLabelsForClone(new Set(availableActiveClassLabels));
+                          } else {
+                            setSelectedLabelsForClone(new Set());
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      Select all
+                    </label>
+                    <span className="text-xs text-muted-foreground">
+                      {selectedLabelsForClone.size} label{selectedLabelsForClone.size === 1 ? "" : "s"} selected
+                    </span>
+                  </div>
+                  <div className="max-h-48 space-y-2 overflow-auto rounded-md border border-border p-3">
+                    {availableActiveClassLabels.map((l) => (
+                      <label key={l} className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedLabelsForClone.has(l)}
+                          onChange={(e) => {
+                            const next = new Set(selectedLabelsForClone);
+                            if (e.target.checked) next.add(l);
+                            else next.delete(l);
+                            setSelectedLabelsForClone(next);
+                          }}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <span className="text-sm">{l}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Will clone to {labelClonePreview.length} active class
+                    {labelClonePreview.length === 1 ? "" : "es"}
+                    {labelClonePreview.length > 0 && `: ${labelClonePreview.map((c) => c.name).join(", ")}`}
+                  </p>
+                </>
+              )}
+            </TabsContent>
+          </Tabs>
           <DialogFooter>
             <div className="flex gap-2">
               <Button
@@ -569,12 +671,18 @@ function ClassDetail() {
                   setCloneProjectOpen(false);
                   setProjectToClone(null);
                   setSelectedClassesForClone(new Set());
+                  setSelectedLabelsForClone(new Set());
+                  setCloneMode("class");
                 }}
               >
                 Cancel
               </Button>
               <Button
-                disabled={selectedClassesForClone.size === 0}
+                disabled={
+                  cloneMode === "class"
+                    ? selectedClassesForClone.size === 0
+                    : labelClonePreview.length === 0
+                }
                 onClick={cloneProject}
               >
                 Clone
