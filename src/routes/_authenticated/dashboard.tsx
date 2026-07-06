@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -27,12 +27,60 @@ function Dashboard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [classToDelete, setClassToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  
+  async function archiveOldActiveClasses(classesToCheck: typeof active) {
+    const now = new Date();
+    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    
+    const classesToArchive = classesToCheck.filter((c) => {
+      const activatedAt = new Date(c.activated_at || c.created_at);
+      return activatedAt < oneYearAgo;
+    });
+    
+    if (classesToArchive.length === 0) return;
+    
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .update({ archived_at: now.toISOString() })
+        .in("id", classesToArchive.map((c) => c.id));
+      
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["classes"] });
+    } catch (e) {
+      console.error("Failed to archive old classes:", e);
+    }
+  }
+  
+  async function deleteLongArchivedClasses(classesToCheck: typeof archived) {
+    const now = new Date();
+    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    
+    const classesToDelete = classesToCheck.filter((c) => {
+      const archivedAt = new Date(c.archived_at!);
+      return archivedAt < oneYearAgo;
+    });
+    
+    if (classesToDelete.length === 0) return;
+    
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .delete()
+        .in("id", classesToDelete.map((c) => c.id));
+      
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["classes"] });
+    } catch (e) {
+      console.error("Failed to delete archived classes:", e);
+    }
+  }
   const { data: classes, isLoading } = useQuery({
     queryKey: ["classes"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("classes")
-        .select("id, name, created_at, archived_at, labels, students(count)")
+        .select("id, name, created_at, archived_at, activated_at, labels, students(count)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -72,6 +120,14 @@ function Dashboard() {
 
   const active = (classes ?? []).filter((c) => !c.archived_at);
   const archived = (classes ?? []).filter((c) => c.archived_at);
+
+  // Run archival and deletion checks when classes load
+  useEffect(() => {
+    if (classes && classes.length > 0) {
+      archiveOldActiveClasses(active);
+      deleteLongArchivedClasses(archived);
+    }
+  }, [classes]);
 
   const renderCard = (c: (typeof active)[number]) => {
     const count = Array.isArray(c.students)
