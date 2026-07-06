@@ -34,7 +34,15 @@ function HowItWorksPage() {
             <section className="space-y-2">
               <h2 className="text-2xl font-semibold">1. Create a class</h2>
               <p className="text-base leading-7 text-muted-foreground">
-                Start from the dashboard. Choose New class, give the class a name, and add your students. You can type names manually or import them from a CSV or Excel file. If you import a file, review the preview and select the cells that contain the student names. Students can still be added or deleted after creating the class if needed.
+                Start from the dashboard. Choose New class, and enter a class name.
+              </p>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Add labels</h3>
+              <p className="text-base leading-7 text-muted-foreground">
+                You can give your class a label (for example: "biology_6th_grade"). Labels help categorize students based on different criteria. You can add labels when creating a class or edit them later. Labels can be used to clone a project to all classes with a given label.
+              </p>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Add students</h3>
+              <p className="text-base leading-7 text-muted-foreground">
+                You can add students to your class by typing their names manually or importing them from a CSV or Excel file. If you import a file, you can select the cells containing student names in a preview of the file. Students can still be added or deleted after creating the class if needed.
               </p>
             </section>
 
