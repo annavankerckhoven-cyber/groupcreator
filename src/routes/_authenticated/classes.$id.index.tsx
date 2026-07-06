@@ -25,6 +25,8 @@ import {
   Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { LabelsInput } from "@/components/LabelsInput";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/")({
   head: () => ({ meta: [{ title: "Class — Group Creator" }] }),
@@ -53,12 +55,16 @@ function ClassDetail() {
   const [selectedClassesForClone, setSelectedClassesForClone] = useState<Set<string>>(new Set());
   const [editingClassName, setEditingClassName] = useState(false);
   const [newClassName, setNewClassName] = useState("");
+  const [editingLabels, setEditingLabels] = useState(false);
+  const [draftLabels, setDraftLabels] = useState<string[]>([]);
+  const [cloneMode, setCloneMode] = useState<"class" | "label">("class");
+  const [selectedLabelsForClone, setSelectedLabelsForClone] = useState<Set<string>>(new Set());
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
     queryFn: async () => {
       const [cls, students, link, subs, projects, allClasses] = await Promise.all([
-        supabase.from("classes").select("id, name, archived_at").eq("id", id).single(),
+        supabase.from("classes").select("id, name, archived_at, labels").eq("id", id).single(),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
         supabase.from("share_links").select("token").eq("class_id", id).limit(1).maybeSingle(),
         supabase.from("submissions").select("student_id, submitted_at").eq("class_id", id),
@@ -67,7 +73,7 @@ function ClassDetail() {
           .select("id, name, group_size, size_policy")
           .eq("class_id", id)
           .order("created_at", { ascending: false }),
-        supabase.from("classes").select("id, name, archived_at").order("name"),
+        supabase.from("classes").select("id, name, archived_at, labels").order("name"),
       ]);
       return {
         cls: cls.data,
@@ -128,9 +134,24 @@ function ClassDetail() {
   }
 
   async function cloneProject() {
-    if (!projectToClone || selectedClassesForClone.size === 0) return;
+    if (!projectToClone) return;
+    let targetClassIds: string[] = [];
+    if (cloneMode === "class") {
+      targetClassIds = Array.from(selectedClassesForClone);
+    } else {
+      const labelSet = selectedLabelsForClone;
+      targetClassIds = (data?.allClasses ?? [])
+        .filter(
+          (c) =>
+            !c.archived_at &&
+            c.id !== id &&
+            (c.labels ?? []).some((l) => labelSet.has(l)),
+        )
+        .map((c) => c.id);
+    }
+    if (targetClassIds.length === 0) return;
     try {
-      const newProjects = Array.from(selectedClassesForClone).map((classId) => ({
+      const newProjects = targetClassIds.map((classId) => ({
         class_id: classId,
         name: projectToClone.name,
         group_size: projectToClone.group_size,
@@ -139,10 +160,12 @@ function ClassDetail() {
 
       const { error } = await supabase.from("group_configs").insert(newProjects);
       if (error) throw error;
-      toast.success("Project cloned to selected classes");
+      toast.success(`Project cloned to ${targetClassIds.length} class${targetClassIds.length === 1 ? "" : "es"}`);
       setCloneProjectOpen(false);
       setProjectToClone(null);
       setSelectedClassesForClone(new Set());
+      setSelectedLabelsForClone(new Set());
+      setCloneMode("class");
       await qc.invalidateQueries({ queryKey: ["class", id] });
     } catch (e) {
       toast.error((e as Error).message);
@@ -165,12 +188,48 @@ function ClassDetail() {
     }
   }
 
+  async function saveLabels() {
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .update({ labels: draftLabels })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Labels updated");
+      setEditingLabels(false);
+      await qc.invalidateQueries({ queryKey: ["class", id] });
+      await qc.invalidateQueries({ queryKey: ["all-labels"] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
   if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   const shareUrl = data.link ? `${window.location.origin}/s/${data.link.token}` : "";
   const submittedSet = new Set(data.submissions.map((s) => s.student_id));
   const submittedAt = new Map(data.submissions.map((s) => [s.student_id, s.submitted_at]));
   const isArchived = !!data.cls.archived_at;
+  const classLabels: string[] = data.cls.labels ?? [];
+  const allLabelSuggestions = Array.from(
+    new Set((data.allClasses ?? []).flatMap((c) => c.labels ?? [])),
+  ).sort();
+  const availableActiveClassLabels = Array.from(
+    new Set(
+      (data.allClasses ?? [])
+        .filter((c) => !c.archived_at && c.id !== id)
+        .flatMap((c) => c.labels ?? []),
+    ),
+  ).sort();
+  const cloneClassTargets = (data.allClasses ?? []).filter(
+    (c) => !c.archived_at && c.id !== id,
+  );
+  const labelClonePreview = (data.allClasses ?? []).filter(
+    (c) =>
+      !c.archived_at &&
+      c.id !== id &&
+      (c.labels ?? []).some((l) => selectedLabelsForClone.has(l)),
+  );
 
   return (
     <div className="space-y-8">
@@ -213,6 +272,53 @@ function ClassDetail() {
               </h1>
               {!isArchived && (
                 <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -mt-2" />
+              )}
+            </div>
+          )}
+          {editingLabels ? (
+            <div className="mt-3 max-w-md">
+              <LabelsInput
+                value={draftLabels}
+                onChange={setDraftLabels}
+                suggestions={allLabelSuggestions}
+                placeholder="Type a label and press space"
+                autoFocus
+              />
+              <div className="mt-2 flex gap-2">
+                <Button size="sm" onClick={saveLabels}>Save labels</Button>
+                <Button size="sm" variant="outline" onClick={() => setEditingLabels(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`mt-2 flex flex-wrap items-center gap-1.5 ${!isArchived ? "cursor-pointer group/labels" : ""}`}
+              onClick={() => {
+                if (isArchived) return;
+                setDraftLabels(classLabels);
+                setEditingLabels(true);
+              }}
+              title={isArchived ? "" : "Click to edit labels"}
+            >
+              {classLabels.length === 0 ? (
+                !isArchived && (
+                  <span className="text-xs text-muted-foreground italic">
+                    Add labels…
+                  </span>
+                )
+              ) : (
+                classLabels.map((l) => (
+                  <span
+                    key={l}
+                    className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
+                  >
+                    {l}
+                  </span>
+                ))
+              )}
+              {!isArchived && (
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover/labels:opacity-100 transition-opacity" />
               )}
             </div>
           )}
