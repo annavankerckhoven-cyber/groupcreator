@@ -103,11 +103,6 @@ function StudentForm() {
         <Card>
           <CardHeader>
             <CardTitle>Pick your name</CardTitle>
-            <CardDescription>
-              Your answers stay private — nobody can see them. Not even your teacher.
-              <br />
-              <strong>It is advised not to enter too many "Not together" preferences.</strong> The fewer "Not together" preferences you enter, the more likely they are to be respected.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <Select value={studentId} onValueChange={setStudentId}>
@@ -115,7 +110,7 @@ function StudentForm() {
                 <SelectValue placeholder="Select your name" />
               </SelectTrigger>
               <SelectContent>
-                {data.students.map((s) => (
+                {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}
                   </SelectItem>
@@ -130,7 +125,10 @@ function StudentForm() {
             <CardHeader>
               <CardTitle>For each classmate</CardTitle>
               <CardDescription>
-                Choose whether you'd like to work with them. "Doesn't matter" is the default.
+                Choose whether you'd like to work with them.
+                Your answers stay private — nobody can see them. Not even your teacher.
+                <br />
+                <strong>It is advised not to enter too many "Not together" preferences.</strong> The fewer "Not together" preferences you enter, the more likely they are to be respected.
               </CardDescription>
             </CardHeader>
             <CardContent>
