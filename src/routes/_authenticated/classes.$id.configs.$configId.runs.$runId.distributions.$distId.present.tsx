@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 
 export const Route = createFileRoute(
   "/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
@@ -18,15 +19,25 @@ function Present() {
   const { data, isLoading } = useQuery({
     queryKey: ["present", distId],
     queryFn: async () => {
-      const [dist, rows, students] = await Promise.all([
+      const [dist, rows, students, run, config, cls] = await Promise.all([
         supabase.from("run_distributions").select("id, rank, score").eq("id", distId).single(),
         supabase
           .from("run_distribution_groups")
           .select("group_index, student_id")
           .eq("distribution_id", distId),
         supabase.from("students").select("id, name").eq("class_id", id),
+        supabase.from("runs").select("id, name").eq("id", runId).single(),
+        supabase.from("group_configs").select("id, name").eq("id", configId).single(),
+        supabase.from("classes").select("id, name").eq("id", id).single(),
       ]);
-      return { dist: dist.data, rows: rows.data ?? [], students: students.data ?? [] };
+      return {
+        dist: dist.data,
+        rows: rows.data ?? [],
+        students: students.data ?? [],
+        run: run.data,
+        config: config.data,
+        class: cls.data,
+      };
     },
   });
 
@@ -39,6 +50,40 @@ function Present() {
     groups[r.group_index].push(r.student_id);
   }
 
+  const downloadAsExcel = () => {
+    // Prepare data for Excel: groups as columns
+    const excelData: string[][] = [];
+    
+    // Header row with group names
+    const headers = groups.map((_, i) => `Group ${i + 1}`);
+    excelData.push(headers);
+    
+    // Student rows
+    const maxGroupSize = Math.max(...groups.map((g) => g.length), 0);
+    for (let i = 0; i < maxGroupSize; i++) {
+      const row: string[] = [];
+      for (const group of groups) {
+        row.push(group[i] ? nameById.get(group[i]) || "" : "");
+      }
+      excelData.push(row);
+    }
+    
+    // Create workbook and worksheet
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Groups");
+    
+    // Generate filename
+    const className = data.class?.name || "Class";
+    const configName = data.config?.name || "Config";
+    const runName = data.run?.name || "Run";
+    const rank = data.dist?.rank || 1;
+    const filename = `${className}_${configName}_${runName}_${rank}.xlsx`;
+    
+    // Download
+    XLSX.writeFile(wb, filename);
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-auto bg-background p-8">
       <div className="mx-auto max-w-7xl">
@@ -49,17 +94,25 @@ function Present() {
             </div>
             <h1 className="text-3xl font-semibold">Groups</h1>
           </div>
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate({
-                to: "/classes/$id/configs/$configId/runs/$runId",
-                params: { id, configId, runId },
-              })
-            }
-          >
-            <X className="mr-1.5 h-4 w-4" /> Close
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={downloadAsExcel}
+            >
+              <Download className="mr-1.5 h-4 w-4" /> Download
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                navigate({
+                  to: "/classes/$id/configs/$configId/runs/$runId",
+                  params: { id, configId, runId },
+                })
+              }
+            >
+              <X className="mr-1.5 h-4 w-4" /> Close
+            </Button>
+          </div>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g, gi) => (
