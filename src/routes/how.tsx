@@ -82,11 +82,15 @@ function HowItWorksPage() {
               </p>
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Distribution scores</h3>
               <p className="text-base leading-7 text-muted-foreground">
-                The score of a distribution is calculated as follows:
-              </p>
-              <p className="text-base leading-7 text-muted-foreground">
-                Every distribution starts with 0 points. For each student that has one of their liked peers in their group, the score increases by 1 point. For each student that has one of their disliked peers in their group, the score decreases by 20 points.
-                Thereby avoiding disliked classmates comes first. Any remaining flexibility is used to group students with their preferred classmates.
+                Each group gets a score based on the preferences of its members. 
+                The score increases per liked peer in a student's group, 
+                and decreases per disliked peer in the group. 
+                The penalty for being with disliked classmates is higher than the reward 
+                for being with liked classmates. Thereby avoiding disliked classmates comes first. 
+                Groups also receive a penalty when a student has none of their liked peers in their group. 
+                This encourages distributions where every student has at least one friend in their group, 
+                rather than concentrating friendships among a few students.
+                The total score of a distribution is the sum of the scores of all the groups.
               </p>
             </section>
 

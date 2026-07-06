@@ -103,7 +103,7 @@ function buildAdj(ids: string[], edges: Edge[]): Adj {
 
 function scoreGroup(group: number[], adj: Adj): number {
   const set = new Set(group);
-  let s = 100;
+  let s = 0;
   for (const m of group) {
     for (const x of adj.likes[m]) if (set.has(x)) s += 1;
     for (const x of adj.dislikes[m]) if (set.has(x)) s -= 50;
@@ -114,7 +114,7 @@ function scoreGroup(group: number[], adj: Adj): number {
 }
 
 function scoreDistribution(dist: number[][], adj: Adj): number {
-  let s = 0;
+  let s = 100;
   for (const g of dist) s += scoreGroup(g, adj);
   return s;
 }
