@@ -300,6 +300,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
           <div className="mt-3 space-y-2 px-6">
             <Label htmlFor="clabels">Labels</Label>
+            <p className="text-xs text-muted-foreground">Press space to add each label. Labels are optional.</p>
             <LabelsInput
               id="clabels"
               value={labels}
@@ -307,7 +308,6 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
               suggestions={labelSuggestions}
               placeholder="Type a label and press space (e.g. 6th_year)"
             />
-            <p className="text-xs text-muted-foreground">Press space to add each label. Labels are optional.</p>
           </div>
 
           <Tabs defaultValue="paste" className="mt-2 px-6">

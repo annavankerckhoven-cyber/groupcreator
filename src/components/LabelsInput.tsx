@@ -13,11 +13,16 @@ interface Props {
 export function LabelsInput({ value, onChange, suggestions = [], placeholder, id, autoFocus }: Props) {
   const [draft, setDraft] = useState("");
   const [focused, setFocused] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (autoFocus) inputRef.current?.focus();
   }, [autoFocus]);
+
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [draft]);
 
   function addLabel(raw: string) {
     const clean = raw.trim().replace(/\s+/g, "_");
@@ -35,12 +40,30 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === " " || e.key === "Enter" || e.key === ",") {
+    const hasFilteredSuggestions = filteredSuggestions.length > 0;
+
+    if (e.key === "ArrowDown") {
+      if (!hasFilteredSuggestions) return;
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev < filteredSuggestions.length - 1 ? prev + 1 : prev));
+    } else if (e.key === "ArrowUp") {
+      if (!hasFilteredSuggestions) return;
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0 && highlightedIndex < filteredSuggestions.length) {
+        e.preventDefault();
+        addLabel(filteredSuggestions[highlightedIndex]);
+      } else if (draft.trim()) {
+        e.preventDefault();
+        addLabel(draft);
+      } else {
+        e.preventDefault();
+      }
+    } else if (e.key === " " || e.key === ",") {
       if (draft.trim()) {
         e.preventDefault();
         addLabel(draft);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
       }
     } else if (e.key === "Backspace" && draft === "" && value.length > 0) {
       e.preventDefault();
@@ -97,7 +120,7 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
       </div>
       {focused && filteredSuggestions.length > 0 && (
         <div className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-md border border-border bg-popover p-1 text-sm shadow-md">
-          {filteredSuggestions.map((s) => (
+          {filteredSuggestions.map((s, index) => (
             <button
               type="button"
               key={s}
@@ -106,7 +129,10 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
                 addLabel(s);
                 inputRef.current?.focus();
               }}
-              className="block w-full rounded px-2 py-1 text-left hover:bg-muted"
+              onMouseEnter={() => setHighlightedIndex(index)}
+              className={`block w-full rounded px-2 py-1 text-left ${
+                index === highlightedIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
+              }`}
             >
               {s}
             </button>

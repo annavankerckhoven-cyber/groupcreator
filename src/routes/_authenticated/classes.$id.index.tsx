@@ -276,7 +276,18 @@ function ClassDetail() {
             </div>
           )}
           {editingLabels ? (
-            <div className="mt-3 max-w-md">
+            <div
+              className="mt-3 max-w-2xl"
+              onBlur={() => {
+                saveLabels();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setEditingLabels(false);
+                  setDraftLabels(classLabels);
+                }
+              }}
+            >
               <LabelsInput
                 value={draftLabels}
                 onChange={setDraftLabels}
@@ -284,12 +295,6 @@ function ClassDetail() {
                 placeholder="Type a label and press space"
                 autoFocus
               />
-              <div className="mt-2 flex gap-2">
-                <Button size="sm" onClick={saveLabels}>Save labels</Button>
-                <Button size="sm" variant="outline" onClick={() => setEditingLabels(false)}>
-                  Cancel
-                </Button>
-              </div>
             </div>
           ) : (
             <div

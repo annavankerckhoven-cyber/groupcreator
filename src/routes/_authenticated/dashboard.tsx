@@ -140,9 +140,6 @@ function Dashboard() {
       <div className="mb-8 flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Your classes</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create a class, then share the link with students.
-          </p>
         </div>
         <Button onClick={() => setOpen(true)}>
           <Plus className="mr-1.5 h-4 w-4" /> New class
@@ -185,7 +182,7 @@ function Dashboard() {
               <h2 className="text-xl font-semibold tracking-tight">Archive</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Archived classes are deleted permanently after 1 year. Set your class to Active
-                again to prevent deletion.
+                again to prevent deletion. Archived classes can't be edited, but you can still view and clone their projects.
               </p>
             </div>
             {archived.length === 0 ? (
