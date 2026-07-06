@@ -23,6 +23,8 @@ import {
   CheckCircle2,
   Circle,
   Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -59,6 +61,9 @@ function ClassDetail() {
   const [draftLabels, setDraftLabels] = useState<string[]>([]);
   const [cloneMode, setCloneMode] = useState<"class" | "label">("class");
   const [selectedLabelsForClone, setSelectedLabelsForClone] = useState<Set<string>>(new Set());
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [editingStudentName, setEditingStudentName] = useState("");
+  const [savingStudent, setSavingStudent] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["class", id],
@@ -97,6 +102,26 @@ function ClassDetail() {
   function openDeleteStudentConfirm(studentId: string, studentName: string) {
     setStudentToDelete({ id: studentId, name: studentName });
     setConfirmStudentDeleteOpen(true);
+  }
+
+  async function saveStudentName() {
+    if (!editingStudentId || !editingStudentName.trim()) return;
+    setSavingStudent(true);
+    try {
+      const { error } = await supabase
+        .from("students")
+        .update({ name: editingStudentName.trim() })
+        .eq("id", editingStudentId);
+      if (error) throw error;
+      toast.success("Student name updated");
+      setEditingStudentId(null);
+      setEditingStudentName("");
+      await qc.invalidateQueries({ queryKey: ["class", id] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingStudent(false);
+    }
   }
 
   async function confirmDeleteStudent() {
@@ -391,24 +416,85 @@ function ClassDetail() {
                     ) : (
                       <Circle className="h-4 w-4 text-destructive fill-destructive" />
                     )}
-                    <span>{s.name}</span>
-                    {done && (
+                    {editingStudentId === s.id ? (
+                      <Input
+                        value={editingStudentName}
+                        onChange={(e) => setEditingStudentName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveStudentName();
+                          if (e.key === "Escape") {
+                            setEditingStudentId(null);
+                            setEditingStudentName("");
+                          }
+                        }}
+                        autoFocus
+                        className="h-7 text-sm"
+                      />
+                    ) : (
+                      <span>{s.name}</span>
+                    )}
+                    {done && !editingStudentId && (
                       <span className="text-xs text-muted-foreground">
                         — submitted on {new Date(submittedAt.get(s.id)!).toLocaleDateString()}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openDeleteStudentConfirm(s.id, s.name)}
-                      className="text-muted-foreground hover:text-muted-foreground"
-                      aria-label={`Delete ${s.name}`}
-                      title={`Delete ${s.name} from this class`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {editingStudentId === s.id ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={saveStudentName}
+                          disabled={savingStudent || !editingStudentName.trim()}
+                          className="text-green-600 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+                          aria-label={`Save ${s.name}`}
+                          title="Save"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingStudentId(null);
+                            setEditingStudentName("");
+                          }}
+                          disabled={savingStudent}
+                          className="text-muted-foreground hover:text-muted-foreground"
+                          aria-label={`Cancel`}
+                          title="Cancel"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingStudentId(s.id);
+                            setEditingStudentName(s.name);
+                          }}
+                          className="text-muted-foreground hover:text-muted-foreground"
+                          aria-label={`Edit ${s.name}`}
+                          title={`Edit ${s.name}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openDeleteStudentConfirm(s.id, s.name)}
+                          className="text-muted-foreground hover:text-muted-foreground"
+                          aria-label={`Delete ${s.name}`}
+                          title={`Delete ${s.name} from this class`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </li>
               );
