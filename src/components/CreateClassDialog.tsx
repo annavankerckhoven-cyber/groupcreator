@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { Upload } from "lucide-react";
+import { LabelsInput } from "@/components/LabelsInput";
+import { useQuery } from "@tanstack/react-query";
 
 interface Props {
   open: boolean;
@@ -33,6 +35,7 @@ function randomToken() {
 
 export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [name, setName] = useState("");
+  const [labels, setLabels] = useState<string[]>([]);
   const [pasted, setPasted] = useState("");
   const [parsedRows, setParsedRows] = useState<Record<string, string>[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
@@ -43,8 +46,21 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [loading, setLoading] = useState(false);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
+  const { data: labelSuggestions = [] } = useQuery({
+    queryKey: ["all-labels"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("classes").select("labels");
+      if (error) throw error;
+      const set = new Set<string>();
+      for (const row of data ?? []) for (const l of row.labels ?? []) set.add(l);
+      return Array.from(set).sort();
+    },
+    enabled: open,
+  });
+
   function reset() {
     setName("");
+    setLabels([]);
     setPasted("");
     setParsedRows([]);
     setColumns([]);
@@ -234,7 +250,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
       if (!userData.user) throw new Error("Not signed in");
       const { data: cls, error: clsErr } = await supabase
         .from("classes")
-        .insert({ name: name.trim(), owner_id: userData.user.id })
+        .insert({ name: name.trim(), owner_id: userData.user.id, labels })
         .select("id")
         .single();
       if (clsErr || !cls) throw clsErr ?? new Error("Failed");
@@ -280,6 +296,18 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
               placeholder="e.g. Biology 9A"
               required
             />
+          </div>
+
+          <div className="mt-3 space-y-2 px-6">
+            <Label htmlFor="clabels">Labels</Label>
+            <LabelsInput
+              id="clabels"
+              value={labels}
+              onChange={setLabels}
+              suggestions={labelSuggestions}
+              placeholder="Type a label and press space (e.g. 6th_year)"
+            />
+            <p className="text-xs text-muted-foreground">Press space to add each label. Labels are optional.</p>
           </div>
 
           <Tabs defaultValue="paste" className="mt-2 px-6">
