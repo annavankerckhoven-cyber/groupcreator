@@ -79,9 +79,9 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
   }, [draft, suggestions, value]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <div
-        className="flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-background px-2 py-1.5 text-sm focus-within:ring-1 focus-within:ring-ring"
+        className="flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-background px-2 py-1.5 text-sm focus-within:ring-1 focus-within:ring-ring w-full"
         onClick={() => inputRef.current?.focus()}
       >
         {value.map((label) => (
