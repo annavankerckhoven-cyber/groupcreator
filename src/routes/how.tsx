@@ -37,15 +37,15 @@ function HowItWorksPage() {
                 Start from the dashboard. Choose New class, and enter a class name.
               </p>
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Add labels</h3>
-              <p className="text-base leading-7 text-muted-foreground">
+              <p className="text-base leading-4 text-muted-foreground">
                 You can give your class a label (for example: "biology_6th_grade"). You can add labels when creating a class or edit them later. Labels can be used to clone a project to all classes with a given label.
               </p>
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Add students</h3>
-              <p className="text-base leading-7 text-muted-foreground">
+              <p className="text-base leading-4 text-muted-foreground">
                 You can add students to your class by typing their names manually or importing them from a CSV or Excel file. If you import a file, you can select the cells containing student names in a preview of the file. Students can still be edited manually after creating the class if needed.
               </p>
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Archived classes</h3>
-              <p className="text-base leading-7 text-muted-foreground">
+              <p className="text-base leading-4 text-muted-foreground">
                 When creating a new class, this class will be active by default for 1 year. After 1 year, this class will be archived. Archived classes are still accessible, but can't be edited. You can clone projects from archived classes to active classes. Archived classes are deleted permanently after 1 year.
                 You can always archive, restore or delete classes manually. If you restore an archived class, this class will remain active again for 1 year. Thereby you can easily maintain your classes.
               </p>
@@ -75,13 +75,13 @@ function HowItWorksPage() {
                 Open the project page and start a new run. Indicate which students are currently absent (if applicable), so they won't be added to any groups. The application will compute possible group distributions using the student preferences. Indicate the time the run should take. The longer the run, the more distributions are evaluated, increasing the changes of finding the optimal results. Once a run has comleted, you can review the results.
               </p>
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Algorithm used to find optimal distributions</h3>
-              <p className="text-base leading-7 text-muted-foreground">
+              <p className="text-base leading-4 text-muted-foreground">
                 During the run, many distributions are generated using an algoritm specialized for large optimalization problems. To give an illustration: to divide a group of 20 people into groups of 4, there are 2.546.168.625 possible distributions. The algorithm will evaluate as much as possible distributions (optimized based on the students responses) within the time limit you set, and store the best ones.
                 Therefore a longer run gives you a better chance of finding the optimal distribution, but even a short run will give you good results. 
                 While running you can see the score of the best distribution found so far. The score is a measure of how well the student preferences are respected. The final results will also show the score of each of the best distribution found.
               </p>
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Distribution scores</h3>
-              <p className="text-base leading-7 text-muted-foreground">
+              <p className="text-base leading-4 text-muted-foreground">
                 Each group gets a score based on the preferences of its members. 
                 The score increases per liked peer in a student's group, 
                 and decreases per disliked peer in the group. 
@@ -98,7 +98,7 @@ function HowItWorksPage() {
               <h2 className="text-2xl font-semibold">5. Use the results</h2>
               <p className="text-base leading-7 text-muted-foreground">
                 Once a run is complete, you can inspect the generated distributions. You can also mark favorite runs or distributions to keep the most useful outcomes easy to find.
-                Use the view button to open the distributions, so they can be easily presented to the students.
+                Use the view button to present a distribution.
               </p>
             </section>
           </div>
