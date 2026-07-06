@@ -32,7 +32,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("classes")
-        .select("id, name, created_at, archived_at, students(count)")
+        .select("id, name, created_at, archived_at, labels, students(count)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -59,7 +59,11 @@ function Dashboard() {
   async function toggleArchive(classId: string, archive: boolean) {
     const { error } = await supabase
       .from("classes")
-      .update({ archived_at: archive ? new Date().toISOString() : null })
+      .update(
+        archive
+          ? { archived_at: new Date().toISOString() }
+          : { archived_at: null, activated_at: new Date().toISOString() },
+      )
       .eq("id", classId);
     if (error) return toast.error(error.message);
     toast.success(archive ? "Class archived" : "Class restored");
@@ -85,6 +89,18 @@ function Dashboard() {
               <CardDescription>
                 {count} student{count === 1 ? "" : "s"}
               </CardDescription>
+              {c.labels && c.labels.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {c.labels.map((l) => (
+                    <span
+                      key={l}
+                      className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
+                    >
+                      {l}
+                    </span>
+                  ))}
+                </div>
+              )}
             </CardHeader>
           </Card>
         </Link>
