@@ -44,6 +44,11 @@ function HowItWorksPage() {
               <p className="text-base leading-7 text-muted-foreground">
                 You can add students to your class by typing their names manually or importing them from a CSV or Excel file. If you import a file, you can select the cells containing student names in a preview of the file. Students can still be added or deleted after creating the class if needed.
               </p>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">Archived classes</h3>
+              <p className="text-base leading-7 text-muted-foreground">
+                When creating a new class, this class will be active by default for 1 year. After 1 year, this class will be archived. Archived classes are still accessible, but can't be edited. You can clone projects from archived classes to active classes. Archived classes are deleted permanently after 1 year.
+                You can always archive, restore or delete classes manually. If you restore an archived class, this class will remain active again for 1 year. Thereby you can easily maintain your classes.
+              </p>
             </section>
 
             <section className="space-y-2">

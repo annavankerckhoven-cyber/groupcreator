@@ -238,7 +238,7 @@ function Dashboard() {
               <h2 className="text-xl font-semibold tracking-tight">Archive</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Archived classes are deleted permanently after 1 year. Set your class to Active
-                again to prevent deletion. Archived classes can't be edited, but you can still view and clone their projects.
+                again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.
               </p>
             </div>
             {archived.length === 0 ? (
