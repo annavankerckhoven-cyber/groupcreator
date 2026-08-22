@@ -223,7 +223,7 @@ function Dashboard() {
 
   return (
     <div>
-      <div className="mb-8 flex items-end justify-between">
+      <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Your classes</h1>
         </div>
@@ -231,6 +231,80 @@ function Dashboard() {
           <Plus className="mr-1.5 h-4 w-4" /> New class
         </Button>
       </div>
+
+      <div className="mb-8 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <Select value={sortKey} onValueChange={(v) => setSort(v as SortKey, sortDir)}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Alphabetically</SelectItem>
+              <SelectItem value="created">Created date</SelectItem>
+              <SelectItem value="modified">Modified date</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            title={sortDir === "asc" ? "Ascending" : "Descending"}
+            aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}`}
+            onClick={() => setSort(sortKey, sortDir === "asc" ? "desc" : "asc")}
+          >
+            {sortDir === "asc" ? (
+              <ArrowUp className="h-4 w-4" />
+            ) : (
+              <ArrowDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search classes…"
+            className="pl-8"
+          />
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Tag className="mr-1.5 h-4 w-4" />
+              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Filter labels"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
+            {allLabels.length === 0 ? (
+              <DropdownMenuItem disabled>No labels yet</DropdownMenuItem>
+            ) : (
+              <>
+                {allLabels.map((label) => (
+                  <DropdownMenuCheckboxItem
+                    key={label}
+                    checked={selectedLabels.includes(label)}
+                    onCheckedChange={(checked) =>
+                      setSelectedLabels((prev) =>
+                        checked ? [...prev, label] : prev.filter((l) => l !== label),
+                      )
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setSelectedLabels([])}>
+                  Clear labels
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
