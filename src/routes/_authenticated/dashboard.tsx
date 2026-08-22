@@ -36,15 +36,22 @@ import {
   ArchiveRestore,
   Search,
   Tag,
-  ArrowUp,
-  ArrowDown,
 } from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 import { toast } from "sonner";
 
 type SortKey = "name" | "created" | "modified";
 type SortDir = "asc" | "desc";
+type SortOption = `${SortKey}-${SortDir}`;
 const SORT_STORAGE_KEY = "gc.dashboard.sort";
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "name-asc", label: "Alphabetically (A to Z)" },
+  { value: "name-desc", label: "Alphabetically (Z to A)" },
+  { value: "created-desc", label: "Created date (newest first)" },
+  { value: "created-asc", label: "Created date (oldest first)" },
+  { value: "modified-desc", label: "Modified date (newest first)" },
+  { value: "modified-asc", label: "Modified date (oldest first)" },
+];
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Group Creator" }] }),
@@ -59,8 +66,7 @@ function Dashboard() {
   const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const [sortKey, setSortKey] = useState<SortKey>("created");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortOption, setSortOption] = useState<SortOption>("created-desc");
 
   // Restore the user's saved sorting preference (persists across sessions).
   useEffect(() => {
@@ -68,23 +74,30 @@ function Dashboard() {
       const raw = localStorage.getItem(SORT_STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as { key?: string; dir?: string };
-      if (parsed.key && ["name", "created", "modified"].includes(parsed.key))
-        setSortKey(parsed.key as SortKey);
-      if (parsed.dir === "asc" || parsed.dir === "desc") setSortDir(parsed.dir);
+      if (
+        parsed.key &&
+        ["name", "created", "modified"].includes(parsed.key) &&
+        (parsed.dir === "asc" || parsed.dir === "desc")
+      ) {
+        setSortOption(`${parsed.key}-${parsed.dir}` as SortOption);
+      }
     } catch {
       /* ignore malformed preference */
     }
   }, []);
 
-  function setSort(key: SortKey, dir: SortDir) {
-    setSortKey(key);
-    setSortDir(dir);
+  function changeSort(option: SortOption) {
+    setSortOption(option);
     try {
+      const [key, dir] = option.split("-") as [SortKey, SortDir];
       localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key, dir }));
     } catch {
       /* ignore storage failures */
     }
   }
+
+  const sortKey = sortOption.split("-")[0] as SortKey;
+  const sortDir = sortOption.split("-")[1] as SortDir;
   
   async function archiveOldActiveClasses(classesToCheck: typeof active) {
     const now = new Date();
@@ -301,48 +314,35 @@ function Dashboard() {
         </Button>
       </div>
 
-      <div className="mb-8 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5">
-          <Select value={sortKey} onValueChange={(v) => setSort(v as SortKey, sortDir)}>
-            <SelectTrigger className="w-[190px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Alphabetically</SelectItem>
-              <SelectItem value="created">Created date</SelectItem>
-              <SelectItem value="modified">Modified date</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            title={sortDir === "asc" ? "Ascending" : "Descending"}
-            aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}`}
-            onClick={() => setSort(sortKey, sortDir === "asc" ? "desc" : "asc")}
-          >
-            {sortDir === "asc" ? (
-              <ArrowUp className="h-4 w-4" />
-            ) : (
-              <ArrowDown className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+      <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <Select value={sortOption} onValueChange={(v) => changeSort(v as SortOption)}>
+          <SelectTrigger className="h-8 w-[180px] border-transparent bg-transparent text-xs text-muted-foreground hover:bg-muted">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <div className="relative w-full sm:w-64">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative w-full sm:w-56">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search classes…"
-            className="pl-8"
+            placeholder="Search…"
+            className="h-8 border-transparent bg-transparent pl-8 text-xs text-foreground placeholder:text-muted-foreground/70 focus-visible:bg-background"
           />
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <Tag className="mr-1.5 h-4 w-4" />
-              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Filter labels"}
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:bg-muted">
+              <Tag className="h-3.5 w-3.5" />
+              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Labels"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
