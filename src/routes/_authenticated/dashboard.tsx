@@ -36,8 +36,6 @@ import {
   ArchiveRestore,
   Search,
   Tag,
-  ArrowUp,
-  ArrowDown,
 } from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 import { toast } from "sonner";
