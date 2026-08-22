@@ -148,8 +148,47 @@ function Dashboard() {
     await qc.invalidateQueries({ queryKey: ["classes"] });
   }
 
-  const active = (classes ?? []).filter((c) => !c.archived_at);
-  const archived = (classes ?? []).filter((c) => c.archived_at);
+  const allActive = (classes ?? []).filter((c) => !c.archived_at);
+  const allArchived = (classes ?? []).filter((c) => c.archived_at);
+
+  const allLabels = useMemo(() => {
+    const set = new Set<string>();
+    (classes ?? []).forEach((c) => (c.labels ?? []).forEach((l) => set.add(l)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [classes]);
+
+  function modifiedAt(c: (typeof allActive)[number]) {
+    const stamps: string[] = [c.updated_at ?? c.created_at];
+    (c.group_configs ?? []).forEach((cfg) => {
+      stamps.push(cfg.updated_at, cfg.created_at);
+      (cfg.runs ?? []).forEach((r) => {
+        stamps.push(r.created_at);
+        if (r.completed_at) stamps.push(r.completed_at);
+      });
+    });
+    return stamps.reduce((max, s) => (s && s > max ? s : max), "");
+  }
+
+  function applyFilters(list: typeof allActive) {
+    const q = search.trim().toLowerCase();
+    const filtered = list.filter((c) => {
+      const matchesSearch = !q || c.name.toLowerCase().includes(q);
+      const matchesLabels =
+        selectedLabels.length === 0 ||
+        selectedLabels.some((l) => (c.labels ?? []).includes(l));
+      return matchesSearch && matchesLabels;
+    });
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortKey === "name") return a.name.localeCompare(b.name);
+      if (sortKey === "modified") return modifiedAt(a).localeCompare(modifiedAt(b));
+      return a.created_at.localeCompare(b.created_at);
+    });
+    return sortDir === "desc" ? sorted.reverse() : sorted;
+  }
+
+  const active = applyFilters(allActive);
+  const archived = applyFilters(allArchived);
+
 
   // Run archival and deletion checks when classes load
   useEffect(() => {
