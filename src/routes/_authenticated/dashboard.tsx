@@ -110,7 +110,9 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("classes")
-        .select("id, name, created_at, archived_at, activated_at, labels, students(count)")
+        .select(
+          "id, name, created_at, updated_at, archived_at, activated_at, labels, students(count), group_configs(created_at, updated_at, runs(created_at, completed_at))",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
