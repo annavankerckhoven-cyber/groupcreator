@@ -316,8 +316,8 @@ function Dashboard() {
 
       <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Select value={sortOption} onValueChange={(v) => changeSort(v as SortOption)}>
-          <SelectTrigger className="h-8 w-[180px] border-transparent bg-transparent text-xs text-muted-foreground hover:bg-muted">
-            <SelectValue placeholder="Sort by" />
+          <SelectTrigger className="h-8 w-[180px] border-transparent bg-transparent text-xs font-normal text-muted-foreground hover:bg-muted">
+            <span>Sort by</span>
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((o) => (
@@ -340,9 +340,9 @@ function Dashboard() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:bg-muted">
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
               <Tag className="h-3.5 w-3.5" />
-              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Labels"}
+              {selectedLabels.length > 0 ? `Filter by label (${selectedLabels.length})` : "Filter by label"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
