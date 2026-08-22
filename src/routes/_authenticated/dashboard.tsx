@@ -316,48 +316,35 @@ function Dashboard() {
         </Button>
       </div>
 
-      <div className="mb-8 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5">
-          <Select value={sortKey} onValueChange={(v) => setSort(v as SortKey, sortDir)}>
-            <SelectTrigger className="w-[190px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Alphabetically</SelectItem>
-              <SelectItem value="created">Created date</SelectItem>
-              <SelectItem value="modified">Modified date</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            title={sortDir === "asc" ? "Ascending" : "Descending"}
-            aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}`}
-            onClick={() => setSort(sortKey, sortDir === "asc" ? "desc" : "asc")}
-          >
-            {sortDir === "asc" ? (
-              <ArrowUp className="h-4 w-4" />
-            ) : (
-              <ArrowDown className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+      <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <Select value={sortOption} onValueChange={(v) => changeSort(v as SortOption)}>
+          <SelectTrigger className="h-8 w-[180px] border-transparent bg-transparent text-xs text-muted-foreground hover:bg-muted">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <div className="relative w-full sm:w-64">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative w-full sm:w-56">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search classes…"
-            className="pl-8"
+            placeholder="Search…"
+            className="h-8 border-transparent bg-transparent pl-8 text-xs text-foreground placeholder:text-muted-foreground/70 focus-visible:bg-background"
           />
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <Tag className="mr-1.5 h-4 w-4" />
-              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Filter labels"}
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:bg-muted">
+              <Tag className="h-3.5 w-3.5" />
+              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Labels"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
