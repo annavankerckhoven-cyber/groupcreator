@@ -1,9 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +28,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Users, Trash2, Archive, ArchiveRestore } from "lucide-react";
+import {
+  Plus,
+  Users,
+  Trash2,
+  Archive,
+  ArchiveRestore,
+  Search,
+  Tag,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 import { toast } from "sonner";
+
+type SortKey = "name" | "created" | "modified";
+type SortDir = "asc" | "desc";
+const SORT_STORAGE_KEY = "gc.dashboard.sort";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Group Creator" }] }),
