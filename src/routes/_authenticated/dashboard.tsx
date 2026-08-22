@@ -328,7 +328,7 @@ function Dashboard() {
           </SelectContent>
         </Select>
 
-        <div className="relative w-full sm:w-56">
+        <div className="relative w-full sm:w-[149px]">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
