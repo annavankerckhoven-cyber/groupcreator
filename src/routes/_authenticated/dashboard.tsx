@@ -57,6 +57,34 @@ function Dashboard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [classToDelete, setClassToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
+  const [sortKey, setSortKey] = useState<SortKey>("created");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // Restore the user's saved sorting preference (persists across sessions).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SORT_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { key?: string; dir?: string };
+      if (parsed.key && ["name", "created", "modified"].includes(parsed.key))
+        setSortKey(parsed.key as SortKey);
+      if (parsed.dir === "asc" || parsed.dir === "desc") setSortDir(parsed.dir);
+    } catch {
+      /* ignore malformed preference */
+    }
+  }, []);
+
+  function setSort(key: SortKey, dir: SortDir) {
+    setSortKey(key);
+    setSortDir(dir);
+    try {
+      localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key, dir }));
+    } catch {
+      /* ignore storage failures */
+    }
+  }
   
   async function archiveOldActiveClasses(classesToCheck: typeof active) {
     const now = new Date();
