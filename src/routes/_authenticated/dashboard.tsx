@@ -44,7 +44,16 @@ import { toast } from "sonner";
 
 type SortKey = "name" | "created" | "modified";
 type SortDir = "asc" | "desc";
+type SortOption = `${SortKey}-${SortDir}`;
 const SORT_STORAGE_KEY = "gc.dashboard.sort";
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "name-asc", label: "Alphabetically (A to Z)" },
+  { value: "name-desc", label: "Alphabetically (Z to A)" },
+  { value: "created-desc", label: "Created date (newest first)" },
+  { value: "created-asc", label: "Created date (oldest first)" },
+  { value: "modified-desc", label: "Modified date (newest first)" },
+  { value: "modified-asc", label: "Modified date (oldest first)" },
+];
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Group Creator" }] }),
@@ -59,8 +68,7 @@ function Dashboard() {
   const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const [sortKey, setSortKey] = useState<SortKey>("created");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortOption, setSortOption] = useState<SortOption>("created-desc");
 
   // Restore the user's saved sorting preference (persists across sessions).
   useEffect(() => {
@@ -68,23 +76,30 @@ function Dashboard() {
       const raw = localStorage.getItem(SORT_STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as { key?: string; dir?: string };
-      if (parsed.key && ["name", "created", "modified"].includes(parsed.key))
-        setSortKey(parsed.key as SortKey);
-      if (parsed.dir === "asc" || parsed.dir === "desc") setSortDir(parsed.dir);
+      if (
+        parsed.key &&
+        ["name", "created", "modified"].includes(parsed.key) &&
+        (parsed.dir === "asc" || parsed.dir === "desc")
+      ) {
+        setSortOption(`${parsed.key}-${parsed.dir}` as SortOption);
+      }
     } catch {
       /* ignore malformed preference */
     }
   }, []);
 
-  function setSort(key: SortKey, dir: SortDir) {
-    setSortKey(key);
-    setSortDir(dir);
+  function changeSort(option: SortOption) {
+    setSortOption(option);
     try {
+      const [key, dir] = option.split("-") as [SortKey, SortDir];
       localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key, dir }));
     } catch {
       /* ignore storage failures */
     }
   }
+
+  const sortKey = sortOption.split("-")[0] as SortKey;
+  const sortDir = sortOption.split("-")[1] as SortDir;
   
   async function archiveOldActiveClasses(classesToCheck: typeof active) {
     const now = new Date();
