@@ -1,9 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +28,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Users, Trash2, Archive, ArchiveRestore } from "lucide-react";
+import {
+  Plus,
+  Users,
+  Trash2,
+  Archive,
+  ArchiveRestore,
+  Search,
+  Tag,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 import { toast } from "sonner";
+
+type SortKey = "name" | "created" | "modified";
+type SortDir = "asc" | "desc";
+const SORT_STORAGE_KEY = "gc.dashboard.sort";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Group Creator" }] }),
@@ -27,6 +57,34 @@ function Dashboard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [classToDelete, setClassToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
+  const [sortKey, setSortKey] = useState<SortKey>("created");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // Restore the user's saved sorting preference (persists across sessions).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SORT_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { key?: string; dir?: string };
+      if (parsed.key && ["name", "created", "modified"].includes(parsed.key))
+        setSortKey(parsed.key as SortKey);
+      if (parsed.dir === "asc" || parsed.dir === "desc") setSortDir(parsed.dir);
+    } catch {
+      /* ignore malformed preference */
+    }
+  }, []);
+
+  function setSort(key: SortKey, dir: SortDir) {
+    setSortKey(key);
+    setSortDir(dir);
+    try {
+      localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key, dir }));
+    } catch {
+      /* ignore storage failures */
+    }
+  }
   
   async function archiveOldActiveClasses(classesToCheck: typeof active) {
     const now = new Date();
@@ -80,7 +138,9 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("classes")
-        .select("id, name, created_at, archived_at, activated_at, labels, students(count)")
+        .select(
+          "id, name, created_at, updated_at, archived_at, activated_at, labels, students(count), group_configs(created_at, updated_at, runs(created_at, completed_at))",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -118,8 +178,47 @@ function Dashboard() {
     await qc.invalidateQueries({ queryKey: ["classes"] });
   }
 
-  const active = (classes ?? []).filter((c) => !c.archived_at);
-  const archived = (classes ?? []).filter((c) => c.archived_at);
+  const allActive = (classes ?? []).filter((c) => !c.archived_at);
+  const allArchived = (classes ?? []).filter((c) => c.archived_at);
+
+  const allLabels = useMemo(() => {
+    const set = new Set<string>();
+    (classes ?? []).forEach((c) => (c.labels ?? []).forEach((l) => set.add(l)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [classes]);
+
+  function modifiedAt(c: (typeof allActive)[number]) {
+    const stamps: string[] = [c.updated_at ?? c.created_at];
+    (c.group_configs ?? []).forEach((cfg) => {
+      stamps.push(cfg.updated_at, cfg.created_at);
+      (cfg.runs ?? []).forEach((r) => {
+        stamps.push(r.created_at);
+        if (r.completed_at) stamps.push(r.completed_at);
+      });
+    });
+    return stamps.reduce((max, s) => (s && s > max ? s : max), "");
+  }
+
+  function applyFilters(list: typeof allActive) {
+    const q = search.trim().toLowerCase();
+    const filtered = list.filter((c) => {
+      const matchesSearch = !q || c.name.toLowerCase().includes(q);
+      const matchesLabels =
+        selectedLabels.length === 0 ||
+        selectedLabels.some((l) => (c.labels ?? []).includes(l));
+      return matchesSearch && matchesLabels;
+    });
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortKey === "name") return a.name.localeCompare(b.name);
+      if (sortKey === "modified") return modifiedAt(a).localeCompare(modifiedAt(b));
+      return a.created_at.localeCompare(b.created_at);
+    });
+    return sortDir === "desc" ? sorted.reverse() : sorted;
+  }
+
+  const active = applyFilters(allActive);
+  const archived = applyFilters(allArchived);
+
 
   // Run archival and deletion checks when classes load
   useEffect(() => {
@@ -193,7 +292,7 @@ function Dashboard() {
 
   return (
     <div>
-      <div className="mb-8 flex items-end justify-between">
+      <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Your classes</h1>
         </div>
@@ -201,6 +300,80 @@ function Dashboard() {
           <Plus className="mr-1.5 h-4 w-4" /> New class
         </Button>
       </div>
+
+      <div className="mb-8 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <Select value={sortKey} onValueChange={(v) => setSort(v as SortKey, sortDir)}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Alphabetically</SelectItem>
+              <SelectItem value="created">Created date</SelectItem>
+              <SelectItem value="modified">Modified date</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            title={sortDir === "asc" ? "Ascending" : "Descending"}
+            aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}`}
+            onClick={() => setSort(sortKey, sortDir === "asc" ? "desc" : "asc")}
+          >
+            {sortDir === "asc" ? (
+              <ArrowUp className="h-4 w-4" />
+            ) : (
+              <ArrowDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search classes…"
+            className="pl-8"
+          />
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Tag className="mr-1.5 h-4 w-4" />
+              {selectedLabels.length > 0 ? `Labels (${selectedLabels.length})` : "Filter labels"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
+            {allLabels.length === 0 ? (
+              <DropdownMenuItem disabled>No labels yet</DropdownMenuItem>
+            ) : (
+              <>
+                {allLabels.map((label) => (
+                  <DropdownMenuCheckboxItem
+                    key={label}
+                    checked={selectedLabels.includes(label)}
+                    onCheckedChange={(checked) =>
+                      setSelectedLabels((prev) =>
+                        checked ? [...prev, label] : prev.filter((l) => l !== label),
+                      )
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setSelectedLabels([])}>
+                  Clear labels
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
