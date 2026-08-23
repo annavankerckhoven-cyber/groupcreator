@@ -316,7 +316,7 @@ function Dashboard() {
 
       <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Select value={sortOption} onValueChange={(v) => changeSort(v as SortOption)}>
-          <SelectTrigger className="h-8 w-auto border-transparent bg-transparent text-xs font-normal text-muted-foreground hover:bg-muted">
+          <SelectTrigger className="h-8 w-[112px] border border-input bg-transparent text-xs font-normal text-muted-foreground hover:bg-muted">
             <span>Sort by</span>
           </SelectTrigger>
           <SelectContent>
@@ -334,13 +334,13 @@ function Dashboard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search…"
-            className="h-8 border-transparent bg-transparent pl-8 text-xs text-foreground placeholder:text-muted-foreground/70 focus-visible:bg-background"
+            className="h-8 border border-input bg-transparent pl-8 text-xs text-foreground placeholder:text-muted-foreground/70 focus-visible:bg-background"
           />
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 border border-input bg-transparent px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
               <Tag className="h-3.5 w-3.5" />
               {selectedLabels.length > 0 ? `Filter by label (${selectedLabels.length})` : "Filter by label"}
             </Button>
