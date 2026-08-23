@@ -316,7 +316,7 @@ function Dashboard() {
 
       <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Select value={sortOption} onValueChange={(v) => changeSort(v as SortOption)}>
-          <SelectTrigger className="h-8 w-auto border-transparent bg-transparent text-xs font-normal text-muted-foreground hover:bg-muted">
+          <SelectTrigger className="h-8 w-[112px] border border-input bg-transparent text-xs font-normal text-muted-foreground hover:bg-muted">
             <span>Sort by</span>
           </SelectTrigger>
           <SelectContent>
