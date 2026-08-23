@@ -340,7 +340,7 @@ function Dashboard() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 border border-input bg-transparent px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
               <Tag className="h-3.5 w-3.5" />
               {selectedLabels.length > 0 ? `Filter by label (${selectedLabels.length})` : "Filter by label"}
             </Button>
