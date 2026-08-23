@@ -334,7 +334,7 @@ function Dashboard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search…"
-            className="h-8 border-transparent bg-transparent pl-8 text-xs text-foreground placeholder:text-muted-foreground/70 focus-visible:bg-background"
+            className="h-8 border border-input bg-transparent pl-8 text-xs text-foreground placeholder:text-muted-foreground/70 focus-visible:bg-background"
           />
         </div>
 
