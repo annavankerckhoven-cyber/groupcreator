@@ -31,7 +31,17 @@ function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      // Supabase returns "Invalid login credentials" for any auth failure.
+      // Surface a clearer, conventional message to the user instead.
+      if (
+        error.message.toLowerCase().includes("invalid login") ||
+        error.message.toLowerCase().includes("invalid credentials")
+      ) {
+        return toast.error("Email and password do not match.");
+      }
+      return toast.error(error.message);
+    }
     toast.success("Welcome back!");
     navigate({ to: "/dashboard" });
   }
