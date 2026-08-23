@@ -42,7 +42,6 @@ function AuthPage() {
       }
       return toast.error(error.message);
     }
-    toast.success("Welcome back!");
     navigate({ to: "/dashboard" });
   }
 
