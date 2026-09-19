@@ -268,6 +268,34 @@ function RunPage() {
   const timeSec = data.run.time_limit_seconds;
   const pct = progress ? Math.min(100, (progress.elapsedMs / (timeSec * 1000)) * 100) : 0;
 
+  const friendCount = new Map<string, number>();
+  for (const p of data.prefs) {
+    if (p.kind === "with") friendCount.set(p.from, (friendCount.get(p.from) ?? 0) + 1);
+  }
+  const nameOf = (sid: string) => nameById.get(sid) ?? sid;
+
+  function distributionDetails(groups: string[][]) {
+    const lonely: string[] = [];
+    const conflicts: string[] = [];
+    for (const g of groups) {
+      const members = new Set(g);
+      for (const sid of g) {
+        const picked = friendCount.get(sid) ?? 0;
+        const hasFriend = data!.prefs.some((p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target));
+        if (picked > 0 && !hasFriend) {
+          lonely.push(`${nameOf(sid)} has none of their ${picked} selected friend${picked === 1 ? "" : "s"} in their group`);
+        }
+        for (const p of data!.prefs) {
+          if (p.kind === "avoid" && p.from === sid && p.target !== sid && members.has(p.target)) {
+            conflicts.push(`${nameOf(sid)} does not want to be in the same group as ${nameOf(p.target)}`);
+          }
+        }
+      }
+    }
+    return { lonely, conflicts };
+  }
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
