@@ -43,6 +43,8 @@ function RunPage() {
   const [running, setRunning] = useState(false);
   const [editingRunName, setEditingRunName] = useState(false);
   const [newRunName, setNewRunName] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [confirmDetailsOpen, setConfirmDetailsOpen] = useState(false);
   const startedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
 
