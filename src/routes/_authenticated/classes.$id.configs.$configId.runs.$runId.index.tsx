@@ -217,18 +217,6 @@ function RunPage() {
     if (completeError) throw completeError;
   }
 
-  async function toggleRunFavorite() {
-    if (!data) return;
-    const next = !data.run.is_favorite;
-    if (next) {
-      const { error: clearError } = await supabase.from("runs").update({ is_favorite: false }).eq("config_id", configId);
-      if (clearError) return toast.error(clearError.message);
-    }
-    const { error } = await supabase.from("runs").update({ is_favorite: next }).eq("id", runId);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["run", runId] });
-    qc.invalidateQueries({ queryKey: ["project", configId] });
-  }
 
   async function toggleDistFavorite(distId: string, current: boolean) {
     if (current) {
