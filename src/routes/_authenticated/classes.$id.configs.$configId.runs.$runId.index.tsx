@@ -319,11 +319,35 @@ function RunPage() {
             </p>
           )}
         </div>
-        <Button variant="ghost" size="sm" onClick={toggleRunFavorite}>
-          <Heart className={`mr-1.5 h-4 w-4 ${data.run.is_favorite ? "fill-primary text-primary" : ""}`} />
-          {data.run.is_favorite ? "Favorite run" : "Mark as favorite"}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Label htmlFor="show-details" className="text-sm font-normal text-muted-foreground">
+            Show distribution details
+          </Label>
+          <Switch
+            id="show-details"
+            checked={showDetails}
+            onCheckedChange={(next) => {
+              if (next) setConfirmDetailsOpen(true);
+              else setShowDetails(false);
+            }}
+          />
+        </div>
       </div>
+
+      <AlertDialog open={confirmDetailsOpen} onOpenChange={setConfirmDetailsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Show distribution details?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to show the distribution details? It contains sensitive information that should not be shared with students.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setShowDetails(true)}>Show details</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {(status === "pending" || status === "running" || status === "error") && !running && (
         <Card>
