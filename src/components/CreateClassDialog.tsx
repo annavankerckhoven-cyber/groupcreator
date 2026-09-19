@@ -70,20 +70,41 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     setSelectionCurrent(null);
   }
 
+  function columnLabel(index: number): string {
+    // A, B, ..., Z, AA, AB, ... like spreadsheet column headers
+    let label = "";
+    let n = index;
+    do {
+      label = String.fromCharCode(65 + (n % 26)) + label;
+      n = Math.floor(n / 26) - 1;
+    } while (n >= 0);
+    return label;
+  }
+
+  function applyRawRows(rawRows: string[][]) {
+    const nonEmpty = rawRows.filter((r) => r.some((v) => String(v ?? "").trim() !== ""));
+    if (!nonEmpty.length) return toast.error("File is empty");
+    const colCount = Math.max(...nonEmpty.map((r) => r.length));
+    const cols = Array.from({ length: colCount }, (_, i) => columnLabel(i));
+    const rows = nonEmpty.map((r) => {
+      const row: Record<string, string> = {};
+      cols.forEach((c, i) => {
+        row[c] = String(r[i] ?? "").trim();
+      });
+      return row;
+    });
+    setParsedRows(rows);
+    setColumns(cols);
+    setSelectedCells([]);
+  }
+
   function handleFile(file: File) {
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext === "csv") {
       Papa.parse(file, {
-        header: true,
+        header: false,
         skipEmptyLines: true,
-        complete: (res) => {
-          const rows = res.data as Record<string, string>[];
-          if (!rows.length) return toast.error("File is empty");
-          const cols = Object.keys(rows[0]);
-          setParsedRows(rows);
-          setColumns(cols);
-          setSelectedCells([]);
-        },
+        complete: (res) => applyRawRows(res.data as string[][]),
         error: (err) => toast.error("Parse error: " + err.message),
       });
     } else if (ext === "xlsx" || ext === "xls") {
@@ -93,12 +114,8 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
           const data = new Uint8Array(e.target!.result as ArrayBuffer);
           const wb = XLSX.read(data, { type: "array" });
           const ws = wb.Sheets[wb.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: "" });
-          if (!rows.length) return toast.error("Sheet is empty");
-          const cols = Object.keys(rows[0]);
-          setParsedRows(rows);
-          setColumns(cols);
-          setSelectedCells([]);
+          const rawRows = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1, defval: "" });
+          applyRawRows(rawRows);
         } catch (err) {
           toast.error("Could not read file");
         }
