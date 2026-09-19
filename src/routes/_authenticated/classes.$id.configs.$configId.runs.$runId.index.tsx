@@ -431,7 +431,7 @@ function RunPage() {
                 : conflicts.length > 0
                   ? "border-red-500 border-2"
                   : lonely.length > 0
-                    ? "border-orange-500 border-2"
+                    ? "border-yellow-500 border-2"
                     : "border-green-500 border-2";
               return (
                 <Card key={d.id} className={outlineClass}>
@@ -464,19 +464,19 @@ function RunPage() {
                     </div>
                     {showDetails && (lonely.length > 0 || conflicts.length > 0) && (
                       <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
-                        {lonely.length > 0 && (
+                        {conflicts.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-xs font-medium text-muted-foreground">Students without a selected friend</div>
-                            <ul className="list-disc space-y-0.5 pl-4 text-xs">
-                              {lonely.map((line, i) => <li key={i}>{line}</li>)}
+                            <div className="text-xs font-bold text-destructive">Unwanted pairings</div>
+                            <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
+                              {conflicts.map((line, i) => <li key={i}>{line}</li>)}
                             </ul>
                           </div>
                         )}
-                        {conflicts.length > 0 && (
+                        {lonely.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-xs font-medium text-muted-foreground">Unwanted pairings</div>
-                            <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
-                              {conflicts.map((line, i) => <li key={i}>{line}</li>)}
+                            <div className="text-xs font-medium text-muted-foreground">Students without a friend</div>
+                            <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                              {lonely.map((line, i) => <li key={i}>{line}</li>)}
                             </ul>
                           </div>
                         )}

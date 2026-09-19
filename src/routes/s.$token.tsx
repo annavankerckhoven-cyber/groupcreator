@@ -125,8 +125,7 @@ function StudentForm() {
             <CardHeader>
               <CardTitle>For each classmate</CardTitle>
               <CardDescription>
-                Choose whether you'd like to work with them.
-                Your answers stay private — nobody can see them. Not even your teacher.
+                Choose whether you'd like to work with them. Your classmates won't see your answers.
                 <br />
                 <strong>It is advised not to enter too many "Not together" preferences.</strong> The fewer "Not together" preferences you enter, the more likely they are to be respected.
               </CardDescription>
