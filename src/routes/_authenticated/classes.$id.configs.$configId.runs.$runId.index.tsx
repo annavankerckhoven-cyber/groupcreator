@@ -7,6 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Heart, Play, AlertTriangle, Eye, ArrowLeft, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { Edge, OptimizerInput, TopResult } from "@/lib/optimizer";
@@ -31,6 +43,8 @@ function RunPage() {
   const [running, setRunning] = useState(false);
   const [editingRunName, setEditingRunName] = useState(false);
   const [newRunName, setNewRunName] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [confirmDetailsOpen, setConfirmDetailsOpen] = useState(false);
   const startedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
 
@@ -205,18 +219,6 @@ function RunPage() {
     if (completeError) throw completeError;
   }
 
-  async function toggleRunFavorite() {
-    if (!data) return;
-    const next = !data.run.is_favorite;
-    if (next) {
-      const { error: clearError } = await supabase.from("runs").update({ is_favorite: false }).eq("config_id", configId);
-      if (clearError) return toast.error(clearError.message);
-    }
-    const { error } = await supabase.from("runs").update({ is_favorite: next }).eq("id", runId);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["run", runId] });
-    qc.invalidateQueries({ queryKey: ["project", configId] });
-  }
 
   async function toggleDistFavorite(distId: string, current: boolean) {
     if (current) {
@@ -265,6 +267,34 @@ function RunPage() {
   const status = data.run.status as RunStatus;
   const timeSec = data.run.time_limit_seconds;
   const pct = progress ? Math.min(100, (progress.elapsedMs / (timeSec * 1000)) * 100) : 0;
+
+  const friendCount = new Map<string, number>();
+  for (const p of data.prefs) {
+    if (p.kind === "with") friendCount.set(p.from, (friendCount.get(p.from) ?? 0) + 1);
+  }
+  const nameOf = (sid: string) => nameById.get(sid) ?? sid;
+
+  function distributionDetails(groups: string[][]) {
+    const lonely: string[] = [];
+    const conflicts: string[] = [];
+    for (const g of groups) {
+      const members = new Set(g);
+      for (const sid of g) {
+        const picked = friendCount.get(sid) ?? 0;
+        const hasFriend = data!.prefs.some((p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target));
+        if (picked > 0 && !hasFriend) {
+          lonely.push(`${nameOf(sid)} has none of their ${picked} selected friend${picked === 1 ? "" : "s"} in their group`);
+        }
+        for (const p of data!.prefs) {
+          if (p.kind === "avoid" && p.from === sid && p.target !== sid && members.has(p.target)) {
+            conflicts.push(`${nameOf(sid)} does not want to be in the same group as ${nameOf(p.target)}`);
+          }
+        }
+      }
+    }
+    return { lonely, conflicts };
+  }
+
 
   return (
     <div className="space-y-6">
@@ -319,11 +349,35 @@ function RunPage() {
             </p>
           )}
         </div>
-        <Button variant="ghost" size="sm" onClick={toggleRunFavorite}>
-          <Heart className={`mr-1.5 h-4 w-4 ${data.run.is_favorite ? "fill-primary text-primary" : ""}`} />
-          {data.run.is_favorite ? "Favorite run" : "Mark as favorite"}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Label htmlFor="show-details" className="text-sm font-normal text-muted-foreground">
+            Show distribution details
+          </Label>
+          <Switch
+            id="show-details"
+            checked={showDetails}
+            onCheckedChange={(next) => {
+              if (next) setConfirmDetailsOpen(true);
+              else setShowDetails(false);
+            }}
+          />
+        </div>
       </div>
+
+      <AlertDialog open={confirmDetailsOpen} onOpenChange={setConfirmDetailsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Show distribution details?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to show the distribution details? It contains sensitive information that should not be shared with students.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setShowDetails(true)}>Show details</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {(status === "pending" || status === "running" || status === "error") && !running && (
         <Card>
@@ -400,6 +454,33 @@ function RunPage() {
                         </div>
                       ))}
                     </div>
+                    {showDetails && (() => {
+                      const { lonely, conflicts } = distributionDetails(groups);
+                      return (
+                        <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
+                          <div className="space-y-1">
+                            <div className="text-xs font-medium text-muted-foreground">Students without a selected friend</div>
+                            {lonely.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">Everyone has at least one selected friend in their group.</p>
+                            ) : (
+                              <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                                {lonely.map((line, i) => <li key={i}>{line}</li>)}
+                              </ul>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-xs font-medium text-muted-foreground">Unwanted pairings</div>
+                            {conflicts.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">No student is grouped with someone they asked to avoid.</p>
+                            ) : (
+                              <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
+                                {conflicts.map((line, i) => <li key={i}>{line}</li>)}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               );
