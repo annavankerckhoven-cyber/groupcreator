@@ -425,8 +425,16 @@ function RunPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {data.distributions.map((d) => {
               const groups = groupsByDist.get(d.id) ?? [];
+              const { lonely, conflicts } = distributionDetails(groups);
+              const outlineClass = !showDetails
+                ? ""
+                : conflicts.length > 0
+                  ? "border-red-500 border-2"
+                  : lonely.length > 0
+                    ? "border-orange-500 border-2"
+                    : "border-green-500 border-2";
               return (
-                <Card key={d.id}>
+                <Card key={d.id} className={outlineClass}>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-base">#{d.rank} · Score {d.score}</CardTitle>
@@ -454,33 +462,30 @@ function RunPage() {
                         </div>
                       ))}
                     </div>
-                    {showDetails && (() => {
-                      const { lonely, conflicts } = distributionDetails(groups);
-                      return (
-                        <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
-                          <div className="space-y-1">
-                            <div className="text-xs font-medium text-muted-foreground">Students without a selected friend</div>
-                            {lonely.length === 0 ? (
-                              <p className="text-xs text-muted-foreground">Everyone has at least one selected friend in their group.</p>
-                            ) : (
-                              <ul className="list-disc space-y-0.5 pl-4 text-xs">
-                                {lonely.map((line, i) => <li key={i}>{line}</li>)}
-                              </ul>
-                            )}
-                          </div>
-                          <div className="space-y-1">
-                            <div className="text-xs font-medium text-muted-foreground">Unwanted pairings</div>
-                            {conflicts.length === 0 ? (
-                              <p className="text-xs text-muted-foreground">No student is grouped with someone they asked to avoid.</p>
-                            ) : (
-                              <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
-                                {conflicts.map((line, i) => <li key={i}>{line}</li>)}
-                              </ul>
-                            )}
-                          </div>
+                    {showDetails && (
+                      <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-muted-foreground">Students without a selected friend</div>
+                          {lonely.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">Everyone has at least one selected friend in their group.</p>
+                          ) : (
+                            <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                              {lonely.map((line, i) => <li key={i}>{line}</li>)}
+                            </ul>
+                          )}
                         </div>
-                      );
-                    })()}
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-muted-foreground">Unwanted pairings</div>
+                          {conflicts.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">No student is grouped with someone they asked to avoid.</p>
+                          ) : (
+                            <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
+                              {conflicts.map((line, i) => <li key={i}>{line}</li>)}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
