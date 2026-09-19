@@ -454,6 +454,33 @@ function RunPage() {
                         </div>
                       ))}
                     </div>
+                    {showDetails && (() => {
+                      const { lonely, conflicts } = distributionDetails(groups);
+                      return (
+                        <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
+                          <div className="space-y-1">
+                            <div className="text-xs font-medium text-muted-foreground">Students without a selected friend</div>
+                            {lonely.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">Everyone has at least one selected friend in their group.</p>
+                            ) : (
+                              <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                                {lonely.map((line, i) => <li key={i}>{line}</li>)}
+                              </ul>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-xs font-medium text-muted-foreground">Unwanted pairings</div>
+                            {conflicts.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">No student is grouped with someone they asked to avoid.</p>
+                            ) : (
+                              <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
+                                {conflicts.map((line, i) => <li key={i}>{line}</li>)}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               );
