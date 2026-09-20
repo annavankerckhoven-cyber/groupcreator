@@ -279,13 +279,13 @@ function RunCardLink({
         className="block pr-12"
       >
         <div className="space-y-1">
-          {run.name && <div className="pr-6 text-sm font-medium">{run.name}</div>}
+          {run.name && <div className="notranslate pr-6 text-sm font-medium" translate="no">{run.name}</div>}
           <div className="text-xs text-muted-foreground">
             {new Date(run.created_at).toLocaleString()}
           </div>
           <div className="text-xs text-muted-foreground">
             {run.status === "completed" ? `${run.time_limit_seconds}s time limit · Best score: ${run.best_score}` : `${run.time_limit_seconds}s time limit`}
-            {absentStudentNames.length > 0 && ` · Absent: ${absentStudentNames.join(", ")}`}
+            {absentStudentNames.length > 0 && <> · Absent: <span className="notranslate" translate="no">{absentStudentNames.join(", ")}</span></>}
           </div>
           <div className="text-xs">
             <span className={statusClass}>{statusLabel}</span>

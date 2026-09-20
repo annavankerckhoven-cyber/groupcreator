@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -276,8 +276,8 @@ function RunPage() {
 
   function distributionDetails(groups: string[][]) {
     const nt = (name: string) => <span className="notranslate" translate="no">{name}</span>;
-    const lonely: React.ReactNode[] = [];
-    const conflicts: React.ReactNode[] = [];
+    const lonely: ReactNode[] = [];
+    const conflicts: ReactNode[] = [];
     for (const g of groups) {
       const members = new Set(g);
       for (const sid of g) {
