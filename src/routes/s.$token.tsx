@@ -4,6 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Users, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { getPublicForm, submitPublicForm } from "@/lib/public-form.functions";
@@ -98,20 +105,18 @@ function StudentForm() {
             <CardTitle>Pick your name</CardTitle>
           </CardHeader>
           <CardContent>
-            <select
-              value={studentId}
-              onChange={(event) => setStudentId(event.target.value)}
-              className="flex h-9 w-full cursor-pointer items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="" disabled>
-                Select your name
-              </option>
-              {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
-                <option key={s.id} value={s.id} translate="no">
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <Select value={studentId} onValueChange={setStudentId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your name" />
+              </SelectTrigger>
+              <SelectContent position="item-aligned" portal={false}>
+                {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    <span className="notranslate" translate="no">{s.name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
 
