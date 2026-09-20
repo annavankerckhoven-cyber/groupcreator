@@ -145,7 +145,7 @@ function ProjectPage() {
             title={isArchived ? "" : "Click to edit project name"}
           >
             <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
-              {project.name}
+              <span className="notranslate" translate="no">{project.name}</span>
               {isArchived && (
                 <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                   Archived
@@ -279,13 +279,13 @@ function RunCardLink({
         className="block pr-12"
       >
         <div className="space-y-1">
-          {run.name && <div className="pr-6 text-sm font-medium">{run.name}</div>}
+          {run.name && <div className="notranslate pr-6 text-sm font-medium" translate="no">{run.name}</div>}
           <div className="text-xs text-muted-foreground">
             {new Date(run.created_at).toLocaleString()}
           </div>
           <div className="text-xs text-muted-foreground">
             {run.status === "completed" ? `${run.time_limit_seconds}s time limit · Best score: ${run.best_score}` : `${run.time_limit_seconds}s time limit`}
-            {absentStudentNames.length > 0 && ` · Absent: ${absentStudentNames.join(", ")}`}
+            {absentStudentNames.length > 0 && <> · Absent: <span className="notranslate" translate="no">{absentStudentNames.join(", ")}</span></>}
           </div>
           <div className="text-xs">
             <span className={statusClass}>{statusLabel}</span>
@@ -421,7 +421,7 @@ function NewRunDialog({
               {students.map((s) => (
                 <label key={s.id} className="flex cursor-pointer items-center gap-2">
                   <Checkbox checked={absent.has(s.id)} onCheckedChange={() => toggle(s.id)} />
-                  <span className="text-sm">{s.name}</span>
+                  <span className="text-sm notranslate" translate="no">{s.name}</span>
                 </label>
               ))}
             </div>

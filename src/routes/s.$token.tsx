@@ -112,7 +112,7 @@ function StudentForm() {
               <SelectContent>
                 {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.name}
+                    <span className="notranslate" translate="no">{s.name}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -139,7 +139,7 @@ function StudentForm() {
                     const v = prefs.get(s.id) ?? "neutral";
                     return (
                       <li key={s.id} className="flex items-center justify-between gap-3 py-3">
-                        <span className="font-medium">{s.name}</span>
+                        <span className="font-medium notranslate" translate="no">{s.name}</span>
                         <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
                           {(["with", "neutral", "avoid"] as Pref[]).map((opt) => {
                             const label =

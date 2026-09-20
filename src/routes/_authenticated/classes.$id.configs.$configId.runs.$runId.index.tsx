@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -275,19 +275,20 @@ function RunPage() {
   const nameOf = (sid: string) => nameById.get(sid) ?? sid;
 
   function distributionDetails(groups: string[][]) {
-    const lonely: string[] = [];
-    const conflicts: string[] = [];
+    const nt = (name: string) => <span className="notranslate" translate="no">{name}</span>;
+    const lonely: ReactNode[] = [];
+    const conflicts: ReactNode[] = [];
     for (const g of groups) {
       const members = new Set(g);
       for (const sid of g) {
         const picked = friendCount.get(sid) ?? 0;
         const hasFriend = data!.prefs.some((p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target));
         if (picked > 0 && !hasFriend) {
-          lonely.push(`${nameOf(sid)} has none of their ${picked} selected friend${picked === 1 ? "" : "s"} in their group`);
+          lonely.push(<>{nt(nameOf(sid))} has none of their {picked} selected friend{picked === 1 ? "" : "s"} in their group</>);
         }
         for (const p of data!.prefs) {
           if (p.kind === "avoid" && p.from === sid && p.target !== sid && members.has(p.target)) {
-            conflicts.push(`${nameOf(sid)} does not want to be in the same group as ${nameOf(p.target)}`);
+            conflicts.push(<>{nt(nameOf(sid))} does not want to be in the same group as {nt(nameOf(p.target))}</>);
           }
         }
       }
@@ -328,7 +329,7 @@ function RunPage() {
               title={isArchived ? "" : "Click to edit run name"}
             >
               <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
-                {data?.run.name || "Run"}
+                <span className="notranslate" translate="no">{data?.run.name || "Run"}</span>
                 {isArchived && (
                   <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                     Archived
@@ -341,11 +342,11 @@ function RunPage() {
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            {data.project.name} · {timeSec}s time limit · {data.absent.size} absent · status: {status}
+            <span className="notranslate" translate="no">{data.project.name}</span> · {timeSec}s time limit · {data.absent.size} absent · status: {status}
           </p>
           {data.absent.size > 0 && (
             <p className="text-sm text-destructive">
-              Absent students: {Array.from(data.absent).map((id) => nameById.get(id)).filter(Boolean).join(", ")}
+              Absent students: <span className="notranslate" translate="no">{Array.from(data.absent).map((id) => nameById.get(id)).filter(Boolean).join(", ")}</span>
             </p>
           )}
         </div>
@@ -456,7 +457,7 @@ function RunPage() {
                           <div className="mb-1 text-xs font-medium text-muted-foreground">Group {gi + 1}</div>
                           <div className="flex flex-wrap gap-1.5">
                             {g.map((sid) => (
-                              <span key={sid} className="rounded-full bg-muted px-2 py-0.5 text-xs">{nameById.get(sid) ?? sid}</span>
+                              <span key={sid} className="notranslate rounded-full bg-muted px-2 py-0.5 text-xs" translate="no">{nameById.get(sid) ?? sid}</span>
                             ))}
                           </div>
                         </div>
