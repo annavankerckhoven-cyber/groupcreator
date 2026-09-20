@@ -177,6 +177,38 @@ function AuthPage() {
           </Tabs>
         </CardContent>
       </Card>
+
+      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset your password</DialogTitle>
+            <DialogDescription>
+              Enter the email address of your account and we'll send you a link to reset your
+              password.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={sendResetLink} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="reset-email">Email</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                required
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setResetOpen(false)}>
+                Go back
+              </Button>
+              <Button type="submit" disabled={resetLoading}>
+                {resetLoading ? "Sending…" : "Send reset link"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
