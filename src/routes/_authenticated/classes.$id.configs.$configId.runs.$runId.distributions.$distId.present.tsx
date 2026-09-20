@@ -123,7 +123,7 @@ function Present() {
               <ul className="space-y-2">
                 {g.map((sid) => (
                   <li key={sid} className="text-xl font-medium">
-                    {nameById.get(sid) ?? sid}
+                    <span className="notranslate" translate="no">{nameById.get(sid) ?? sid}</span>
                   </li>
                 ))}
               </ul>
