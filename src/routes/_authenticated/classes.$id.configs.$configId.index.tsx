@@ -145,7 +145,7 @@ function ProjectPage() {
             title={isArchived ? "" : "Click to edit project name"}
           >
             <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
-              {project.name}
+              <span className="notranslate" translate="no">{project.name}</span>
               {isArchived && (
                 <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                   Archived

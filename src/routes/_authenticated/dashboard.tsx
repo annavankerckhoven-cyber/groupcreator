@@ -252,7 +252,7 @@ function Dashboard() {
           <Card className="h-full transition-shadow hover:shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-lg">
-                {c.name}
+                <span className="notranslate" translate="no">{c.name}</span>
               </CardTitle>
               <CardDescription>
                 {count} student{count === 1 ? "" : "s"}

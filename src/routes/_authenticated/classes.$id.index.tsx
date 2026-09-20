@@ -288,7 +288,7 @@ function ClassDetail() {
               title={isArchived ? "" : "Click to edit class name"}
             >
               <h1 className={`text-3xl font-semibold tracking-tight ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
-                {data?.cls?.name}
+                <span className="notranslate" translate="no">{data?.cls?.name}</span>
                 {isArchived && (
                   <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                     Archived
@@ -431,7 +431,7 @@ function ClassDetail() {
                         className="h-7 text-sm"
                       />
                     ) : (
-                      <span>{s.name}</span>
+                      <span className="notranslate" translate="no">{s.name}</span>
                     )}
                     {done && !editingStudentId && (
                       <span className="text-xs text-muted-foreground">
@@ -532,7 +532,7 @@ function ClassDetail() {
                       className="flex flex-1 items-center justify-between"
                     >
                       <div>
-                        <div className="font-medium">{p.name}</div>
+                        <div className="font-medium notranslate" translate="no">{p.name}</div>
                         <div className="text-xs text-muted-foreground">
                           Groups of {p.group_size} ·{" "}
                           {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
@@ -678,7 +678,7 @@ function ClassDetail() {
                           }}
                           className="h-4 w-4 rounded border-gray-300"
                         />
-                        <span className="text-sm">{c.name}</span>
+                        <span className="text-sm notranslate" translate="no">{c.name}</span>
                         {(c.labels ?? []).length > 0 && (
                           <span className="ml-1 flex flex-wrap gap-1">
                             {(c.labels ?? []).map((l) => (
@@ -748,7 +748,9 @@ function ClassDetail() {
                   <p className="mt-2 text-xs text-muted-foreground">
                     Will clone to {labelClonePreview.length} active class
                     {labelClonePreview.length === 1 ? "" : "es"}
-                    {labelClonePreview.length > 0 && `: ${labelClonePreview.map((c) => c.name).join(", ")}`}
+                    {labelClonePreview.length > 0 && (
+                      <>: <span className="notranslate" translate="no">{labelClonePreview.map((c) => c.name).join(", ")}</span></>
+                    )}
                   </p>
                 </>
               )}
