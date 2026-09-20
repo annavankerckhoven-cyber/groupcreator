@@ -56,6 +56,18 @@ function AuthPage() {
     navigate({ to: "/dashboard" });
   }
 
+  async function sendResetLink(e: React.FormEvent) {
+    e.preventDefault();
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetLoading(false);
+    if (error) return toast.error(error.message);
+    setResetOpen(false);
+    toast.success("If an account exists for that email, a reset link is on its way.");
+  }
+
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -109,6 +121,16 @@ function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetEmail(email);
+                      setResetOpen(true);
+                    }}
+                    className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  >
+                    Forgot password?
+                  </button>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
