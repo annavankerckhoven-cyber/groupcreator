@@ -109,7 +109,7 @@ function StudentForm() {
               <SelectTrigger>
                 <SelectValue placeholder="Select your name" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="item-aligned">
                 {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     <span className="notranslate" translate="no">{s.name}</span>
