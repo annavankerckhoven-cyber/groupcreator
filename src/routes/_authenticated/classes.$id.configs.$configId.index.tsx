@@ -421,7 +421,7 @@ function NewRunDialog({
               {students.map((s) => (
                 <label key={s.id} className="flex cursor-pointer items-center gap-2">
                   <Checkbox checked={absent.has(s.id)} onCheckedChange={() => toggle(s.id)} />
-                  <span className="text-sm">{s.name}</span>
+                  <span className="text-sm notranslate" translate="no">{s.name}</span>
                 </label>
               ))}
             </div>
