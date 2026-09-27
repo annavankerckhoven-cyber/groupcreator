@@ -41,6 +41,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [columns, setColumns] = useState<string[]>([]);
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [fileDragOver, setFileDragOver] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{ row: number; column: string } | null>(null);
   const [selectionCurrent, setSelectionCurrent] = useState<{ row: number; column: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -350,9 +351,31 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
           </TabsContent>
 
           <TabsContent value="import" className="space-y-3 pt-2">
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 px-4 py-8 text-center hover:bg-muted/50">
+            <label
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${
+                fileDragOver
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-muted/30 hover:bg-muted/50"
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setFileDragOver(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                setFileDragOver(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setFileDragOver(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleFile(file);
+              }}
+            >
               <Upload className="mb-2 h-6 w-6 text-muted-foreground" />
-              <span className="text-sm font-medium">Click to upload CSV or Excel</span>
+              <span className="text-sm font-medium">
+                Drag &amp; drop a CSV or Excel file here, or click to browse
+              </span>
               <span className="mt-1 text-xs text-muted-foreground">.csv, .xlsx</span>
               <input
                 type="file"
