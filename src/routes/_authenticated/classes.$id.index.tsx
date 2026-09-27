@@ -843,7 +843,7 @@ function ClassDetail() {
       </Dialog>
 
       <NewProjectDialog
-        open={projectOpen}
+        open={projectOpen || editProjectOpen}
         onOpenChange={setProjectOpen}
         classId={id}
         onCreated={() => qc.invalidateQueries({ queryKey: ["class", id] })}
