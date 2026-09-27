@@ -48,6 +48,13 @@ function ClassDetail() {
   const [deletingStudent, setDeletingStudent] = useState(false);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [cloneProjectOpen, setCloneProjectOpen] = useState(false);
+  const [editProjectOpen, setEditProjectOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<{
+    id: string;
+    name: string;
+    group_size: number;
+    size_policy: string;
+  } | null>(null);
   const [projectToClone, setProjectToClone] = useState<{
     id: string;
     name: string;
@@ -541,6 +548,20 @@ function ClassDetail() {
                     </Link>
                     <button
                       type="button"
+                      aria-label={`Edit ${p.name}`}
+                      title={`Edit ${p.name}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setProjectToEdit(p);
+                        setEditProjectOpen(true);
+                      }}
+                      className="ml-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
                       aria-label={`Clone ${p.name}`}
                       title={`Clone ${p.name} to other classes`}
                       onClick={(e) => {
@@ -826,6 +847,9 @@ function ClassDetail() {
         onOpenChange={setProjectOpen}
         classId={id}
         onCreated={() => qc.invalidateQueries({ queryKey: ["class", id] })}
+        editProject={editProjectOpen ? projectToEdit : null}
+        onOpenEditChange={setEditProjectOpen}
+        onSaved={() => qc.invalidateQueries({ queryKey: ["class", id] })}
       />
 
       <AddStudentDialog
