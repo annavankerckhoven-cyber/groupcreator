@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -48,6 +48,13 @@ function ClassDetail() {
   const [deletingStudent, setDeletingStudent] = useState(false);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [cloneProjectOpen, setCloneProjectOpen] = useState(false);
+  const [editProjectOpen, setEditProjectOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<{
+    id: string;
+    name: string;
+    group_size: number;
+    size_policy: string;
+  } | null>(null);
   const [projectToClone, setProjectToClone] = useState<{
     id: string;
     name: string;
@@ -541,6 +548,20 @@ function ClassDetail() {
                     </Link>
                     <button
                       type="button"
+                      aria-label={`Edit ${p.name}`}
+                      title={`Edit ${p.name}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setProjectToEdit(p);
+                        setEditProjectOpen(true);
+                      }}
+                      className="ml-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
                       aria-label={`Clone ${p.name}`}
                       title={`Clone ${p.name} to other classes`}
                       onClick={(e) => {
@@ -826,6 +847,9 @@ function ClassDetail() {
         onOpenChange={setProjectOpen}
         classId={id}
         onCreated={() => qc.invalidateQueries({ queryKey: ["class", id] })}
+        editProject={editProjectOpen ? projectToEdit : null}
+        onOpenEditChange={setEditProjectOpen}
+        onSaved={() => qc.invalidateQueries({ queryKey: ["class", id] })}
       />
 
       <AddStudentDialog
@@ -843,34 +867,63 @@ function NewProjectDialog({
   onOpenChange,
   classId,
   onCreated,
+  editProject = null,
+  onOpenEditChange,
+  onSaved,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   classId: string;
   onCreated: () => void;
+  editProject?: { id: string; name: string; group_size: number; size_policy: string } | null;
+  onOpenEditChange?: (o: boolean) => void;
+  onSaved?: () => void;
 }) {
+  const editing = !!editProject;
   const [name, setName] = useState("");
   const [size, setSize] = useState(4);
   const [policy, setPolicy] = useState<"plus" | "minus">("plus");
   const [loading, setLoading] = useState(false);
 
-  async function create() {
+  useEffect(() => {
+    if (!open) return;
+    if (editProject) {
+      setName(editProject.name);
+      setSize(editProject.group_size);
+      setPolicy(editProject.size_policy === "minus" ? "minus" : "plus");
+    } else {
+      setName("");
+      setSize(4);
+      setPolicy("plus");
+    }
+  }, [open, editProject]);
+
+  const setOpen = (o: boolean) => (editing ? onOpenEditChange?.(o) : onOpenChange(o));
+
+  async function save() {
     if (!name.trim()) return toast.error("Give it a name");
     if (size < 2) return toast.error("Group size must be at least 2");
     setLoading(true);
     try {
-      const { data: proj, error } = await supabase
-        .from("group_configs")
-        .insert({ class_id: classId, name: name.trim(), group_size: size, size_policy: policy })
-        .select("id")
-        .single();
-      if (error || !proj) throw error ?? new Error("Failed");
-      toast.success("Project created");
-      onCreated();
-      onOpenChange(false);
-      setName("");
-      setSize(4);
-      setPolicy("plus");
+      if (editing && editProject) {
+        const { error } = await supabase
+          .from("group_configs")
+          .update({ name: name.trim(), group_size: size, size_policy: policy })
+          .eq("id", editProject.id);
+        if (error) throw error;
+        toast.success("Project updated");
+        onSaved?.();
+      } else {
+        const { data: proj, error } = await supabase
+          .from("group_configs")
+          .insert({ class_id: classId, name: name.trim(), group_size: size, size_policy: policy })
+          .select("id")
+          .single();
+        if (error || !proj) throw error ?? new Error("Failed");
+        toast.success("Project created");
+        onCreated();
+      }
+      setOpen(false);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -879,12 +932,14 @@ function NewProjectDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>New project</DialogTitle>
+          <DialogTitle>{editing ? "Edit project" : "New project"}</DialogTitle>
           <DialogDescription>
-            Set the group size; you'll create runs to compute groups on the project page.
+            {editing
+              ? "Update the project settings. Existing runs and distributions keep their groups."
+              : "Set the group size; you'll create runs to compute groups on the project page."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -932,9 +987,20 @@ function NewProjectDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={loading || !name.trim() || size < 2} onClick={create}>
-            {loading ? "Creating…" : "Create project"}
-          </Button>
+          {editing ? (
+            <>
+              <Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
+                {loading ? "Saving…" : "Save"}
+              </Button>
+            </>
+          ) : (
+            <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
+              {loading ? "Creating…" : "Create project"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
