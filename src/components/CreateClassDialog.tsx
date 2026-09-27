@@ -41,6 +41,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [columns, setColumns] = useState<string[]>([]);
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [fileDragOver, setFileDragOver] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{ row: number; column: string } | null>(null);
   const [selectionCurrent, setSelectionCurrent] = useState<{ row: number; column: string } | null>(null);
   const [loading, setLoading] = useState(false);
