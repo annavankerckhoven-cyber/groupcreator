@@ -867,34 +867,63 @@ function NewProjectDialog({
   onOpenChange,
   classId,
   onCreated,
+  editProject = null,
+  onOpenEditChange,
+  onSaved,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   classId: string;
   onCreated: () => void;
+  editProject?: { id: string; name: string; group_size: number; size_policy: string } | null;
+  onOpenEditChange?: (o: boolean) => void;
+  onSaved?: () => void;
 }) {
+  const editing = !!editProject;
   const [name, setName] = useState("");
   const [size, setSize] = useState(4);
   const [policy, setPolicy] = useState<"plus" | "minus">("plus");
   const [loading, setLoading] = useState(false);
 
-  async function create() {
+  useEffect(() => {
+    if (!open) return;
+    if (editProject) {
+      setName(editProject.name);
+      setSize(editProject.group_size);
+      setPolicy(editProject.size_policy === "minus" ? "minus" : "plus");
+    } else {
+      setName("");
+      setSize(4);
+      setPolicy("plus");
+    }
+  }, [open, editProject]);
+
+  const setOpen = (o: boolean) => (editing ? onOpenEditChange?.(o) : onOpenChange(o));
+
+  async function save() {
     if (!name.trim()) return toast.error("Give it a name");
     if (size < 2) return toast.error("Group size must be at least 2");
     setLoading(true);
     try {
-      const { data: proj, error } = await supabase
-        .from("group_configs")
-        .insert({ class_id: classId, name: name.trim(), group_size: size, size_policy: policy })
-        .select("id")
-        .single();
-      if (error || !proj) throw error ?? new Error("Failed");
-      toast.success("Project created");
-      onCreated();
-      onOpenChange(false);
-      setName("");
-      setSize(4);
-      setPolicy("plus");
+      if (editing && editProject) {
+        const { error } = await supabase
+          .from("group_configs")
+          .update({ name: name.trim(), group_size: size, size_policy: policy })
+          .eq("id", editProject.id);
+        if (error) throw error;
+        toast.success("Project updated");
+        onSaved?.();
+      } else {
+        const { data: proj, error } = await supabase
+          .from("group_configs")
+          .insert({ class_id: classId, name: name.trim(), group_size: size, size_policy: policy })
+          .select("id")
+          .single();
+        if (error || !proj) throw error ?? new Error("Failed");
+        toast.success("Project created");
+        onCreated();
+      }
+      setOpen(false);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
