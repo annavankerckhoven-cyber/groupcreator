@@ -987,9 +987,20 @@ function NewProjectDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={loading || !name.trim() || size < 2} onClick={create}>
-            {loading ? "Creating…" : "Create project"}
-          </Button>
+          {editing ? (
+            <>
+              <Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
+                {loading ? "Saving…" : "Save"}
+              </Button>
+            </>
+          ) : (
+            <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
+              {loading ? "Creating…" : "Create project"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
