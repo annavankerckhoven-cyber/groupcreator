@@ -932,12 +932,14 @@ function NewProjectDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>New project</DialogTitle>
+          <DialogTitle>{editing ? "Edit project" : "New project"}</DialogTitle>
           <DialogDescription>
-            Set the group size; you'll create runs to compute groups on the project page.
+            {editing
+              ? "Update the project settings. Existing runs and distributions keep their groups."
+              : "Set the group size; you'll create runs to compute groups on the project page."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
