@@ -48,9 +48,14 @@ function ResetPasswordPage() {
     e.preventDefault();
     if (password !== confirm) return toast.error("Passwords do not match.");
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { resetPassword } = await import("@/lib/auth.functions");
+    try {
+      await resetPassword({ data: { password } });
+    } catch (err) {
+      setLoading(false);
+      return toast.error(err instanceof Error ? err.message : "Could not update password.");
+    }
     setLoading(false);
-    if (error) return toast.error(error.message);
     toast.success("Password updated. You are now signed in.");
     navigate({ to: "/dashboard" });
   }
