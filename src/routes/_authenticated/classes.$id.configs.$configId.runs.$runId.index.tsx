@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
@@ -33,9 +33,9 @@ export const Route = createFileRoute("/_authenticated/classes/$id/configs/$confi
 
 type RunStatus = "pending" | "running" | "completed" | "error";
 
-function RunPage() {
-  const { id, configId, runId } = Route.useParams();
-  const { autostart } = Route.useSearch();
+export function RunPage() {
+  const { id, configId, runId } = useParams({ strict: false }) as { id: string; configId: string; runId: string };
+  const { autostart } = useSearch({ strict: false }) as { autostart?: number };
   const qc = useQueryClient();
   const navigate = useNavigate();
 
@@ -259,7 +259,8 @@ function RunPage() {
   const groupsByDist = new Map<string, string[][]>();
   for (const row of data.distGroups) {
     if (!groupsByDist.has(row.distribution_id)) groupsByDist.set(row.distribution_id, []);
-    const arr = groupsByDist.get(row.distribution_id)!;
+    const arr = groupsByDist.get(row.distribution_id);
+    if (!arr) continue;
     if (!arr[row.group_index]) arr[row.group_index] = [];
     arr[row.group_index].push(row.student_id);
   }
@@ -282,11 +283,11 @@ function RunPage() {
       const members = new Set(g);
       for (const sid of g) {
         const picked = friendCount.get(sid) ?? 0;
-        const hasFriend = data!.prefs.some((p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target));
+        const hasFriend = data.prefs.some((p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target));
         if (picked > 0 && !hasFriend) {
           lonely.push(<>{nt(nameOf(sid))} has none of their {picked} selected friend{picked === 1 ? "" : "s"} in their group</>);
         }
-        for (const p of data!.prefs) {
+        for (const p of data.prefs) {
           if (p.kind === "avoid" && p.from === sid && p.target !== sid && members.has(p.target)) {
             conflicts.push(<>{nt(nameOf(sid))} does not want to be in the same group as {nt(nameOf(p.target))}</>);
           }

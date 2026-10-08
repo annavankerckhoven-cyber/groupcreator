@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -22,8 +22,8 @@ export const Route = createFileRoute("/s/$token")({
 
 type Pref = "with" | "neutral" | "avoid";
 
-function StudentForm() {
-  const { token } = Route.useParams();
+export function StudentForm() {
+  const { token } = useParams({ strict: false }) as { token: string };
   const qc = useQueryClient();
   const getForm = useServerFn(getPublicForm);
   const submitForm = useServerFn(submitPublicForm);

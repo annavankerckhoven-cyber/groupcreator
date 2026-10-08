@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,8 +29,8 @@ type RunCard = {
   best_score: number | null;
 };
 
-function ProjectPage() {
-  const { id, configId } = Route.useParams();
+export function ProjectPage() {
+  const { id, configId } = useParams({ strict: false }) as { id: string; configId: string };
   const qc = useQueryClient();
   const [runOpen, setRunOpen] = useState(false);
   const [runToDelete, setRunToDelete] = useState<string | null>(null);
@@ -336,7 +336,7 @@ function RunCardLink({
             e.stopPropagation();
             navigate({
               to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
-              params: { id: classId, configId, runId: run.id, distId: run.favorite_distribution_id! },
+              params: { id: classId, configId, runId: run.id, distId: run.favorite_distribution_id ?? "" },
             });
           }}
           className="absolute right-3 top-20 z-10 rounded-md p-1 transition-colors hover:bg-primary/10 focus:opacity-100"

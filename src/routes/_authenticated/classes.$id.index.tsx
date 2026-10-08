@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,8 +35,8 @@ export const Route = createFileRoute("/_authenticated/classes/$id/")({
   component: ClassDetail,
 });
 
-function ClassDetail() {
-  const { id } = Route.useParams();
+export function ClassDetail() {
+  const { id } = useParams({ strict: false }) as { id: string };
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [projectOpen, setProjectOpen] = useState(false);
