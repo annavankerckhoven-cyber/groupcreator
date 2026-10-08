@@ -6,14 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isDutchPath } from "@/lib/i18n";
+import { useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [{ title: "Reset password — Group Creator" }] }),
   component: ResetPasswordPage,
 });
 
-function ResetPasswordPage() {
+export function ResetPasswordPage() {
   const navigate = useNavigate();
+  const dutch = useRouterState({ select: (state) => isDutchPath(state.location.pathname) });
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,7 +60,7 @@ function ResetPasswordPage() {
     }
     setLoading(false);
     toast.success("Password updated. You are now signed in.");
-    navigate({ to: "/dashboard" });
+    window.location.assign(dutch ? "/nl/dashboard" : "/dashboard");
   }
 
   return (

@@ -15,14 +15,17 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isDutchPath } from "@/lib/i18n";
+import { useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — Group Creator" }] }),
   component: AuthPage,
 });
 
-function AuthPage() {
+export function AuthPage() {
   const navigate = useNavigate();
+  const dutch = useRouterState({ select: (state) => isDutchPath(state.location.pathname) });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -33,9 +36,9 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+      if (data.session) window.location.assign(dutch ? "/nl/dashboard" : "/dashboard");
     });
-  }, [navigate]);
+  }, [dutch]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -53,14 +56,14 @@ function AuthPage() {
       }
       return toast.error(error.message);
     }
-    navigate({ to: "/dashboard" });
+    window.location.assign(dutch ? "/nl/dashboard" : "/dashboard");
   }
 
   async function sendResetLink(e: React.FormEvent) {
     e.preventDefault();
     setResetLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}${dutch ? "/nl" : ""}/reset-password`,
     });
     setResetLoading(false);
     if (error) return toast.error(error.message);
@@ -75,14 +78,14 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}${dutch ? "/nl" : ""}`,
         data: { display_name: name || email.split("@")[0] },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Account created!");
-    navigate({ to: "/dashboard" });
+    window.location.assign(dutch ? "/nl/dashboard" : "/dashboard");
   }
 
   return (

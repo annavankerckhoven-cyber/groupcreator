@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Users, LogOut, Coffee, CircleHelp } from "lucide-react";
 import { toast } from "sonner";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
 });
 
-function AuthLayout() {
+export function AuthLayout() {
   const navigate = useNavigate();
   async function signOut() {
     await supabase.auth.signOut();
@@ -32,6 +33,7 @@ function AuthLayout() {
             <span className="hidden sm:inline text-lg font-semibold tracking-tight">Group Creator</span>
           </Link>
           <div className="flex items-center gap-2">
+            <LanguageSelector />
             <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
               <Link to="/how" className="inline-flex items-center gap-2">
                 <CircleHelp className="h-4 w-4" />

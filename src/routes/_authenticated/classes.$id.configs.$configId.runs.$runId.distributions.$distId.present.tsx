@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,8 @@ export const Route = createFileRoute(
   component: Present,
 });
 
-function Present() {
-  const { id, configId, runId, distId } = Route.useParams();
+export function Present() {
+  const { id, configId, runId, distId } = useParams({ strict: false }) as { id: string; configId: string; runId: string; distId: string };
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({

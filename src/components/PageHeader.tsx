@@ -3,8 +3,13 @@ import { Link } from "@tanstack/react-router";
 import { Users, Coffee, CircleUserRound, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { localeFromPathname, withLocale } from "@/lib/i18n";
+import { useRouterState } from "@tanstack/react-router";
 
 export function PageHeader() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const locale = localeFromPathname(pathname);
   const [signedIn, setSignedIn] = useState(false);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
@@ -12,14 +17,15 @@ export function PageHeader() {
 
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-6">
-      <Link to="/" className="flex items-center gap-2">
+      <a href={withLocale("/", locale)} className="flex items-center gap-2">
         <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
           <Users className="h-4 w-4" />
         </div>
         <span className="hidden sm:inline text-lg font-semibold tracking-tight">Group Creator</span>
-      </Link>
+      </a>
 
       <div className="ml-auto flex flex-nowrap items-center gap-2">
+        <LanguageSelector />
         <Button asChild variant="outline" className="shrink-0 whitespace-nowrap">
           <a
             href="https://www.buymeacoffee.com/annavankerckhoven"
@@ -33,12 +39,12 @@ export function PageHeader() {
           </a>
         </Button>
         <Button asChild variant="default" className="shrink-0 whitespace-nowrap">
-          <Link to={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center gap-2 whitespace-nowrap">
+          <a href={withLocale(signedIn ? "/dashboard" : "/auth", locale)} className="inline-flex items-center gap-2 whitespace-nowrap">
             {signedIn ? <Home className="h-4 w-4" /> : <CircleUserRound className="h-4 w-4" />}
             <span className="hidden sm:inline">
               {signedIn ? "Go to dashboard" : "Log in / Sign up"}
             </span>
-          </Link>
+          </a>
         </Button>
       </div>
     </header>
