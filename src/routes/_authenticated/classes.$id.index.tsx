@@ -29,6 +29,8 @@ import {
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LabelsInput } from "@/components/LabelsInput";
+import { isDutchPath } from "@/lib/i18n";
+import { useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/")({
   head: () => ({ meta: [{ title: "Class — Group Creator" }] }),
@@ -39,6 +41,7 @@ export function ClassDetail() {
   const { id } = useParams({ strict: false }) as { id: string };
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const isDutch = useRouterState({ select: (state) => isDutchPath(state.location.pathname) });
   const [projectOpen, setProjectOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -238,7 +241,7 @@ export function ClassDetail() {
 
   if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
-  const shareUrl = data.link ? `${window.location.origin}/s/${data.link.token}` : "";
+  const shareUrl = data.link ? `${window.location.origin}${isDutch ? "/nl" : ""}/s/${data.link.token}` : "";
   const submittedSet = new Set(data.submissions.map((s) => s.student_id));
   const submittedAt = new Map(data.submissions.map((s) => [s.student_id, s.submitted_at]));
   const isArchived = !!data.cls.archived_at;

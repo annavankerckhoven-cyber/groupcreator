@@ -218,7 +218,18 @@ export function DutchTranslation() {
       }
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-    return () => observer.disconnect();
+    const preserveDutch = (event: MouseEvent) => {
+      const anchor = (event.target as Element | null)?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor || anchor.target === "_blank" || anchor.origin !== window.location.origin) return;
+      if (anchor.pathname === "/nl" || anchor.pathname.startsWith("/nl/")) return;
+      event.preventDefault();
+      window.location.assign(`/nl${anchor.pathname === "/" ? "" : anchor.pathname}${anchor.search}${anchor.hash}`);
+    };
+    document.addEventListener("click", preserveDutch, true);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("click", preserveDutch, true);
+    };
   }, [pathname]);
 
   return null;
