@@ -1,3 +1,4 @@
+import { extraDutch } from "./translations-extra";
 const exact: Record<string, string> = {
   "Page not found": "Pagina niet gevonden",
   "The page you're looking for doesn't exist or has been moved.": "De pagina die je zoekt bestaat niet of is verplaatst.",
@@ -143,6 +144,26 @@ const exact: Record<string, string> = {
 };
 
 const replacements: Array<[RegExp, string]> = [
+  [/^Filter by label \((\d+)\)$/, "Filteren op label ($1)"],
+  [/^Create class with (\d+) students$/, "Klas met $1 leerlingen aanmaken"],
+  [/^Created "(.*)" with (\d+) students$/, 'Klas "$1" met $2 leerlingen aangemaakt'],
+  [/^Project cloned to (\d+) classes?$/, "Project naar $1 klas(sen) gekopieerd"],
+  [/^Delete class (.+)$/, "Klas $1 verwijderen"],
+  [/^Delete (.+) from this class$/, "$1 uit deze klas verwijderen"],
+  [/^Delete (.+)$/, "$1 verwijderen"],
+  [/^Clone (.+) to other classes$/, "$1 naar andere klassen kopiëren"],
+  [/^Clone (.+)$/, "$1 kopiëren"],
+  [/^Edit (.+)$/, "$1 bewerken"],
+  [/^Save (.+)$/, "$1 opslaan"],
+  [/^Remove label (.+)$/, "Label $1 verwijderen"],
+  [/^Restore (.+)$/, "$1 opnieuw actief maken"],
+  [/^Archive (.+)$/, "$1 archiveren"],
+  [/^(\d+)s time limit · Best score: (.+)$/, "$1s rekentijd · Beste score: $2"],
+  [/^(\d+)s time limit$/, "$1s rekentijd"],
+  [/^Failed to start run: (.*)$/, "De berekening kon niet worden gestart: $1"],
+  [/^Failed to start optimizer: (.*)$/, "De optimalisatie kon niet worden gestart: $1"],
+  [/^Optimizer crashed: (.*)$/, "De optimalisatie is onverwacht gestopt: $1"],
+  [/^Parse error: (.*)$/, "Fout bij het verwerken van het bestand: $1"],
   [/^Step (\d+)$/, "Stap $1"],
   [/^(\d+) students?$/, "$1 leerlingen"],
   [/^(\d+) of (\d+) students have submitted their preferences\.$/, "$1 van $2 leerlingen hebben hun voorkeuren ingediend."],
@@ -163,7 +184,7 @@ export function translateDutch(value: string) {
   const trailing = value.match(/\s*$/)?.[0] ?? "";
   const core = value.trim();
   if (!core) return value;
-  const direct = exact[core];
+  const direct = extraDutch[core] ?? exact[core];
   if (direct) return `${leading}${direct}${trailing}`;
   for (const [pattern, replacement] of replacements) {
     if (pattern.test(core)) return `${leading}${core.replace(pattern, replacement)}${trailing}`;
