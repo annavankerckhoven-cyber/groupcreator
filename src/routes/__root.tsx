@@ -6,13 +6,14 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { DutchTranslation } from "@/components/DutchTranslation";
+import { localeFromPathname, type Locale } from "@/lib/i18n";
 
 function NotFoundComponent() {
   return (
@@ -74,7 +75,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient; locale?: Locale }>()({
+  beforeLoad: ({ location }) => ({ locale: localeFromPathname(location.publicHref.split(/[?#]/)[0]) }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -116,8 +118,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const locale = useRouterState({ select: (state) => localeFromPathname(state.location.publicHref.split(/[?#]/)[0]) });
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <HeadContent />
       </head>
@@ -136,7 +139,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <DutchTranslation />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
