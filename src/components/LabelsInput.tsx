@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function LabelsInput({ value, onChange, suggestions = [], placeholder, id, autoFocus }: Props) {
+  const { t, locale } = useTranslation();
   const [draft, setDraft] = useState("");
   const [focused, setFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -89,7 +91,7 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
             key={label}
             className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
           >
-            {label}
+            {t(label)}
             <button
               type="button"
               onClick={(e) => {
@@ -97,7 +99,7 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
                 removeLabel(label);
               }}
               className="rounded-sm hover:bg-muted"
-              aria-label={`Remove label ${label}`}
+              aria-label={t(`Remove label ${label}`)}
             >
               <X className="h-3 w-3" />
             </button>
@@ -114,7 +116,7 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
             setTimeout(() => setFocused(false), 150);
             if (draft.trim()) addLabel(draft);
           }}
-          placeholder={value.length === 0 ? placeholder : ""}
+          placeholder={t(value.length === 0 ? placeholder : "")}
           className="min-w-[80px] flex-1 border-0 bg-transparent p-1 text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>

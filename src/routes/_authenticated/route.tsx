@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 export function AuthLayout() {
+  const { t, locale } = useTranslation();
   const navigate = useNavigate();
   async function signOut() {
     await supabase.auth.signOut();
@@ -30,14 +32,14 @@ export function AuthLayout() {
             <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
               <Users className="h-4 w-4" />
             </div>
-            <span className="hidden sm:inline text-lg font-semibold tracking-tight">Group Creator</span>
+            <span className="hidden sm:inline text-lg font-semibold tracking-tight">{t("Group Creator")}</span>
           </Link>
           <div className="flex items-center gap-2">
             <LanguageSelector />
             <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
               <Link to="/how" className="inline-flex items-center gap-2">
                 <CircleHelp className="h-4 w-4" />
-                <span className="hidden sm:inline">Help</span>
+                <span className="hidden sm:inline">{t("Help")}</span>
               </Link>
             </Button>
             <Button asChild variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">
@@ -46,15 +48,14 @@ export function AuthLayout() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2"
-                aria-label="Buy me a coffee"
+                aria-label={t("Buy me a coffee")}
               >
                 <Coffee className="h-4 w-4" />
-                <span className="hidden sm:inline">Buy me a coffee</span>
+                <span className="hidden sm:inline">{t("Buy me a coffee")}</span>
               </a>
             </Button>
             <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="mr-1.5 h-4 w-4" /> Sign out
-            </Button>
+              <LogOut className="mr-1.5 h-4 w-4" />{t(" Sign out")}</Button>
           </div>
         </div>
       </header>

@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { useState, useRef } from "react";
 import {
   Dialog,
@@ -34,6 +35,7 @@ function randomToken() {
 }
 
 export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
+  const { t, locale } = useTranslation();
   const [name, setName] = useState("");
   const [labels, setLabels] = useState<string[]>([]);
   const [pasted, setPasted] = useState("");
@@ -300,52 +302,52 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     >
       <DialogContent className="h-[95vh] max-h-[95vh] w-[95vw] max-w-[95vw] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>New class</DialogTitle>
-          <DialogDescription>Name your class and add your students.</DialogDescription>
+          <DialogTitle>{t("New class")}</DialogTitle>
+          <DialogDescription>{t("Name your class and add your students.")}</DialogDescription>
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1">
           <div className="space-y-2 px-6">
-            <Label htmlFor="cname">Class name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="cname">{t("Class name ")}<span className="text-red-500">{t("*")}</span></Label>
             <Input
               id="cname"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Biology 9A"
+              placeholder={t("e.g. Biology 9A")}
               required
             />
           </div>
 
           <div className="mt-3 space-y-2 px-6">
-            <Label htmlFor="clabels">Labels</Label>
-            <p className="text-xs text-muted-foreground">Press space to add each label. Labels are optional.</p>
+            <Label htmlFor="clabels">{t("Labels")}</Label>
+            <p className="text-xs text-muted-foreground">{t("Press space to add each label. Labels are optional.")}</p>
             <LabelsInput
               id="clabels"
               value={labels}
               onChange={setLabels}
               suggestions={labelSuggestions}
-              placeholder="Type a label and press space (e.g. 6th_year)"
+              placeholder={t("Type a label and press space (e.g. 6th_year)")}
             />
           </div>
 
           <Tabs defaultValue="paste" className="mt-2 px-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="paste">Enter manually</TabsTrigger>
-            <TabsTrigger value="import">Import file</TabsTrigger>
+            <TabsTrigger value="paste">{t("Enter manually")}</TabsTrigger>
+            <TabsTrigger value="import">{t("Import file")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="paste" className="space-y-3 pt-2">
-            <Label htmlFor="roster">One name per line</Label>
+            <Label htmlFor="roster">{t("One name per line")}</Label>
             <Textarea
               id="roster"
               rows={8}
               value={pasted}
               onChange={(e) => setPasted(e.target.value)}
-              placeholder={"Alice\nBilal\nChen\nDamia"}
+              placeholder={t("Alice\nBilal\nChen\nDamia")}
             />
             <DialogFooter>
               <Button disabled={loading || !name.trim() || namesFromPaste().length === 0} onClick={() => create(namesFromPaste())}>
-                {loading ? "Creating…" : `Create class with ${namesFromPaste().length} students`}
+                {t(loading ? "Creating…" : `Create class with ${namesFromPaste().length} students`)}
               </Button>
             </DialogFooter>
           </TabsContent>
@@ -373,10 +375,8 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
               }}
             >
               <Upload className="mb-2 h-6 w-6 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                Drag &amp; drop a CSV or Excel file here, or click to browse
-              </span>
-              <span className="mt-1 text-xs text-muted-foreground">.csv, .xlsx</span>
+              <span className="text-sm font-medium">{t("Drag &amp; drop a CSV or Excel file here, or click to browse")}</span>
+              <span className="mt-1 text-xs text-muted-foreground">{t(".csv, .xlsx")}</span>
               <input
                 type="file"
                 accept=".csv,.xlsx,.xls"
@@ -388,10 +388,8 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
             {columns.length > 0 && (
               <>
                 <div className="space-y-1.5">
-                  <Label>Select the cells containing student names</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.
-                  </p>
+                  <Label>{t("Select the cells containing student names")}</Label>
+                  <p className="text-xs text-muted-foreground">{t("Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.")}</p>
                   <div ref={tableContainerRef} className="rounded-md border border-border bg-card p-2">
                     <table className="min-w-full border-collapse text-left text-xs select-none" onMouseUp={handleTableMouseUp} onMouseLeave={() => { if (dragging) { setDragging(false); } }}>
                       <thead>
@@ -401,7 +399,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                               key={column} 
                               onClick={() => selectColumn(column)}
                               className="border border-border bg-muted/50 px-2 py-1 font-medium text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
-                              title="Click to select all values in this column"
+                              title={t("Click to select all values in this column")}
                             >
                               {column}
                             </th>
@@ -449,12 +447,10 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                   </div>
                 </div>
                 <div className="rounded-md border border-border bg-card p-3 text-xs">
-                  <div className="mb-1 font-medium text-muted-foreground">
-                    Selected — {namesFromImport().length} students
-                  </div>
+                  <div className="mb-1 font-medium text-muted-foreground">{t("Selected — ")}{namesFromImport().length}{t(" students")}</div>
                   <div className="max-h-24 overflow-auto text-foreground">
                     {namesFromImport().slice(0, 30).join(", ")}
-                    {namesFromImport().length > 30 ? "…" : ""}
+                    {t(namesFromImport().length > 30 ? "…" : "")}
                   </div>
                 </div>
               </>
@@ -465,7 +461,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
                 disabled={loading || !name.trim() || namesFromImport().length === 0}
                 onClick={() => create(namesFromImport())}
               >
-                {loading ? "Creating…" : `Create class with ${namesFromImport().length} students`}
+                {t(loading ? "Creating…" : `Create class with ${namesFromImport().length} students`)}
               </Button>
             </DialogFooter>
           </TabsContent>

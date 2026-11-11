@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -13,7 +14,7 @@ import { Plus, Play, Heart, AlertTriangle, Trash2, Eye, Pencil } from "lucide-re
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/")({
-  head: () => ({ meta: [{ title: "Project — Group Creator" }] }),
+  head: ({ match }) => pageHead("Project — Group Creator", "Manage project settings and start new group calculations.", match.context.locale),
   component: ProjectPage,
 });
 
@@ -30,6 +31,7 @@ type RunCard = {
 };
 
 export function ProjectPage() {
+  const { t, locale } = useTranslation();
   const { id, configId } = useParams({ strict: false }) as { id: string; configId: string };
   const qc = useQueryClient();
   const [runOpen, setRunOpen] = useState(false);
@@ -112,14 +114,14 @@ export function ProjectPage() {
     },
   });
 
-  if (isLoading || !data || !data.project) return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading || !data || !data.project) return <div className="text-sm text-muted-foreground">{t("Loading…")}</div>;
   const project = data.project;
   const isArchived = data.classArchived;
 
   return (
     <div className="space-y-6">
       <div>
-        <Link to="/classes/$id" params={{ id }} className="text-sm text-muted-foreground hover:underline">← Back to class</Link>
+        <Link to="/classes/$id" params={{ id }} className="text-sm text-muted-foreground hover:underline">{t("← Back to class")}</Link>
         {editingProjectName ? (
           <div className="mt-2">
             <Input
@@ -142,14 +144,12 @@ export function ProjectPage() {
                 setNewProjectName(project.name || "");
               }
             }}
-            title={isArchived ? "" : "Click to edit project name"}
+            title={t(isArchived ? "" : "Click to edit project name")}
           >
             <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
               <span className="notranslate" translate="no">{project.name}</span>
               {isArchived && (
-                <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                  Archived
-                </span>
+                <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">{t("Archived")}</span>
               )}
             </h1>
             {!isArchived && (
@@ -157,24 +157,23 @@ export function ProjectPage() {
             )}
           </div>
         )}
-        <p className="text-sm text-muted-foreground">
-          Groups of {project.group_size} · {project.size_policy === "plus" ? "some groups with 1 additional person" : "some groups with 1 fewer person"}
+        <p className="text-sm text-muted-foreground">{t("Groups of ")}{project.group_size}{t(" · ")}{t(project.size_policy === "plus" ? "some groups with 1 additional person" : "some groups with 1 fewer person")}
         </p>
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Runs</CardTitle>
-            <CardDescription>Each run computes max. 5 group distributions.</CardDescription>
+            <CardTitle className="text-base">{t("Runs")}</CardTitle>
+            <CardDescription>{t("Each run computes max. 5 group distributions.")}</CardDescription>
           </div>
           {!isArchived && (
-            <Button size="sm" onClick={() => setRunOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New run</Button>
+            <Button size="sm" onClick={() => setRunOpen(true)}><Plus className="mr-1.5 h-4 w-4" />{t(" New run")}</Button>
           )}
         </CardHeader>
         <CardContent>
           {data.runs.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No runs yet. Create one to compute groups.</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">{t("No runs yet. Create one to compute groups.")}</p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {data.runs.map((r) => (
@@ -197,28 +196,28 @@ export function ProjectPage() {
       <Dialog open={confirmOpen} onOpenChange={(o) => { if (!o) { setConfirmOpen(false); setRunToDelete(null); } else setConfirmOpen(true); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Delete run</DialogTitle>
-            <DialogDescription>Are you sure you want to delete this run? The results will no longer be available.</DialogDescription>
+            <DialogTitle>{t("Delete run")}</DialogTitle>
+            <DialogDescription>{t("Are you sure you want to delete this run? The results will no longer be available.")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
-              <Button variant="outline" disabled={deleting} onClick={() => { setConfirmOpen(false); setRunToDelete(null); }}>Cancel</Button>
+              <Button variant="outline" disabled={deleting} onClick={() => { setConfirmOpen(false); setRunToDelete(null); }}>{t("Cancel")}</Button>
               <Button variant="destructive" disabled={deleting} onClick={async () => {
                 if (!runToDelete) return;
                 setDeleting(true);
                 try {
                   const { error } = await supabase.from("runs").delete().eq("id", runToDelete);
                   if (error) throw error;
-                  toast.success("Run deleted");
+                  toast.success(t("Run deleted"));
                   await qc.invalidateQueries({ queryKey: ["project", configId] });
                 } catch (e) {
-                  toast.error((e as Error).message);
+                  toast.error(t((e as Error).message));
                 } finally {
                   setDeleting(false);
                   setConfirmOpen(false);
                   setRunToDelete(null);
                 }
-              }}>{deleting ? "Deleting…" : "Delete"}</Button>
+              }}>{t(deleting ? "Deleting…" : "Delete")}</Button>
             </div>
           </DialogFooter>
         </DialogContent>
@@ -248,6 +247,7 @@ function RunCardLink({
   onToggleFavorite: () => void;
   onDelete: () => void;
 }) {
+  const { t, locale } = useTranslation();
   const navigate = useNavigate();
   const { data: absentData } = useQuery({
     queryKey: ["run_absent", run.id],
@@ -284,21 +284,21 @@ function RunCardLink({
             {new Date(run.created_at).toLocaleString()}
           </div>
           <div className="text-xs text-muted-foreground">
-            {run.status === "completed" ? `${run.time_limit_seconds}s time limit · Best score: ${run.best_score}` : `${run.time_limit_seconds}s time limit`}
-            {absentStudentNames.length > 0 && <> · Absent: <span className="notranslate" translate="no">{absentStudentNames.join(", ")}</span></>}
+            {t(run.status === "completed" ? `${run.time_limit_seconds}s time limit · Best score: ${run.best_score}` : `${run.time_limit_seconds}s time limit`)}
+            {absentStudentNames.length > 0 && <>{t(" · Absent: ")}<span className="notranslate" translate="no">{absentStudentNames.join(", ")}</span></>}
           </div>
           <div className="text-xs">
-            <span className={statusClass}>{statusLabel}</span>
+            <span className={statusClass}>{t(statusLabel)}</span>
           </div>
           {run.status === "error" && run.error_message && (
-            <p className="line-clamp-2 pt-1 text-xs text-destructive">{run.error_message}</p>
+            <p className="line-clamp-2 pt-1 text-xs text-destructive">{t(run.error_message)}</p>
           )}
         </div>
       
       <button
         type="button"
-        aria-label={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
-        title={run.is_favorite ? "Remove from favorites" : "Add to favorites"}
+        aria-label={t(run.is_favorite ? "Remove from favorites" : "Add to favorites")}
+        title={t(run.is_favorite ? "Remove from favorites" : "Add to favorites")}
         disabled={favoriteLoading}
         onClick={(e) => {
           e.preventDefault();
@@ -314,8 +314,8 @@ function RunCardLink({
       </button>
       <button
         type="button"
-        aria-label="Delete run"
-        title="Delete run"
+        aria-label={t("Delete run")}
+        title={t("Delete run")}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -329,8 +329,8 @@ function RunCardLink({
       {run.status === "completed" && run.favorite_distribution_id && (
         <button
           type="button"
-          aria-label="View favorite distribution"
-          title="View favorite distribution"
+          aria-label={t("View favorite distribution")}
+          title={t("View favorite distribution")}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -357,6 +357,7 @@ function NewRunDialog({
   defaultName: string;
   onCreated: () => void;
 }) {
+  const { t, locale } = useTranslation();
   const [absent, setAbsent] = useState<Set<string>>(new Set());
   const [seconds, setSeconds] = useState(5);
   const [name, setName] = useState(defaultName);
@@ -404,20 +405,18 @@ function NewRunDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>New run</DialogTitle>
-          <DialogDescription>
-            The optimization runs in your browser. Keep this tab open — closing it cancels the computation. Your settings are saved, so you can re-run with one click.
-          </DialogDescription>
+          <DialogTitle>{t("New run")}</DialogTitle>
+          <DialogDescription>{t("The optimization runs in your browser. Keep this tab open — closing it cancels the computation. Your settings are saved, so you can re-run with one click.")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
           <div>
-            <Label htmlFor="run-name">Run name</Label>
+            <Label htmlFor="run-name">{t("Run name")}</Label>
             <Input id="run-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
           </div>
           <div>
-            <Label>Absent students (excluded from this run)</Label>
+            <Label>{t("Absent students (excluded from this run)")}</Label>
             <div className="mt-2 max-h-56 space-y-1.5 overflow-auto rounded-md border border-border p-3">
-              {students.length === 0 && <p className="text-sm text-muted-foreground">No students in this class.</p>}
+              {students.length === 0 && <p className="text-sm text-muted-foreground">{t("No students in this class.")}</p>}
               {students.map((s) => (
                 <label key={s.id} className="flex cursor-pointer items-center gap-2">
                   <Checkbox checked={absent.has(s.id)} onCheckedChange={() => toggle(s.id)} />
@@ -428,22 +427,22 @@ function NewRunDialog({
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <Label>Time to run</Label>
+              <Label>{t("Time to run")}</Label>
               <span className="text-sm tabular-nums text-muted-foreground">
                 {seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60 ? `${seconds % 60}s` : ""}`.trim()}
               </span>
             </div>
             <Slider min={5} max={180} step={5} value={[seconds]} onValueChange={(v) => setSeconds(v[0])} className="mt-3" />
-            <p className="mt-1 text-xs text-muted-foreground">Longer runs explore more solutions, increasing the chance of finding the optimal distribution.</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("Longer runs explore more solutions, increasing the chance of finding the optimal distribution.")}</p>
           </div>
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            <p className="text-xs">Don't close this browser tab while a run is computing — you'll have to start it again. Your settings will be saved so you can re-run instantly.</p>
+            <p className="text-xs">{t("Don't close this browser tab while a run is computing — you'll have to start it again. Your settings will be saved so you can re-run instantly.")}</p>
           </div>
         </div>
         <DialogFooter>
           <Button disabled={loading} onClick={createAndStart}>
-            <Play className="mr-1.5 h-4 w-4" /> {loading ? "Starting…" : "Run"}
+            <Play className="mr-1.5 h-4 w-4" /> {t(loading ? "Starting…" : "Run")}
           </Button>
         </DialogFooter>
       </DialogContent>

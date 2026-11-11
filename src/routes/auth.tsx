@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — Group Creator" }] }),
+  head: ({ match }) => pageHead("Sign in — Group Creator", "Sign in or create your free Group Creator teacher account.", match.context.locale),
   component: AuthPage,
 });
 
 export function AuthPage() {
+  const { t, locale } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,23 +89,21 @@ export function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">
-        ← Back home
-      </Link>
+      <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">{t("← Back home")}</Link>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Welcome to Group Creator</CardTitle>
+          <CardTitle>{t("Welcome to Group Creator")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
+              <TabsTrigger value="signin">{t("Sign in")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("Sign up")}</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <form onSubmit={signIn} className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email-in">Email</Label>
+                  <Label htmlFor="email-in">{t("Email")}</Label>
                   <Input
                     id="email-in"
                     type="email"
@@ -113,7 +113,7 @@ export function AuthPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="pw-in">Password</Label>
+                  <Label htmlFor="pw-in">{t("Password")}</Label>
                   <Input
                     id="pw-in"
                     type="password"
@@ -128,28 +128,26 @@ export function AuthPage() {
                       setResetOpen(true);
                     }}
                     className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                  >
-                    Forgot password?
-                  </button>
+                  >{t("Forgot password?")}</button>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in…" : "Sign in"}
+                  {t(loading ? "Signing in…" : "Sign in")}
                 </Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
               <form onSubmit={signUp} className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="name-up">Your name</Label>
+                  <Label htmlFor="name-up">{t("Your name")}</Label>
                   <Input
                     id="name-up"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ms. Rivera"
+                    placeholder={t("Ms. Rivera")}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="email-up">Email</Label>
+                  <Label htmlFor="email-up">{t("Email")}</Label>
                   <Input
                     id="email-up"
                     type="email"
@@ -159,7 +157,7 @@ export function AuthPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="pw-up">Password</Label>
+                  <Label htmlFor="pw-up">{t("Password")}</Label>
                   <Input
                     id="pw-up"
                     type="password"
@@ -170,7 +168,7 @@ export function AuthPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating…" : "Create account"}
+                  {t(loading ? "Creating…" : "Create account")}
                 </Button>
               </form>
             </TabsContent>
@@ -181,15 +179,12 @@ export function AuthPage() {
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset your password</DialogTitle>
-            <DialogDescription>
-              Enter the email address of your account and we'll send you a link to reset your
-              password.
-            </DialogDescription>
+            <DialogTitle>{t("Reset your password")}</DialogTitle>
+            <DialogDescription>{t("Enter the email address of your account and we'll send you a link to reset your password.")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={sendResetLink} className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="reset-email">Email</Label>
+              <Label htmlFor="reset-email">{t("Email")}</Label>
               <Input
                 id="reset-email"
                 type="email"
@@ -199,11 +194,9 @@ export function AuthPage() {
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setResetOpen(false)}>
-                Go back
-              </Button>
+              <Button type="button" variant="ghost" onClick={() => setResetOpen(false)}>{t("Go back")}</Button>
               <Button type="submit" disabled={resetLoading}>
-                {resetLoading ? "Sending…" : "Send reset link"}
+                {t(resetLoading ? "Sending…" : "Send reset link")}
               </Button>
             </DialogFooter>
           </form>

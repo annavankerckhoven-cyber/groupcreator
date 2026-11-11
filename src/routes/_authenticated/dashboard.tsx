@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
@@ -54,11 +55,12 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Group Creator" }] }),
+  head: ({ match }) => pageHead("Dashboard — Group Creator", "Manage your classes, student forms and grouping projects.", match.context.locale),
   component: Dashboard,
 });
 
 export function Dashboard() {
+  const { t, locale } = useTranslation();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -255,7 +257,7 @@ export function Dashboard() {
                 <span className="notranslate" translate="no">{c.name}</span>
               </CardTitle>
               <CardDescription>
-                {count} student{count === 1 ? "" : "s"}
+                {count}{t(" student")}{t(count === 1 ? "" : "s")}
               </CardDescription>
               {c.labels && c.labels.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
@@ -274,8 +276,8 @@ export function Dashboard() {
         </Link>
         <button
           type="button"
-          aria-label={`Delete ${c.name}`}
-          title={`Delete class ${c.name}`}
+          aria-label={t(`Delete ${c.name}`)}
+          title={t(`Delete class ${c.name}`)}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -288,8 +290,8 @@ export function Dashboard() {
         </button>
         <button
           type="button"
-          aria-label={isArchived ? `Restore ${c.name}` : `Archive ${c.name}`}
-          title={isArchived ? "Move back to Active" : "Move to Archive"}
+          aria-label={t(isArchived ? `Restore ${c.name}` : `Archive ${c.name}`)}
+          title={t(isArchived ? "Move back to Active" : "Move to Archive")}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -307,22 +309,21 @@ export function Dashboard() {
     <div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Your classes</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{t("Your classes")}</h1>
         </div>
         <Button onClick={() => setOpen(true)}>
-          <Plus className="mr-1.5 h-4 w-4" /> New class
-        </Button>
+          <Plus className="mr-1.5 h-4 w-4" />{t(" New class")}</Button>
       </div>
 
       <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Select value={sortOption} onValueChange={(v) => changeSort(v as SortOption)}>
           <SelectTrigger className="h-8 w-[112px] border border-input bg-transparent text-xs font-normal text-muted-foreground shadow-none hover:bg-muted">
-            <span>Sort by</span>
+            <span>{t("Sort by")}</span>
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>
-                {o.label}
+                {t(o.label)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -333,7 +334,7 @@ export function Dashboard() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search…"
+            placeholder={t("Search…")}
             className="h-8 border border-input bg-transparent pl-8 text-xs text-foreground shadow-none placeholder:text-muted-foreground/70 focus-visible:bg-background"
           />
         </div>
@@ -342,12 +343,12 @@ export function Dashboard() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 border border-input bg-transparent px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
               <Tag className="h-3.5 w-3.5" />
-              {selectedLabels.length > 0 ? `Filter by label (${selectedLabels.length})` : "Filter by label"}
+              {t(selectedLabels.length > 0 ? `Filter by label (${selectedLabels.length})` : "Filter by label")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
             {allLabels.length === 0 ? (
-              <DropdownMenuItem disabled>No labels yet</DropdownMenuItem>
+              <DropdownMenuItem disabled>{t("No labels yet")}</DropdownMenuItem>
             ) : (
               <>
                 {allLabels.map((label) => (
@@ -361,13 +362,11 @@ export function Dashboard() {
                     }
                     onSelect={(e) => e.preventDefault()}
                   >
-                    {label}
+                    {t(label)}
                   </DropdownMenuCheckboxItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setSelectedLabels([])}>
-                  Clear labels
-                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSelectedLabels([])}>{t("Clear labels")}</DropdownMenuItem>
               </>
             )}
           </DropdownMenuContent>
@@ -376,27 +375,22 @@ export function Dashboard() {
 
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("Loading…")}</p>
       ) : (
         <div className="space-y-10">
           <section>
             <div className="mb-4">
-              <h2 className="text-xl font-semibold tracking-tight">Active classes</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Active classes are moved to Archive automatically after 1 year.
-              </p>
+              <h2 className="text-xl font-semibold tracking-tight">{t("Active classes")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("Active classes are moved to Archive automatically after 1 year.")}</p>
             </div>
             {active.length === 0 ? (
               <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                   <Users className="mb-3 h-10 w-10 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold">No active classes</h3>
-                  <p className="mb-6 mt-1 max-w-sm text-sm text-muted-foreground">
-                    Create your first class. Paste a list of names or import a CSV/Excel file.
-                  </p>
+                  <h3 className="text-lg font-semibold">{t("No active classes")}</h3>
+                  <p className="mb-6 mt-1 max-w-sm text-sm text-muted-foreground">{t("Create your first class. Paste a list of names or import a CSV/Excel file.")}</p>
                   <Button onClick={() => setOpen(true)}>
-                    <Plus className="mr-1.5 h-4 w-4" /> Create a class
-                  </Button>
+                    <Plus className="mr-1.5 h-4 w-4" />{t(" Create a class")}</Button>
                 </CardContent>
               </Card>
             ) : (
@@ -408,14 +402,11 @@ export function Dashboard() {
 
           <section>
             <div className="mb-4">
-              <h2 className="text-xl font-semibold tracking-tight">Archive</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Archived classes are deleted permanently after 1 year. Set your class to Active
-                again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.
-              </p>
+              <h2 className="text-xl font-semibold tracking-tight">{t("Archive")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("Archived classes are deleted permanently after 1 year. Set your class to Active again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.")}</p>
             </div>
             {archived.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No archived classes.</p>
+              <p className="text-sm text-muted-foreground">{t("No archived classes.")}</p>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {archived.map(renderCard)}
@@ -436,11 +427,8 @@ export function Dashboard() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Delete class</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this class? All of its projects, runs, distributions,
-              and student form responses will be deleted.
-            </DialogDescription>
+            <DialogTitle>{t("Delete class")}</DialogTitle>
+            <DialogDescription>{t("Are you sure you want to delete this class? All of its projects, runs, distributions, and student form responses will be deleted.")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
@@ -451,11 +439,9 @@ export function Dashboard() {
                   setConfirmOpen(false);
                   setClassToDelete(null);
                 }}
-              >
-                Cancel
-              </Button>
+              >{t("Cancel")}</Button>
               <Button variant="destructive" disabled={deleting} onClick={confirmDeleteClass}>
-                {deleting ? "Deleting…" : "Delete"}
+                {t(deleting ? "Deleting…" : "Delete")}
               </Button>
             </div>
           </DialogFooter>
