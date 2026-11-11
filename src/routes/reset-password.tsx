@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,17 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { isDutchPath } from "@/lib/i18n";
-import { useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password — Group Creator" }] }),
+  head: ({ match }) => pageHead("Reset password — Group Creator", "Reset the password for your Group Creator account.", match.context.locale),
   component: ResetPasswordPage,
 });
 
 export function ResetPasswordPage() {
+  const { t, locale } = useTranslation();
   const navigate = useNavigate();
-  const dutch = useRouterState({ select: (state) => isDutchPath(state.location.pathname) });
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,32 +59,28 @@ export function ResetPasswordPage() {
     }
     setLoading(false);
     toast.success("Password updated. You are now signed in.");
-    window.location.assign(dutch ? "/nl/dashboard" : "/dashboard");
+    navigate({ to: "/dashboard" });
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <Link to="/auth" className="mb-6 text-sm text-muted-foreground hover:text-foreground">
-        ← Back to sign in
-      </Link>
+      <Link to="/auth" className="mb-6 text-sm text-muted-foreground hover:text-foreground">{t("← Back to sign in")}</Link>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Choose a new password</CardTitle>
+          <CardTitle>{t("Choose a new password")}</CardTitle>
         </CardHeader>
         <CardContent>
           {invalid ? (
             <div className="space-y-3 pt-2">
-              <p className="text-sm text-muted-foreground">
-                This reset link is invalid or has expired. Request a new one from the sign-in page.
-              </p>
+              <p className="text-sm text-muted-foreground">{t("This reset link is invalid or has expired. Request a new one from the sign-in page.")}</p>
               <Link to="/auth">
-                <Button className="w-full">Back to sign in</Button>
+                <Button className="w-full">{t("Back to sign in")}</Button>
               </Link>
             </div>
           ) : (
             <form onSubmit={updatePassword} className="space-y-3 pt-2">
               <div className="space-y-1.5">
-                <Label htmlFor="pw-new">New password</Label>
+                <Label htmlFor="pw-new">{t("New password")}</Label>
                 <Input
                   id="pw-new"
                   type="password"
@@ -96,7 +91,7 @@ export function ResetPasswordPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="pw-confirm">Confirm new password</Label>
+                <Label htmlFor="pw-confirm">{t("Confirm new password")}</Label>
                 <Input
                   id="pw-confirm"
                   type="password"
@@ -107,7 +102,7 @@ export function ResetPasswordPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !ready}>
-                {loading ? "Updating…" : "Update password"}
+                {t(loading ? "Updating…" : "Update password")}
               </Button>
             </form>
           )}

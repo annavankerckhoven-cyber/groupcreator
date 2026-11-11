@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -26,7 +27,7 @@ import type { WorkerOutbound } from "@/workers/optimizer.worker";
 import OptimizerWorker from "@/workers/optimizer.worker?worker";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/runs/$runId/")({
-  head: () => ({ meta: [{ title: "Run — Group Creator" }] }),
+  head: ({ match }) => pageHead("Run — Group Creator", "Review group distributions and their preference scores.", match.context.locale),
   validateSearch: z.object({ autostart: z.coerce.number().optional().catch(undefined) }),
   component: RunPage,
 });
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/_authenticated/classes/$id/configs/$confi
 type RunStatus = "pending" | "running" | "completed" | "error";
 
 export function RunPage() {
+  const { t, locale } = useTranslation();
   const { id, configId, runId } = useParams({ strict: false }) as { id: string; configId: string; runId: string };
   const { autostart } = useSearch({ strict: false }) as { autostart?: number };
   const qc = useQueryClient();
@@ -252,7 +254,7 @@ export function RunPage() {
     }
   }
 
-  if (isLoading || !data) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading || !data) return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
 
   const isArchived = data.classArchived;
   const nameById = new Map(data.students.map((s) => [s.id, s.name]));
@@ -303,8 +305,7 @@ export function RunPage() {
       <div className="flex items-start justify-between">
         <div>
           <Link to="/classes/$id/configs/$configId" params={{ id, configId }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to project
-          </Link>
+            <ArrowLeft className="h-3.5 w-3.5" />{t(" Back to project")}</Link>
           {editingRunName ? (
             <div className="mt-2">
               <Input
@@ -327,14 +328,12 @@ export function RunPage() {
                   setNewRunName(data?.run.name || "Run");
                 }
               }}
-              title={isArchived ? "" : "Click to edit run name"}
+              title={t(isArchived ? "" : "Click to edit run name")}
             >
               <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
                 <span className="notranslate" translate="no">{data?.run.name || "Run"}</span>
                 {isArchived && (
-                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                    Archived
-                  </span>
+                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">{t("Archived")}</span>
                 )}
               </h1>
               {!isArchived && (
@@ -343,18 +342,15 @@ export function RunPage() {
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            <span className="notranslate" translate="no">{data.project.name}</span> · {timeSec}s time limit · {data.absent.size} absent · status: {status}
+            <span className="notranslate" translate="no">{data.project.name}</span>{t(" · ")}{timeSec}{t("s time limit · ")}{data.absent.size}{t(" absent · status: ")}{status}
           </p>
           {data.absent.size > 0 && (
-            <p className="text-sm text-destructive">
-              Absent students: <span className="notranslate" translate="no">{Array.from(data.absent).map((id) => nameById.get(id)).filter(Boolean).join(", ")}</span>
+            <p className="text-sm text-destructive">{t("Absent students: ")}<span className="notranslate" translate="no">{Array.from(data.absent).map((id) => nameById.get(id)).filter(Boolean).join(", ")}</span>
             </p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Label htmlFor="show-details" className="text-sm font-normal text-muted-foreground">
-            Show distribution details
-          </Label>
+          <Label htmlFor="show-details" className="text-sm font-normal text-muted-foreground">{t("Show distribution details")}</Label>
           <Switch
             id="show-details"
             checked={showDetails}
@@ -369,14 +365,12 @@ export function RunPage() {
       <AlertDialog open={confirmDetailsOpen} onOpenChange={setConfirmDetailsOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Show distribution details?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to show the distribution details? It contains sensitive information that should not be shared with students.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("Show distribution details?")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("Are you sure you want to show the distribution details? It contains sensitive information that should not be shared with students.")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setShowDetails(true)}>Show details</AlertDialogAction>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setShowDetails(true)}>{t("Show details")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -387,18 +381,18 @@ export function RunPage() {
             <div className="flex items-start gap-2 text-amber-900 dark:text-amber-200">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <p className="text-sm">
-                {status === "running"
+                {t(status === "running"
                   ? "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results."
-                  : "Don't close this tab while the run is computing. The optimization runs in your browser."}
+                  : "Don't close this tab while the run is computing. The optimization runs in your browser.")}
               </p>
             </div>
             {status === "error" && data.run.error_message && (
               <p className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
-                {data.run.error_message}
+                {t(data.run.error_message)}
               </p>
             )}
             <Button onClick={() => { startedRef.current = true; void startRun(); }}>
-              <Play className="mr-1.5 h-4 w-4" /> {status === "running" || status === "error" ? "Restart run" : "Start run"}
+              <Play className="mr-1.5 h-4 w-4" /> {t(status === "running" || status === "error" ? "Restart run" : "Start run")}
             </Button>
           </CardContent>
         </Card>
@@ -407,15 +401,15 @@ export function RunPage() {
       {running && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Optimizing…</CardTitle>
-            <CardDescription>Keep this tab open. Closing it cancels the run.</CardDescription>
+            <CardTitle className="text-base">{t("Optimizing…")}</CardTitle>
+            <CardDescription>{t("Keep this tab open. Closing it cancels the run.")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Progress value={pct} />
             <div className="flex justify-between text-xs tabular-nums text-muted-foreground">
-              <span>{Math.floor((progress?.elapsedMs ?? 0) / 1000)}s / {timeSec}s</span>
-              <span>{progress?.iterations ?? 0} iterations</span>
-              <span>Best score: {progress?.bestScore ?? 0}</span>
+              <span>{Math.floor((progress?.elapsedMs ?? 0) / 1000)}{t("s / ")}{timeSec}{t("s")}</span>
+              <span>{progress?.iterations ?? 0}{t(" iterations")}</span>
+              <span>{t("Best score: ")}{progress?.bestScore ?? 0}</span>
             </div>
           </CardContent>
         </Card>
@@ -423,7 +417,7 @@ export function RunPage() {
 
       {status === "completed" && data.distributions.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Top {data.distributions.length} distributions</h2>
+          <h2 className="text-lg font-semibold">{t("Top ")}{data.distributions.length}{t(" distributions")}</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {data.distributions.map((d) => {
               const groups = groupsByDist.get(d.id) ?? [];
@@ -439,23 +433,22 @@ export function RunPage() {
                 <Card key={d.id} className={outlineClass}>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="text-base">#{d.rank} · Score {d.score}</CardTitle>
-                      <CardDescription>{groups.length} groups</CardDescription>
+                      <CardTitle className="text-base">{t("#")}{d.rank}{t(" · Score ")}{d.score}</CardTitle>
+                      <CardDescription>{groups.length}{t(" groups")}</CardDescription>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => toggleDistFavorite(d.id, d.is_favorite)} aria-label="Favorite distribution">
+                      <Button variant="ghost" size="icon" onClick={() => toggleDistFavorite(d.id, d.is_favorite)} aria-label={t("Favorite distribution")}>
                         <Heart className={`h-4 w-4 ${d.is_favorite ? "fill-primary text-primary" : ""}`} />
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigate({ to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present", params: { id, configId, runId, distId: d.id } })}>
-                        <Eye className="mr-1.5 h-4 w-4" /> View
-                      </Button>
+                        <Eye className="mr-1.5 h-4 w-4" />{t(" View")}</Button>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       {groups.map((g, gi) => (
                         <div key={gi} className="rounded-md border border-border p-2.5">
-                          <div className="mb-1 text-xs font-medium text-muted-foreground">Group {gi + 1}</div>
+                          <div className="mb-1 text-xs font-medium text-muted-foreground">{t("Group ")}{gi + 1}</div>
                           <div className="flex flex-wrap gap-1.5">
                             {g.map((sid) => (
                               <span key={sid} className="notranslate rounded-full bg-muted px-2 py-0.5 text-xs" translate="no">{nameById.get(sid) ?? sid}</span>
@@ -468,7 +461,7 @@ export function RunPage() {
                       <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
                         {conflicts.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-xs font-bold text-destructive">Unwanted pairings</div>
+                            <div className="text-xs font-bold text-destructive">{t("Unwanted pairings")}</div>
                             <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
                               {conflicts.map((line, i) => <li key={i}>{line}</li>)}
                             </ul>
@@ -476,7 +469,7 @@ export function RunPage() {
                         )}
                         {lonely.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-xs font-medium text-muted-foreground">Students without a friend</div>
+                            <div className="text-xs font-medium text-muted-foreground">{t("Students without a friend")}</div>
                             <ul className="list-disc space-y-0.5 pl-4 text-xs">
                               {lonely.map((line, i) => <li key={i}>{line}</li>)}
                             </ul>

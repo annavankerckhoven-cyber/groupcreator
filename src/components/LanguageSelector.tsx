@@ -11,11 +11,12 @@ import { localeFromPathname, withLocale, type Locale } from "@/lib/i18n";
 
 export function LanguageSelector() {
   const location = useRouterState({ select: (state) => state.location });
-  const locale = localeFromPathname(location.pathname);
+  const publicPath = location.publicHref.split(/[?#]/)[0];
+  const locale = localeFromPathname(publicPath);
 
   function switchLanguage(next: Locale) {
-    const path = withLocale(location.pathname, next);
-    window.location.assign(`${path}${location.searchStr}${location.hash}`);
+    const path = withLocale(publicPath, next);
+    window.location.assign(`${path}${location.searchStr}${location.hash ? `#${location.hash}` : ""}`);
   }
 
   return (
@@ -32,8 +33,8 @@ export function LanguageSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => switchLanguage("en")}>English</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => switchLanguage("nl")}>Nederlands</DropdownMenuItem>
+        <DropdownMenuItem translate="no" onSelect={() => switchLanguage("en")}>English</DropdownMenuItem>
+        <DropdownMenuItem translate="no" onSelect={() => switchLanguage("nl")}>Nederlands</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

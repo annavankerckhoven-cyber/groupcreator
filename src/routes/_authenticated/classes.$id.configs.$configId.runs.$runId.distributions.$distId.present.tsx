@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,11 +9,12 @@ import * as XLSX from "xlsx";
 export const Route = createFileRoute(
   "/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
 )({
-  head: () => ({ meta: [{ title: "Presentation — Group Creator" }] }),
+  head: ({ match }) => pageHead("Presentation — Group Creator", "Present and download a classroom group distribution.", match.context.locale),
   component: Present,
 });
 
 export function Present() {
+  const { t, locale } = useTranslation();
   const { id, configId, runId, distId } = useParams({ strict: false }) as { id: string; configId: string; runId: string; distId: string };
   const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ export function Present() {
     },
   });
 
-  if (isLoading || !data?.dist) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading || !data?.dist) return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
 
   const nameById = new Map(data.students.map((s) => [s.id, s.name]));
   const groups: string[][] = [];
@@ -89,18 +91,16 @@ export function Present() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <div className="text-sm text-muted-foreground">
-              Distribution #{data.dist.rank} · Score {data.dist.score}
+            <div className="text-sm text-muted-foreground">{t("Distribution #")}{data.dist.rank}{t(" · Score ")}{data.dist.score}
             </div>
-            <h1 className="text-3xl font-semibold">Groups</h1>
+            <h1 className="text-3xl font-semibold">{t("Groups")}</h1>
           </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={downloadAsExcel}
             >
-              <Download className="mr-1.5 h-4 w-4" /> Download
-            </Button>
+              <Download className="mr-1.5 h-4 w-4" />{t(" Download")}</Button>
             <Button
               variant="outline"
               onClick={() =>
@@ -110,15 +110,13 @@ export function Present() {
                 })
               }
             >
-              <X className="mr-1.5 h-4 w-4" /> Close
-            </Button>
+              <X className="mr-1.5 h-4 w-4" />{t(" Close")}</Button>
           </div>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g, gi) => (
             <div key={gi} className="rounded-xl border-2 border-border bg-card p-6 shadow-sm">
-              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                Group {gi + 1}
+              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">{t("Group ")}{gi + 1}
               </div>
               <ul className="space-y-2">
                 {g.map((sid) => (

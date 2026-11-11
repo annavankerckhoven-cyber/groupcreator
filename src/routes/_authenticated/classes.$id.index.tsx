@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -29,19 +30,17 @@ import {
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LabelsInput } from "@/components/LabelsInput";
-import { isDutchPath } from "@/lib/i18n";
-import { useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/")({
-  head: () => ({ meta: [{ title: "Class — Group Creator" }] }),
+  head: ({ match }) => pageHead("Class — Group Creator", "Manage class projects, student links and your student roster.", match.context.locale),
   component: ClassDetail,
 });
 
 export function ClassDetail() {
+  const { t, locale } = useTranslation();
   const { id } = useParams({ strict: false }) as { id: string };
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const isDutch = useRouterState({ select: (state) => isDutchPath(state.location.pathname) });
   const [projectOpen, setProjectOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -239,9 +238,9 @@ export function ClassDetail() {
     }
   }
 
-  if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
 
-  const shareUrl = data.link ? `${window.location.origin}${isDutch ? "/nl" : ""}/s/${data.link.token}` : "";
+  const shareUrl = data.link ? `${window.location.origin}${locale === "nl" ? "/nl" : ""}/s/${data.link.token}` : "";
   const submittedSet = new Set(data.submissions.map((s) => s.student_id));
   const submittedAt = new Map(data.submissions.map((s) => [s.student_id, s.submitted_at]));
   const isArchived = !!data.cls.archived_at;
@@ -270,9 +269,7 @@ export function ClassDetail() {
     <div className="space-y-8">
       <div className="flex items-end justify-between">
         <div>
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-            ← All classes
-          </Link>
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">{t("← All classes")}</Link>
           {editingClassName ? (
             <div className="mt-2">
               <Input
@@ -295,14 +292,12 @@ export function ClassDetail() {
                   setNewClassName(data?.cls?.name || "");
                 }
               }}
-              title={isArchived ? "" : "Click to edit class name"}
+              title={t(isArchived ? "" : "Click to edit class name")}
             >
               <h1 className={`text-3xl font-semibold tracking-tight ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
                 <span className="notranslate" translate="no">{data?.cls?.name}</span>
                 {isArchived && (
-                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                    Archived
-                  </span>
+                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">{t("Archived")}</span>
                 )}
               </h1>
               {!isArchived && (
@@ -327,7 +322,7 @@ export function ClassDetail() {
                 value={draftLabels}
                 onChange={setDraftLabels}
                 suggestions={allLabelSuggestions}
-                placeholder="Type a label and press space"
+                placeholder={t("Type a label and press space")}
                 autoFocus
               />
             </div>
@@ -339,13 +334,11 @@ export function ClassDetail() {
                 setDraftLabels(classLabels);
                 setEditingLabels(true);
               }}
-              title={isArchived ? "" : "Click to edit labels"}
+              title={t(isArchived ? "" : "Click to edit labels")}
             >
               {classLabels.length === 0 ? (
                 !isArchived && (
-                  <span className="text-xs text-muted-foreground italic">
-                    Add labels…
-                  </span>
+                  <span className="text-xs text-muted-foreground italic">{t("Add labels…")}</span>
                 )
               ) : (
                 classLabels.map((l) => (
@@ -369,28 +362,23 @@ export function ClassDetail() {
           onClick={deleteClass}
           className="text-muted-foreground hover:text-muted-foreground"
         >
-          <Trash2 className="mr-1.5 h-4 w-4" /> Delete class
-        </Button>
+          <Trash2 className="mr-1.5 h-4 w-4" />{t(" Delete class")}</Button>
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Projects</CardTitle>
-            <CardDescription>
-              Each project is one way of dividing the class — set the group size, then make runs to
-              compute groups.
-            </CardDescription>
+            <CardTitle className="text-base">{t("Projects")}</CardTitle>
+            <CardDescription>{t("Each project is one way of dividing the class — set the group size, then make runs to compute groups.")}</CardDescription>
           </div>
           {!isArchived && (
             <Button size="sm" onClick={() => setProjectOpen(true)}>
-              <Plus className="mr-1.5 h-4 w-4" /> New project
-            </Button>
+              <Plus className="mr-1.5 h-4 w-4" />{t(" New project")}</Button>
           )}
         </CardHeader>
         <CardContent>
           {data.projects.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No projects yet.</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">{t("No projects yet.")}</p>
           ) : (
             <ul className="divide-y divide-border">
               {data.projects.map((p) => (
@@ -403,16 +391,15 @@ export function ClassDetail() {
                     >
                       <div>
                         <div className="font-medium notranslate" translate="no">{p.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          Groups of {p.group_size} ·{" "}
-                          {p.size_policy === "plus" ? "some groups +1" : "some groups −1"}
+                        <div className="text-xs text-muted-foreground">{t("Groups of ")}{p.group_size}{t(" ·")}{t(" ")}
+                          {t(p.size_policy === "plus" ? "some groups +1" : "some groups −1")}
                         </div>
                       </div>
                     </Link>
                     <button
                       type="button"
-                      aria-label={`Edit ${p.name}`}
-                      title={`Edit ${p.name}`}
+                      aria-label={t(`Edit ${p.name}`)}
+                      title={t(`Edit ${p.name}`)}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -425,8 +412,8 @@ export function ClassDetail() {
                     </button>
                     <button
                       type="button"
-                      aria-label={`Clone ${p.name}`}
-                      title={`Clone ${p.name} to other classes`}
+                      aria-label={t(`Clone ${p.name}`)}
+                      title={t(`Clone ${p.name} to other classes`)}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -440,8 +427,8 @@ export function ClassDetail() {
                     </button>
                     <button
                       type="button"
-                      aria-label={`Delete ${p.name}`}
-                      title={`Delete ${p.name}`}
+                      aria-label={t(`Delete ${p.name}`)}
+                      title={t(`Delete ${p.name}`)}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -465,11 +452,8 @@ export function ClassDetail() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <LinkIcon className="h-4 w-4" /> Student link
-            </CardTitle>
-            <CardDescription>
-              Share this with your students. They open it, pick their name, and fill the form.
-            </CardDescription>
+              <LinkIcon className="h-4 w-4" />{t(" Student link")}</CardTitle>
+            <CardDescription>{t("Share this with your students. They open it, pick their name, and fill the form.")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
@@ -478,11 +462,10 @@ export function ClassDetail() {
                 variant="outline"
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
-                  toast.success("Link copied");
+                  toast.success(t("Link copied"));
                 }}
               >
-                <Copy className="mr-1.5 h-4 w-4" /> Copy
-              </Button>
+                <Copy className="mr-1.5 h-4 w-4" />{t(" Copy")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -491,15 +474,13 @@ export function ClassDetail() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Students</CardTitle>
+            <CardTitle className="text-base">{t("Students")}</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              {submittedSet.size} of {data.students.length} students have submitted their preferences.
-            </p>
+              {submittedSet.size}{t(" of ")}{data.students.length}{t(" students have submitted their preferences.")}</p>
           </div>
           {!isArchived && (
             <Button size="sm" onClick={() => setAddStudentOpen(true)}>
-              <Plus className="mr-1.5 h-4 w-4" /> Add student
-            </Button>
+              <Plus className="mr-1.5 h-4 w-4" />{t(" Add student")}</Button>
           )}
         </CardHeader>
         <CardContent>
@@ -532,8 +513,7 @@ export function ClassDetail() {
                       <span className="notranslate" translate="no">{s.name}</span>
                     )}
                     {done && !editingStudentId && (
-                      <span className="text-xs text-muted-foreground">
-                        — submitted on {new Date(submittedAt.get(s.id)!).toLocaleDateString()}
+                      <span className="text-xs text-muted-foreground">{t("— submitted on ")}{new Date(submittedAt.get(s.id)!).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -546,8 +526,8 @@ export function ClassDetail() {
                           onClick={saveStudentName}
                           disabled={savingStudent || !editingStudentName.trim()}
                           className="text-green-600 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
-                          aria-label={`Save ${s.name}`}
-                          title="Save"
+                          aria-label={t(`Save ${s.name}`)}
+                          title={t("Save")}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -560,8 +540,8 @@ export function ClassDetail() {
                           }}
                           disabled={savingStudent}
                           className="text-muted-foreground hover:text-muted-foreground"
-                          aria-label={`Cancel`}
-                          title="Cancel"
+                          aria-label={t(`Cancel`)}
+                          title={t("Cancel")}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -576,8 +556,8 @@ export function ClassDetail() {
                             setEditingStudentName(s.name);
                           }}
                           className="text-muted-foreground hover:text-muted-foreground"
-                          aria-label={`Edit ${s.name}`}
-                          title={`Edit ${s.name}`}
+                          aria-label={t(`Edit ${s.name}`)}
+                          title={t(`Edit ${s.name}`)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -586,8 +566,8 @@ export function ClassDetail() {
                           size="sm"
                           onClick={() => openDeleteStudentConfirm(s.id, s.name)}
                           className="text-muted-foreground hover:text-muted-foreground"
-                          aria-label={`Delete ${s.name}`}
-                          title={`Delete ${s.name} from this class`}
+                          aria-label={t(`Delete ${s.name}`)}
+                          title={t(`Delete ${s.name} from this class`)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -613,10 +593,8 @@ export function ClassDetail() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Delete project</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this project? Its runs and distributions will be removed as well.
-            </DialogDescription>
+            <DialogTitle>{t("Delete project")}</DialogTitle>
+            <DialogDescription>{t("Are you sure you want to delete this project? Its runs and distributions will be removed as well.")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
@@ -627,11 +605,9 @@ export function ClassDetail() {
                   setConfirmOpen(false);
                   setProjectToDelete(null);
                 }}
-              >
-                Cancel
-              </Button>
+              >{t("Cancel")}</Button>
               <Button variant="destructive" disabled={deleting} onClick={deleteProject}>
-                {deleting ? "Deleting…" : "Delete"}
+                {t(deleting ? "Deleting…" : "Delete")}
               </Button>
             </div>
           </DialogFooter>
@@ -652,19 +628,17 @@ export function ClassDetail() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Clone project</DialogTitle>
-            <DialogDescription>
-              Choose where to clone "{projectToClone?.name}". Only active classes are available as targets.
-            </DialogDescription>
+            <DialogTitle>{t("Clone project")}</DialogTitle>
+            <DialogDescription>{t("Choose where to clone \"")}{projectToClone?.name}{t("\". Only active classes are available as targets.")}</DialogDescription>
           </DialogHeader>
           <Tabs value={cloneMode} onValueChange={(v) => setCloneMode(v as "class" | "label")}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="class">Select by class name</TabsTrigger>
-              <TabsTrigger value="label">Select by label</TabsTrigger>
+              <TabsTrigger value="class">{t("Select by class name")}</TabsTrigger>
+              <TabsTrigger value="label">{t("Select by label")}</TabsTrigger>
             </TabsList>
             <TabsContent value="class" className="pt-3">
               {cloneClassTargets.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No other active classes.</p>
+                <p className="text-sm text-muted-foreground">{t("No other active classes.")}</p>
               ) : (
                 <>
                   <div className="mb-2 flex items-center justify-between">
@@ -683,12 +657,9 @@ export function ClassDetail() {
                           }
                         }}
                         className="h-4 w-4 rounded border-gray-300"
-                      />
-                      Select all
-                    </label>
+                      />{t("Select all")}</label>
                     <span className="text-xs text-muted-foreground">
-                      {selectedClassesForClone.size} selected
-                    </span>
+                      {selectedClassesForClone.size}{t(" selected")}</span>
                   </div>
                   <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
                     {cloneClassTargets.map((c) => (
@@ -725,9 +696,7 @@ export function ClassDetail() {
             </TabsContent>
             <TabsContent value="label" className="pt-3">
               {availableActiveClassLabels.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No labels available on other active classes.
-                </p>
+                <p className="text-sm text-muted-foreground">{t("No labels available on other active classes.")}</p>
               ) : (
                 <>
                   <div className="mb-2 flex items-center justify-between">
@@ -746,12 +715,9 @@ export function ClassDetail() {
                           }
                         }}
                         className="h-4 w-4 rounded border-gray-300"
-                      />
-                      Select all
-                    </label>
+                      />{t("Select all")}</label>
                     <span className="text-xs text-muted-foreground">
-                      {selectedLabelsForClone.size} label{selectedLabelsForClone.size === 1 ? "" : "s"} selected
-                    </span>
+                      {selectedLabelsForClone.size}{t(" label")}{t(selectedLabelsForClone.size === 1 ? "" : "s")}{t(" selected")}</span>
                   </div>
                   <div className="max-h-48 space-y-2 overflow-auto rounded-md border border-border p-3">
                     {availableActiveClassLabels.map((l) => (
@@ -771,11 +737,9 @@ export function ClassDetail() {
                       </label>
                     ))}
                   </div>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Will clone to {labelClonePreview.length} active class
-                    {labelClonePreview.length === 1 ? "" : "es"}
+                  <p className="mt-2 text-xs text-muted-foreground">{t("Will clone to ")}{labelClonePreview.length}{t(" active class")}{t(labelClonePreview.length === 1 ? "" : "es")}
                     {labelClonePreview.length > 0 && (
-                      <>: <span className="notranslate" translate="no">{labelClonePreview.map((c) => c.name).join(", ")}</span></>
+                      <>{t(": ")}<span className="notranslate" translate="no">{labelClonePreview.map((c) => c.name).join(", ")}</span></>
                     )}
                   </p>
                 </>
@@ -793,9 +757,7 @@ export function ClassDetail() {
                   setSelectedLabelsForClone(new Set());
                   setCloneMode("class");
                 }}
-              >
-                Cancel
-              </Button>
+              >{t("Cancel")}</Button>
               <Button
                 disabled={
                   cloneMode === "class"
@@ -803,9 +765,7 @@ export function ClassDetail() {
                     : labelClonePreview.length === 0
                 }
                 onClick={cloneProject}
-              >
-                Clone
-              </Button>
+              >{t("Clone")}</Button>
             </div>
           </DialogFooter>
         </DialogContent>
@@ -822,10 +782,8 @@ export function ClassDetail() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Delete student</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {studentToDelete?.name}? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.
-            </DialogDescription>
+            <DialogTitle>{t("Delete student")}</DialogTitle>
+            <DialogDescription>{t("Are you sure you want to delete ")}{studentToDelete?.name}{t("? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
@@ -836,11 +794,9 @@ export function ClassDetail() {
                   setConfirmStudentDeleteOpen(false);
                   setStudentToDelete(null);
                 }}
-              >
-                Cancel
-              </Button>
+              >{t("Cancel")}</Button>
               <Button variant="destructive" disabled={deletingStudent} onClick={confirmDeleteStudent}>
-                {deletingStudent ? "Deleting…" : "Delete"}
+                {t(deletingStudent ? "Deleting…" : "Delete")}
               </Button>
             </div>
           </DialogFooter>
@@ -884,6 +840,7 @@ function NewProjectDialog({
   onOpenEditChange?: (o: boolean) => void;
   onSaved?: () => void;
 }) {
+  const { t, locale } = useTranslation();
   const editing = !!editProject;
   const [name, setName] = useState("");
   const [size, setSize] = useState(4);
@@ -940,26 +897,26 @@ function NewProjectDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editing ? "Edit project" : "New project"}</DialogTitle>
+          <DialogTitle>{t(editing ? "Edit project" : "New project")}</DialogTitle>
           <DialogDescription>
-            {editing
+            {t(editing
               ? "Update the project settings. Existing runs and distributions keep their groups."
-              : "Set the group size; you'll create runs to compute groups on the project page."}
+              : "Set the group size; you'll create runs to compute groups on the project page.")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="cn">Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="cn">{t("Name ")}<span className="text-red-500">{t("*")}</span></Label>
             <Input
               id="cn"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Project 1"
+              placeholder={t("e.g. Project 1")}
               required
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="gs">Students per group <span className="text-red-500">*</span></Label>
+            <Label htmlFor="gs">{t("Students per group ")}<span className="text-red-500">{t("*")}</span></Label>
             <Input
               id="gs"
               type="number"
@@ -970,7 +927,7 @@ function NewProjectDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label>If it doesn't divide evenly</Label>
+            <Label>{t("If it doesn't divide evenly")}</Label>
             <RadioGroup
               value={policy}
               onValueChange={(v) => setPolicy(v as "plus" | "minus")}
@@ -978,15 +935,11 @@ function NewProjectDialog({
             >
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="plus" id="p-plus" />
-                <Label htmlFor="p-plus" className="font-normal">
-                  Some groups with 1 additional person
-                </Label>
+                <Label htmlFor="p-plus" className="font-normal">{t("Some groups with 1 additional person")}</Label>
               </div>
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="minus" id="p-minus" />
-                <Label htmlFor="p-minus" className="font-normal">
-                  Some groups with 1 fewer person
-                </Label>
+                <Label htmlFor="p-minus" className="font-normal">{t("Some groups with 1 fewer person")}</Label>
               </div>
             </RadioGroup>
           </div>
@@ -994,16 +947,14 @@ function NewProjectDialog({
         <DialogFooter>
           {editing ? (
             <>
-              <Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
+              <Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>{t("Cancel")}</Button>
               <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
-                {loading ? "Saving…" : "Save"}
+                {t(loading ? "Saving…" : "Save")}
               </Button>
             </>
           ) : (
             <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
-              {loading ? "Creating…" : "Create project"}
+              {t(loading ? "Creating…" : "Create project")}
             </Button>
           )}
         </DialogFooter>
@@ -1023,6 +974,7 @@ function AddStudentDialog({
   classId: string;
   onCreated: () => void;
 }) {
+  const { t, locale } = useTranslation();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -1051,19 +1003,17 @@ function AddStudentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add student</DialogTitle>
-          <DialogDescription>
-            Add a new student to the class. They will be included in future group distributions.
-          </DialogDescription>
+          <DialogTitle>{t("Add student")}</DialogTitle>
+          <DialogDescription>{t("Add a new student to the class. They will be included in future group distributions.")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="student-name">Student name</Label>
+            <Label htmlFor="student-name">{t("Student name")}</Label>
             <Input
               id="student-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. John Smith"
+              placeholder={t("e.g. John Smith")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") addStudent();
               }}
@@ -1078,11 +1028,9 @@ function AddStudentDialog({
               onOpenChange(false);
               setName("");
             }}
-          >
-            Cancel
-          </Button>
+          >{t("Cancel")}</Button>
           <Button disabled={loading} onClick={addStudent}>
-            {loading ? "Adding…" : "Add student"}
+            {t(loading ? "Adding…" : "Add student")}
           </Button>
         </DialogFooter>
       </DialogContent>

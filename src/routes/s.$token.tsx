@@ -1,3 +1,4 @@
+import { useTranslation, pageHead } from "@/lib/i18n";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,13 +17,14 @@ import { toast } from "sonner";
 import { getPublicForm, submitPublicForm } from "@/lib/public-form.functions";
 
 export const Route = createFileRoute("/s/$token")({
-  head: () => ({ meta: [{ title: "Student form — Group Creator" }] }),
+  head: ({ match }) => pageHead("Student form — Group Creator", "Submit your classroom group preferences privately.", match.context.locale),
   component: StudentForm,
 });
 
 type Pref = "with" | "neutral" | "avoid";
 
 export function StudentForm() {
+  const { t, locale } = useTranslation();
   const { token } = useParams({ strict: false }) as { token: string };
   const qc = useQueryClient();
   const getForm = useServerFn(getPublicForm);
@@ -66,16 +68,16 @@ export function StudentForm() {
       return submitForm({ data: { token, studentId, preferences: out } });
     },
     onSuccess: (res) => {
-      if (!res.ok) return toast.error(res.error);
-      toast.success("Your preferences have been saved.");
+      if (!res.ok) return toast.error(t(res.error));
+      toast.success(t("Your preferences have been saved."));
       setShowSuccess(true);
       qc.invalidateQueries({ queryKey: ["public-form", token] });
     },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => toast.error(t((e as Error).message)),
   });
 
-  if (isLoading) return <CenterMessage>Loading…</CenterMessage>;
-  if (!data || !data.ok) return <CenterMessage>This link is no longer valid.</CenterMessage>;
+  if (isLoading) return <CenterMessage>{t("Loading…")}</CenterMessage>;
+  if (!data || !data.ok) return <CenterMessage>{t("This link is no longer valid.")}</CenterMessage>;
 
   if (showSuccess) {
     return (
@@ -83,10 +85,8 @@ export function StudentForm() {
         <Card className="max-w-md w-full">
           <CardContent className="flex flex-col items-center py-10 text-center">
             <CheckCircle2 className="mb-3 h-10 w-10 text-primary" />
-            <h2 className="text-xl font-semibold">Thanks!</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Your preferences have been saved. You can close this tab.
-            </p>
+            <h2 className="text-xl font-semibold">{t("Thanks!")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t("Your preferences have been saved. You can close this tab.")}</p>
           </CardContent>
         </Card>
       </div>
@@ -102,12 +102,12 @@ export function StudentForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Pick your name</CardTitle>
+            <CardTitle>{t("Pick your name")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Select value={studentId} onValueChange={setStudentId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select your name" />
+                <SelectValue placeholder={t("Select your name")} />
               </SelectTrigger>
               <SelectContent position="item-aligned" portal={false}>
                 {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
@@ -123,12 +123,9 @@ export function StudentForm() {
         {studentId && (
           <Card>
             <CardHeader>
-              <CardTitle>For each classmate</CardTitle>
-              <CardDescription>
-                Choose whether you'd like to work with them. Your classmates won't see your answers.
-                <br />
-                <strong>It is advised not to enter too many "Not together" preferences.</strong> The fewer "Not together" preferences you enter, the more likely they are to be respected.
-              </CardDescription>
+              <CardTitle>{t("For each classmate")}</CardTitle>
+              <CardDescription>{t("Choose whether you'd like to work with them. Your classmates won't see your answers.")}<br />
+                <strong>{t("It is advised not to enter too many \"Not together\" preferences.")}</strong>{t(" The fewer \"Not together\" preferences you enter, the more likely they are to be respected.")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border">
@@ -166,7 +163,7 @@ export function StudentForm() {
                                   setPrefs(next);
                                 }}
                               >
-                                {label}
+                                {t(label)}
                               </button>
                             );
                           })}
@@ -181,7 +178,7 @@ export function StudentForm() {
                   disabled={submitMut.isPending}
                   onClick={() => submitMut.mutate()}
                 >
-                  {submitMut.isPending ? "Saving…" : "Submit"}
+                  {t(submitMut.isPending ? "Saving…" : "Submit")}
                 </Button>
               </div>
             </CardContent>
@@ -193,6 +190,7 @@ export function StudentForm() {
 }
 
 function CenterMessage({ children }: { children: React.ReactNode }) {
+  const { t, locale } = useTranslation();
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-sm text-muted-foreground px-4 text-center">
       {children}

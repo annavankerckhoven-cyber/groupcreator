@@ -1,7 +1,4 @@
-import { useEffect } from "react";
-import { useRouterState } from "@tanstack/react-router";
-import { isDutchPath } from "@/lib/i18n";
-
+import { extraDutch } from "./translations-extra";
 const exact: Record<string, string> = {
   "Page not found": "Pagina niet gevonden",
   "The page you're looking for doesn't exist or has been moved.": "De pagina die je zoekt bestaat niet of is verplaatst.",
@@ -60,7 +57,6 @@ const exact: Record<string, string> = {
   "Active classes are moved to Archive automatically after 1 year.": "Actieve klassen worden na 1 jaar automatisch naar het archief verplaatst.",
   "No active classes": "Geen actieve klassen",
   "Create your first class. Paste a list of names or import a CSV/Excel file.": "Maak je eerste klas. Plak een namenlijst of importeer een CSV- of Excel-bestand.",
-  "Create a class": "Klas aanmaken",
   "Archive": "Archief",
   "No archived classes.": "Geen gearchiveerde klassen.",
   "Delete class": "Klas verwijderen",
@@ -105,7 +101,6 @@ const exact: Record<string, string> = {
   "New run": "Nieuwe berekening",
   "No runs yet. Create one to compute groups.": "Nog geen berekeningen. Maak er een om groepen te berekenen.",
   "Delete run": "Berekening verwijderen",
-  "New run": "Nieuwe berekening",
   "Run name": "Naam van berekening",
   "Absent students (excluded from this run)": "Afwezige leerlingen (uitgesloten van deze berekening)",
   "No students in this class.": "Geen leerlingen in deze klas.",
@@ -138,7 +133,6 @@ const exact: Record<string, string> = {
   "Together": "Samen",
   "Doesn't matter": "Maakt niet uit",
   "Not together": "Niet samen",
-  "Saving…": "Bezig met opslaan…",
   "Submit": "Indienen",
   "Thanks!": "Bedankt!",
   "Your preferences have been saved. You can close this tab.": "Je voorkeuren zijn opgeslagen. Je kunt dit tabblad sluiten.",
@@ -150,6 +144,26 @@ const exact: Record<string, string> = {
 };
 
 const replacements: Array<[RegExp, string]> = [
+  [/^Filter by label \((\d+)\)$/, "Filteren op label ($1)"],
+  [/^Create class with (\d+) students$/, "Klas met $1 leerlingen aanmaken"],
+  [/^Created "(.*)" with (\d+) students$/, 'Klas "$1" met $2 leerlingen aangemaakt'],
+  [/^Project cloned to (\d+) classes?$/, "Project naar $1 klas(sen) gekopieerd"],
+  [/^Delete class (.+)$/, "Klas $1 verwijderen"],
+  [/^Delete (.+) from this class$/, "$1 uit deze klas verwijderen"],
+  [/^Delete (.+)$/, "$1 verwijderen"],
+  [/^Clone (.+) to other classes$/, "$1 naar andere klassen kopiëren"],
+  [/^Clone (.+)$/, "$1 kopiëren"],
+  [/^Edit (.+)$/, "$1 bewerken"],
+  [/^Save (.+)$/, "$1 opslaan"],
+  [/^Remove label (.+)$/, "Label $1 verwijderen"],
+  [/^Restore (.+)$/, "$1 opnieuw actief maken"],
+  [/^Archive (.+)$/, "$1 archiveren"],
+  [/^(\d+)s time limit · Best score: (.+)$/, "$1s rekentijd · Beste score: $2"],
+  [/^(\d+)s time limit$/, "$1s rekentijd"],
+  [/^Failed to start run: (.*)$/, "De berekening kon niet worden gestart: $1"],
+  [/^Failed to start optimizer: (.*)$/, "De optimalisatie kon niet worden gestart: $1"],
+  [/^Optimizer crashed: (.*)$/, "De optimalisatie is onverwacht gestopt: $1"],
+  [/^Parse error: (.*)$/, "Fout bij het verwerken van het bestand: $1"],
   [/^Step (\d+)$/, "Stap $1"],
   [/^(\d+) students?$/, "$1 leerlingen"],
   [/^(\d+) of (\d+) students have submitted their preferences\.$/, "$1 van $2 leerlingen hebben hun voorkeuren ingediend."],
@@ -165,12 +179,12 @@ const replacements: Array<[RegExp, string]> = [
   [/^some groups −1$/, "sommige groepen −1"],
 ];
 
-function translateValue(value: string) {
+export function translateDutch(value: string) {
   const leading = value.match(/^\s*/)?.[0] ?? "";
   const trailing = value.match(/\s*$/)?.[0] ?? "";
   const core = value.trim();
   if (!core) return value;
-  const direct = exact[core];
+  const direct = extraDutch[core] ?? exact[core];
   if (direct) return `${leading}${direct}${trailing}`;
   for (const [pattern, replacement] of replacements) {
     if (pattern.test(core)) return `${leading}${core.replace(pattern, replacement)}${trailing}`;
@@ -178,59 +192,3 @@ function translateValue(value: string) {
   return value;
 }
 
-function translateElement(root: ParentNode) {
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  const nodes: Text[] = [];
-  while (walker.nextNode()) nodes.push(walker.currentNode as Text);
-  for (const node of nodes) {
-    const parent = node.parentElement;
-    if (!parent || parent.closest(".notranslate,[translate='no'],script,style")) continue;
-    const next = translateValue(node.data);
-    if (next !== node.data) node.data = next;
-  }
-  if (root instanceof Element) {
-    for (const element of [root, ...Array.from(root.querySelectorAll("[placeholder],[title],[aria-label]"))]) {
-      if (element.closest(".notranslate,[translate='no']")) continue;
-      for (const attr of ["placeholder", "title", "aria-label"]) {
-        const value = element.getAttribute(attr);
-        if (value) element.setAttribute(attr, translateValue(value));
-      }
-    }
-  }
-}
-
-export function DutchTranslation() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-
-  useEffect(() => {
-    if (!isDutchPath(pathname)) return;
-    document.documentElement.lang = "nl";
-    translateElement(document.body);
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === "characterData" && mutation.target.parentNode) {
-          translateElement(mutation.target.parentNode);
-        }
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) translateElement(node as Element);
-          if (node.nodeType === Node.TEXT_NODE && node.parentNode) translateElement(node.parentNode);
-        });
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-    const preserveDutch = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest("a[href]") as HTMLAnchorElement | null;
-      if (!anchor || anchor.target === "_blank" || anchor.origin !== window.location.origin) return;
-      if (anchor.pathname === "/nl" || anchor.pathname.startsWith("/nl/")) return;
-      event.preventDefault();
-      window.location.assign(`/nl${anchor.pathname === "/" ? "" : anchor.pathname}${anchor.search}${anchor.hash}`);
-    };
-    document.addEventListener("click", preserveDutch, true);
-    return () => {
-      observer.disconnect();
-      document.removeEventListener("click", preserveDutch, true);
-    };
-  }, [pathname]);
-
-  return null;
-}
