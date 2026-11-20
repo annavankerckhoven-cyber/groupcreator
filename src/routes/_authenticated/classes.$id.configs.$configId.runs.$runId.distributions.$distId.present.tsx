@@ -9,13 +9,23 @@ import * as XLSX from "xlsx";
 export const Route = createFileRoute(
   "/_authenticated/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
 )({
-  head: ({ match }) => pageHead("Presentation — Group Creator", "Present and download a classroom group distribution.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Presentation — Group Creator",
+      "Present and download a classroom group distribution.",
+      match.context.locale,
+    ),
   component: Present,
 });
 
 export function Present() {
   const { t, locale } = useTranslation();
-  const { id, configId, runId, distId } = useParams({ strict: false }) as { id: string; configId: string; runId: string; distId: string };
+  const { id, configId, runId, distId } = useParams({ strict: false }) as {
+    id: string;
+    configId: string;
+    runId: string;
+    distId: string;
+  };
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
@@ -43,7 +53,8 @@ export function Present() {
     },
   });
 
-  if (isLoading || !data?.dist) return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
+  if (isLoading || !data?.dist)
+    return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
 
   const nameById = new Map(data.students.map((s) => [s.id, s.name]));
   const groups: string[][] = [];
@@ -55,11 +66,11 @@ export function Present() {
   const downloadAsExcel = () => {
     // Prepare data for Excel: groups as columns
     const excelData: string[][] = [];
-    
+
     // Header row with group names
     const headers = groups.map((_, i) => `Group ${i + 1}`);
     excelData.push(headers);
-    
+
     // Student rows
     const maxGroupSize = Math.max(...groups.map((g) => g.length), 0);
     for (let i = 0; i < maxGroupSize; i++) {
@@ -69,19 +80,19 @@ export function Present() {
       }
       excelData.push(row);
     }
-    
+
     // Create workbook and worksheet
     const ws = XLSX.utils.aoa_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Groups");
-    
+
     // Generate filename
     const className = data.class?.name || "Class";
     const configName = data.config?.name || "Config";
     const runName = data.run?.name || "Run";
     const rank = data.dist?.rank || 1;
     const filename = `${className}_${configName}_${runName}_${rank}.xlsx`;
-    
+
     // Download
     XLSX.writeFile(wb, filename);
   };
@@ -91,16 +102,19 @@ export function Present() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <div className="text-sm text-muted-foreground">{t("Distribution #")}{data.dist.rank}{t(" · Score ")}{data.dist.score}
+            <div className="text-sm text-muted-foreground">
+              {t("Distribution #")}
+              {data.dist.rank}
+              {t(" · Score ")}
+              {data.dist.score}
             </div>
             <h1 className="text-3xl font-semibold">{t("Groups")}</h1>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={downloadAsExcel}
-            >
-              <Download className="mr-1.5 h-4 w-4" />{t(" Download")}</Button>
+            <Button variant="outline" onClick={downloadAsExcel}>
+              <Download className="mr-1.5 h-4 w-4" />
+              {t(" Download")}
+            </Button>
             <Button
               variant="outline"
               onClick={() =>
@@ -110,18 +124,24 @@ export function Present() {
                 })
               }
             >
-              <X className="mr-1.5 h-4 w-4" />{t(" Close")}</Button>
+              <X className="mr-1.5 h-4 w-4" />
+              {t(" Close")}
+            </Button>
           </div>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g, gi) => (
             <div key={gi} className="rounded-xl border-2 border-border bg-card p-6 shadow-sm">
-              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">{t("Group ")}{gi + 1}
+              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                {t("Group ")}
+                {gi + 1}
               </div>
               <ul className="space-y-2">
                 {g.map((sid) => (
                   <li key={sid} className="text-xl font-medium">
-                    <span className="notranslate" translate="no">{nameById.get(sid) ?? sid}</span>
+                    <span className="notranslate" translate="no">
+                      {nameById.get(sid) ?? sid}
+                    </span>
                   </li>
                 ))}
               </ul>

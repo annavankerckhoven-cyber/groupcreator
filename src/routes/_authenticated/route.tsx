@@ -1,4 +1,4 @@
-import { useTranslation, pageHead } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export function AuthLayout() {
   const navigate = useNavigate();
   async function signOut() {
     await supabase.auth.signOut();
-    toast.success("Signed out");
+    toast.success(t("Signed out"));
     navigate({ to: "/" });
   }
   return (
@@ -32,7 +32,9 @@ export function AuthLayout() {
             <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
               <Users className="h-4 w-4" />
             </div>
-            <span className="hidden sm:inline text-lg font-semibold tracking-tight">{t("Group Creator")}</span>
+            <span className="hidden sm:inline text-lg font-semibold tracking-tight">
+              {t("Group Creator")}
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             <LanguageSelector />
@@ -55,7 +57,9 @@ export function AuthLayout() {
               </a>
             </Button>
             <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="mr-1.5 h-4 w-4" />{t(" Sign out")}</Button>
+              <LogOut className="mr-1.5 h-4 w-4" />
+              {t(" Sign out")}
+            </Button>
           </div>
         </div>
       </header>

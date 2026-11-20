@@ -1,4 +1,4 @@
-import { useTranslation, pageHead } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 
@@ -11,7 +11,14 @@ interface Props {
   autoFocus?: boolean;
 }
 
-export function LabelsInput({ value, onChange, suggestions = [], placeholder, id, autoFocus }: Props) {
+export function LabelsInput({
+  value,
+  onChange,
+  suggestions = [],
+  placeholder,
+  id,
+  autoFocus,
+}: Props) {
   const { t, locale } = useTranslation();
   const [draft, setDraft] = useState("");
   const [focused, setFocused] = useState(false);
@@ -91,7 +98,11 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
             key={label}
             className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
           >
-            {t(label)}
+            <span translate="no" className="notranslate">
+              <span translate="no" className="notranslate">
+                {label}
+              </span>
+            </span>
             <button
               type="button"
               onClick={(e) => {
@@ -136,7 +147,9 @@ export function LabelsInput({ value, onChange, suggestions = [], placeholder, id
                 index === highlightedIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
               }`}
             >
-              {s}
+              <span translate="no" className="notranslate">
+                {s}
+              </span>
             </button>
           ))}
         </div>

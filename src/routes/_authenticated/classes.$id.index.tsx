@@ -32,7 +32,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LabelsInput } from "@/components/LabelsInput";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/")({
-  head: ({ match }) => pageHead("Class — Group Creator", "Manage class projects, student links and your student roster.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Class — Group Creator",
+      "Manage class projects, student links and your student roster.",
+      match.context.locale,
+    ),
   component: ClassDetail,
 });
 
@@ -101,10 +106,10 @@ export function ClassDetail() {
   });
 
   async function deleteClass() {
-    if (!confirm("Delete this class and all its data? This cannot be undone.")) return;
+    if (!confirm(t("Delete this class and all its data? This cannot be undone."))) return;
     const { error } = await supabase.from("classes").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Class deleted");
+    if (error) return toast.error(t(error.message));
+    toast.success(t("Class deleted"));
     navigate({ to: "/dashboard" });
   }
 
@@ -122,12 +127,12 @@ export function ClassDetail() {
         .update({ name: editingStudentName.trim() })
         .eq("id", editingStudentId);
       if (error) throw error;
-      toast.success("Student name updated");
+      toast.success(t("Student name updated"));
       setEditingStudentId(null);
       setEditingStudentName("");
       await qc.invalidateQueries({ queryKey: ["class", id] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setSavingStudent(false);
     }
@@ -139,10 +144,10 @@ export function ClassDetail() {
     try {
       const { error } = await supabase.from("students").delete().eq("id", studentToDelete.id);
       if (error) throw error;
-      toast.success("Student deleted");
+      toast.success(t("Student deleted"));
       await qc.invalidateQueries({ queryKey: ["class", id] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setDeletingStudent(false);
       setConfirmStudentDeleteOpen(false);
@@ -156,10 +161,10 @@ export function ClassDetail() {
     try {
       const { error } = await supabase.from("group_configs").delete().eq("id", projectToDelete);
       if (error) throw error;
-      toast.success("Project deleted");
+      toast.success(t("Project deleted"));
       await qc.invalidateQueries({ queryKey: ["class", id] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -176,10 +181,7 @@ export function ClassDetail() {
       const labelSet = selectedLabelsForClone;
       targetClassIds = (data?.allClasses ?? [])
         .filter(
-          (c) =>
-            !c.archived_at &&
-            c.id !== id &&
-            (c.labels ?? []).some((l) => labelSet.has(l)),
+          (c) => !c.archived_at && c.id !== id && (c.labels ?? []).some((l) => labelSet.has(l)),
         )
         .map((c) => c.id);
     }
@@ -194,7 +196,11 @@ export function ClassDetail() {
 
       const { error } = await supabase.from("group_configs").insert(newProjects);
       if (error) throw error;
-      toast.success(`Project cloned to ${targetClassIds.length} class${targetClassIds.length === 1 ? "" : "es"}`);
+      toast.success(
+        t(
+          `Project cloned to ${targetClassIds.length} class${targetClassIds.length === 1 ? "" : "es"}`,
+        ),
+      );
       setCloneProjectOpen(false);
       setProjectToClone(null);
       setSelectedClassesForClone(new Set());
@@ -202,7 +208,7 @@ export function ClassDetail() {
       setCloneMode("class");
       await qc.invalidateQueries({ queryKey: ["class", id] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     }
   }
 
@@ -214,33 +220,33 @@ export function ClassDetail() {
         .update({ name: newClassName.trim() })
         .eq("id", id);
       if (error) throw error;
-      toast.success("Class name updated");
+      toast.success(t("Class name updated"));
       setEditingClassName(false);
       await qc.invalidateQueries({ queryKey: ["class", id] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     }
   }
 
   async function saveLabels() {
     try {
-      const { error } = await supabase
-        .from("classes")
-        .update({ labels: draftLabels })
-        .eq("id", id);
+      const { error } = await supabase.from("classes").update({ labels: draftLabels }).eq("id", id);
       if (error) throw error;
-      toast.success("Labels updated");
+      toast.success(t("Labels updated"));
       setEditingLabels(false);
       await qc.invalidateQueries({ queryKey: ["class", id] });
       await qc.invalidateQueries({ queryKey: ["all-labels"] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     }
   }
 
-  if (isLoading || !data?.cls) return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
+  if (isLoading || !data?.cls)
+    return <p className="text-sm text-muted-foreground">{t("Loading…")}</p>;
 
-  const shareUrl = data.link ? `${window.location.origin}${locale === "nl" ? "/nl" : ""}/s/${data.link.token}` : "";
+  const shareUrl = data.link
+    ? `${window.location.origin}${locale === "nl" ? "/nl" : ""}/s/${data.link.token}`
+    : "";
   const submittedSet = new Set(data.submissions.map((s) => s.student_id));
   const submittedAt = new Map(data.submissions.map((s) => [s.student_id, s.submitted_at]));
   const isArchived = !!data.cls.archived_at;
@@ -255,21 +261,19 @@ export function ClassDetail() {
         .flatMap((c) => c.labels ?? []),
     ),
   ).sort();
-  const cloneClassTargets = (data.allClasses ?? []).filter(
-    (c) => !c.archived_at && c.id !== id,
-  );
+  const cloneClassTargets = (data.allClasses ?? []).filter((c) => !c.archived_at && c.id !== id);
   const labelClonePreview = (data.allClasses ?? []).filter(
     (c) =>
-      !c.archived_at &&
-      c.id !== id &&
-      (c.labels ?? []).some((l) => selectedLabelsForClone.has(l)),
+      !c.archived_at && c.id !== id && (c.labels ?? []).some((l) => selectedLabelsForClone.has(l)),
   );
 
   return (
     <div className="space-y-8">
       <div className="flex items-end justify-between">
         <div>
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">{t("← All classes")}</Link>
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+            {t("← All classes")}
+          </Link>
           {editingClassName ? (
             <div className="mt-2">
               <Input
@@ -294,10 +298,16 @@ export function ClassDetail() {
               }}
               title={t(isArchived ? "" : "Click to edit class name")}
             >
-              <h1 className={`text-3xl font-semibold tracking-tight ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
-                <span className="notranslate" translate="no">{data?.cls?.name}</span>
+              <h1
+                className={`text-3xl font-semibold tracking-tight ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}
+              >
+                <span className="notranslate" translate="no">
+                  {data?.cls?.name}
+                </span>
                 {isArchived && (
-                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">{t("Archived")}</span>
+                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                    {t("Archived")}
+                  </span>
                 )}
               </h1>
               {!isArchived && (
@@ -336,20 +346,20 @@ export function ClassDetail() {
               }}
               title={t(isArchived ? "" : "Click to edit labels")}
             >
-              {classLabels.length === 0 ? (
-                !isArchived && (
-                  <span className="text-xs text-muted-foreground italic">{t("Add labels…")}</span>
-                )
-              ) : (
-                classLabels.map((l) => (
-                  <span
-                    key={l}
-                    className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
-                  >
-                    {l}
-                  </span>
-                ))
-              )}
+              {classLabels.length === 0
+                ? !isArchived && (
+                    <span className="text-xs text-muted-foreground italic">{t("Add labels…")}</span>
+                  )
+                : classLabels.map((l) => (
+                    <span
+                      key={l}
+                      className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
+                    >
+                      <span translate="no" className="notranslate">
+                        {l}
+                      </span>
+                    </span>
+                  ))}
               {!isArchived && (
                 <Pencil className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover/labels:opacity-100 transition-opacity" />
               )}
@@ -362,23 +372,33 @@ export function ClassDetail() {
           onClick={deleteClass}
           className="text-muted-foreground hover:text-muted-foreground"
         >
-          <Trash2 className="mr-1.5 h-4 w-4" />{t(" Delete class")}</Button>
+          <Trash2 className="mr-1.5 h-4 w-4" />
+          {t(" Delete class")}
+        </Button>
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base">{t("Projects")}</CardTitle>
-            <CardDescription>{t("Each project is one way of dividing the class — set the group size, then make runs to compute groups.")}</CardDescription>
+            <CardDescription>
+              {t(
+                "Each project is one way of dividing the class — set the group size, then make runs to compute groups.",
+              )}
+            </CardDescription>
           </div>
           {!isArchived && (
             <Button size="sm" onClick={() => setProjectOpen(true)}>
-              <Plus className="mr-1.5 h-4 w-4" />{t(" New project")}</Button>
+              <Plus className="mr-1.5 h-4 w-4" />
+              {t(" New project")}
+            </Button>
           )}
         </CardHeader>
         <CardContent>
           {data.projects.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">{t("No projects yet.")}</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              {t("No projects yet.")}
+            </p>
           ) : (
             <ul className="divide-y divide-border">
               {data.projects.map((p) => (
@@ -390,8 +410,14 @@ export function ClassDetail() {
                       className="flex flex-1 items-center justify-between"
                     >
                       <div>
-                        <div className="font-medium notranslate" translate="no">{p.name}</div>
-                        <div className="text-xs text-muted-foreground">{t("Groups of ")}{p.group_size}{t(" ·")}{t(" ")}
+                        <div className="font-medium notranslate" translate="no">
+                          {p.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {t("Groups of ")}
+                          {p.group_size}
+                          {t(" ·")}
+                          {t(" ")}
                           {t(p.size_policy === "plus" ? "some groups +1" : "some groups −1")}
                         </div>
                       </div>
@@ -448,12 +474,17 @@ export function ClassDetail() {
       </Card>
 
       {shareUrl && (
-
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <LinkIcon className="h-4 w-4" />{t(" Student link")}</CardTitle>
-            <CardDescription>{t("Share this with your students. They open it, pick their name, and fill the form.")}</CardDescription>
+              <LinkIcon className="h-4 w-4" />
+              {t(" Student link")}
+            </CardTitle>
+            <CardDescription>
+              {t(
+                "Share this with your students. They open it, pick their name, and fill the form.",
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
@@ -465,7 +496,9 @@ export function ClassDetail() {
                   toast.success(t("Link copied"));
                 }}
               >
-                <Copy className="mr-1.5 h-4 w-4" />{t(" Copy")}</Button>
+                <Copy className="mr-1.5 h-4 w-4" />
+                {t(" Copy")}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -476,111 +509,122 @@ export function ClassDetail() {
           <div>
             <CardTitle className="text-base">{t("Students")}</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              {submittedSet.size}{t(" of ")}{data.students.length}{t(" students have submitted their preferences.")}</p>
+              {submittedSet.size}
+              {t(" of ")}
+              {data.students.length}
+              {t(" students have submitted their preferences.")}
+            </p>
           </div>
           {!isArchived && (
             <Button size="sm" onClick={() => setAddStudentOpen(true)}>
-              <Plus className="mr-1.5 h-4 w-4" />{t(" Add student")}</Button>
+              <Plus className="mr-1.5 h-4 w-4" />
+              {t(" Add student")}
+            </Button>
           )}
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border">
-            {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => {
-              const done = submittedSet.has(s.id);
-              return (
-                <li key={s.id} className="flex items-center justify-between py-2.5">
-                  <div className="flex items-center gap-3">
-                    {done ? (
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                    ) : (
-                      <Circle className="h-4 w-4 text-destructive fill-destructive" />
-                    )}
-                    {editingStudentId === s.id ? (
-                      <Input
-                        value={editingStudentName}
-                        onChange={(e) => setEditingStudentName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveStudentName();
-                          if (e.key === "Escape") {
-                            setEditingStudentId(null);
-                            setEditingStudentName("");
-                          }
-                        }}
-                        autoFocus
-                        className="h-7 text-sm"
-                      />
-                    ) : (
-                      <span className="notranslate" translate="no">{s.name}</span>
-                    )}
-                    {done && !editingStudentId && (
-                      <span className="text-xs text-muted-foreground">{t("— submitted on ")}{new Date(submittedAt.get(s.id)!).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {editingStudentId === s.id ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={saveStudentName}
-                          disabled={savingStudent || !editingStudentName.trim()}
-                          className="text-green-600 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
-                          aria-label={t(`Save ${s.name}`)}
-                          title={t("Save")}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingStudentId(null);
-                            setEditingStudentName("");
+            {[...data.students]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((s) => {
+                const done = submittedSet.has(s.id);
+                return (
+                  <li key={s.id} className="flex items-center justify-between py-2.5">
+                    <div className="flex items-center gap-3">
+                      {done ? (
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Circle className="h-4 w-4 text-destructive fill-destructive" />
+                      )}
+                      {editingStudentId === s.id ? (
+                        <Input
+                          value={editingStudentName}
+                          onChange={(e) => setEditingStudentName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveStudentName();
+                            if (e.key === "Escape") {
+                              setEditingStudentId(null);
+                              setEditingStudentName("");
+                            }
                           }}
-                          disabled={savingStudent}
-                          className="text-muted-foreground hover:text-muted-foreground"
-                          aria-label={t(`Cancel`)}
-                          title={t("Cancel")}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingStudentId(s.id);
-                            setEditingStudentName(s.name);
-                          }}
-                          className="text-muted-foreground hover:text-muted-foreground"
-                          aria-label={t(`Edit ${s.name}`)}
-                          title={t(`Edit ${s.name}`)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openDeleteStudentConfirm(s.id, s.name)}
-                          className="text-muted-foreground hover:text-muted-foreground"
-                          aria-label={t(`Delete ${s.name}`)}
-                          title={t(`Delete ${s.name} from this class`)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
+                          autoFocus
+                          className="h-7 text-sm"
+                        />
+                      ) : (
+                        <span className="notranslate" translate="no">
+                          {s.name}
+                        </span>
+                      )}
+                      {done && !editingStudentId && (
+                        <span className="text-xs text-muted-foreground">
+                          {t("— submitted on ")}
+                          {new Date(submittedAt.get(s.id)!).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {editingStudentId === s.id ? (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={saveStudentName}
+                            disabled={savingStudent || !editingStudentName.trim()}
+                            className="text-green-600 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+                            aria-label={t(`Save ${s.name}`)}
+                            title={t("Save")}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingStudentId(null);
+                              setEditingStudentName("");
+                            }}
+                            disabled={savingStudent}
+                            className="text-muted-foreground hover:text-muted-foreground"
+                            aria-label={t(`Cancel`)}
+                            title={t("Cancel")}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingStudentId(s.id);
+                              setEditingStudentName(s.name);
+                            }}
+                            className="text-muted-foreground hover:text-muted-foreground"
+                            aria-label={t(`Edit ${s.name}`)}
+                            title={t(`Edit ${s.name}`)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDeleteStudentConfirm(s.id, s.name)}
+                            className="text-muted-foreground hover:text-muted-foreground"
+                            aria-label={t(`Delete ${s.name}`)}
+                            title={t(`Delete ${s.name} from this class`)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
           </ul>
         </CardContent>
       </Card>
-
 
       <Dialog
         open={confirmOpen}
@@ -594,7 +638,11 @@ export function ClassDetail() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{t("Delete project")}</DialogTitle>
-            <DialogDescription>{t("Are you sure you want to delete this project? Its runs and distributions will be removed as well.")}</DialogDescription>
+            <DialogDescription>
+              {t(
+                "Are you sure you want to delete this project? Its runs and distributions will be removed as well.",
+              )}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
@@ -605,7 +653,9 @@ export function ClassDetail() {
                   setConfirmOpen(false);
                   setProjectToDelete(null);
                 }}
-              >{t("Cancel")}</Button>
+              >
+                {t("Cancel")}
+              </Button>
               <Button variant="destructive" disabled={deleting} onClick={deleteProject}>
                 {t(deleting ? "Deleting…" : "Delete")}
               </Button>
@@ -629,7 +679,11 @@ export function ClassDetail() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{t("Clone project")}</DialogTitle>
-            <DialogDescription>{t("Choose where to clone \"")}{projectToClone?.name}{t("\". Only active classes are available as targets.")}</DialogDescription>
+            <DialogDescription>
+              {t('Choose where to clone "')}
+              {projectToClone?.name}
+              {t('". Only active classes are available as targets.')}
+            </DialogDescription>
           </DialogHeader>
           <Tabs value={cloneMode} onValueChange={(v) => setCloneMode(v as "class" | "label")}>
             <TabsList className="grid w-full grid-cols-2">
@@ -657,9 +711,13 @@ export function ClassDetail() {
                           }
                         }}
                         className="h-4 w-4 rounded border-gray-300"
-                      />{t("Select all")}</label>
+                      />
+                      {t("Select all")}
+                    </label>
                     <span className="text-xs text-muted-foreground">
-                      {selectedClassesForClone.size}{t(" selected")}</span>
+                      {selectedClassesForClone.size}
+                      {t(" selected")}
+                    </span>
                   </div>
                   <div className="max-h-64 space-y-2 overflow-auto rounded-md border border-border p-3">
                     {cloneClassTargets.map((c) => (
@@ -675,7 +733,9 @@ export function ClassDetail() {
                           }}
                           className="h-4 w-4 rounded border-gray-300"
                         />
-                        <span className="text-sm notranslate" translate="no">{c.name}</span>
+                        <span className="text-sm notranslate" translate="no">
+                          {c.name}
+                        </span>
                         {(c.labels ?? []).length > 0 && (
                           <span className="ml-1 flex flex-wrap gap-1">
                             {(c.labels ?? []).map((l) => (
@@ -683,7 +743,9 @@ export function ClassDetail() {
                                 key={l}
                                 className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-secondary-foreground"
                               >
-                                {l}
+                                <span translate="no" className="notranslate">
+                                  {l}
+                                </span>
                               </span>
                             ))}
                           </span>
@@ -696,7 +758,9 @@ export function ClassDetail() {
             </TabsContent>
             <TabsContent value="label" className="pt-3">
               {availableActiveClassLabels.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("No labels available on other active classes.")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("No labels available on other active classes.")}
+                </p>
               ) : (
                 <>
                   <div className="mb-2 flex items-center justify-between">
@@ -715,9 +779,15 @@ export function ClassDetail() {
                           }
                         }}
                         className="h-4 w-4 rounded border-gray-300"
-                      />{t("Select all")}</label>
+                      />
+                      {t("Select all")}
+                    </label>
                     <span className="text-xs text-muted-foreground">
-                      {selectedLabelsForClone.size}{t(" label")}{t(selectedLabelsForClone.size === 1 ? "" : "s")}{t(" selected")}</span>
+                      {selectedLabelsForClone.size}
+                      {t(" label")}
+                      {t(selectedLabelsForClone.size === 1 ? "" : "s")}
+                      {t(" selected")}
+                    </span>
                   </div>
                   <div className="max-h-48 space-y-2 overflow-auto rounded-md border border-border p-3">
                     {availableActiveClassLabels.map((l) => (
@@ -733,13 +803,26 @@ export function ClassDetail() {
                           }}
                           className="h-4 w-4 rounded border-gray-300"
                         />
-                        <span className="text-sm">{l}</span>
+                        <span className="text-sm">
+                          <span translate="no" className="notranslate">
+                            {l}
+                          </span>
+                        </span>
                       </label>
                     ))}
                   </div>
-                  <p className="mt-2 text-xs text-muted-foreground">{t("Will clone to ")}{labelClonePreview.length}{t(" active class")}{t(labelClonePreview.length === 1 ? "" : "es")}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {t("Will clone to ")}
+                    {labelClonePreview.length}
+                    {t(" active class")}
+                    {t(labelClonePreview.length === 1 ? "" : "es")}
                     {labelClonePreview.length > 0 && (
-                      <>{t(": ")}<span className="notranslate" translate="no">{labelClonePreview.map((c) => c.name).join(", ")}</span></>
+                      <>
+                        {t(": ")}
+                        <span className="notranslate" translate="no">
+                          {labelClonePreview.map((c) => c.name).join(", ")}
+                        </span>
+                      </>
                     )}
                   </p>
                 </>
@@ -757,7 +840,9 @@ export function ClassDetail() {
                   setSelectedLabelsForClone(new Set());
                   setCloneMode("class");
                 }}
-              >{t("Cancel")}</Button>
+              >
+                {t("Cancel")}
+              </Button>
               <Button
                 disabled={
                   cloneMode === "class"
@@ -765,7 +850,9 @@ export function ClassDetail() {
                     : labelClonePreview.length === 0
                 }
                 onClick={cloneProject}
-              >{t("Clone")}</Button>
+              >
+                {t("Clone")}
+              </Button>
             </div>
           </DialogFooter>
         </DialogContent>
@@ -783,7 +870,13 @@ export function ClassDetail() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{t("Delete student")}</DialogTitle>
-            <DialogDescription>{t("Are you sure you want to delete ")}{studentToDelete?.name}{t("? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.")}</DialogDescription>
+            <DialogDescription>
+              {t("Are you sure you want to delete ")}
+              {studentToDelete?.name}
+              {t(
+                "? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.",
+              )}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
@@ -794,8 +887,14 @@ export function ClassDetail() {
                   setConfirmStudentDeleteOpen(false);
                   setStudentToDelete(null);
                 }}
-              >{t("Cancel")}</Button>
-              <Button variant="destructive" disabled={deletingStudent} onClick={confirmDeleteStudent}>
+              >
+                {t("Cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={deletingStudent}
+                onClick={confirmDeleteStudent}
+              >
                 {t(deletingStudent ? "Deleting…" : "Delete")}
               </Button>
             </div>
@@ -863,8 +962,8 @@ function NewProjectDialog({
   const setOpen = (o: boolean) => (editing ? onOpenEditChange?.(o) : onOpenChange(o));
 
   async function save() {
-    if (!name.trim()) return toast.error("Give it a name");
-    if (size < 2) return toast.error("Group size must be at least 2");
+    if (!name.trim()) return toast.error(t("Give it a name"));
+    if (size < 2) return toast.error(t("Group size must be at least 2"));
     setLoading(true);
     try {
       if (editing && editProject) {
@@ -873,7 +972,7 @@ function NewProjectDialog({
           .update({ name: name.trim(), group_size: size, size_policy: policy })
           .eq("id", editProject.id);
         if (error) throw error;
-        toast.success("Project updated");
+        toast.success(t("Project updated"));
         onSaved?.();
       } else {
         const { data: proj, error } = await supabase
@@ -882,12 +981,12 @@ function NewProjectDialog({
           .select("id")
           .single();
         if (error || !proj) throw error ?? new Error("Failed");
-        toast.success("Project created");
+        toast.success(t("Project created"));
         onCreated();
       }
       setOpen(false);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setLoading(false);
     }
@@ -899,14 +998,19 @@ function NewProjectDialog({
         <DialogHeader>
           <DialogTitle>{t(editing ? "Edit project" : "New project")}</DialogTitle>
           <DialogDescription>
-            {t(editing
-              ? "Update the project settings. Existing runs and distributions keep their groups."
-              : "Set the group size; you'll create runs to compute groups on the project page.")}
+            {t(
+              editing
+                ? "Update the project settings. Existing runs and distributions keep their groups."
+                : "Set the group size; you'll create runs to compute groups on the project page.",
+            )}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="cn">{t("Name ")}<span className="text-red-500">{t("*")}</span></Label>
+            <Label htmlFor="cn">
+              {t("Name ")}
+              <span className="text-red-500">{t("*")}</span>
+            </Label>
             <Input
               id="cn"
               value={name}
@@ -916,7 +1020,10 @@ function NewProjectDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="gs">{t("Students per group ")}<span className="text-red-500">{t("*")}</span></Label>
+            <Label htmlFor="gs">
+              {t("Students per group ")}
+              <span className="text-red-500">{t("*")}</span>
+            </Label>
             <Input
               id="gs"
               type="number"
@@ -935,11 +1042,15 @@ function NewProjectDialog({
             >
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="plus" id="p-plus" />
-                <Label htmlFor="p-plus" className="font-normal">{t("Some groups with 1 additional person")}</Label>
+                <Label htmlFor="p-plus" className="font-normal">
+                  {t("Some groups with 1 additional person")}
+                </Label>
               </div>
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="minus" id="p-minus" />
-                <Label htmlFor="p-minus" className="font-normal">{t("Some groups with 1 fewer person")}</Label>
+                <Label htmlFor="p-minus" className="font-normal">
+                  {t("Some groups with 1 fewer person")}
+                </Label>
               </div>
             </RadioGroup>
           </div>
@@ -947,7 +1058,9 @@ function NewProjectDialog({
         <DialogFooter>
           {editing ? (
             <>
-              <Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>{t("Cancel")}</Button>
+              <Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
+                {t("Cancel")}
+              </Button>
               <Button disabled={loading || !name.trim() || size < 2} onClick={save}>
                 {t(loading ? "Saving…" : "Save")}
               </Button>
@@ -979,7 +1092,7 @@ function AddStudentDialog({
   const [loading, setLoading] = useState(false);
 
   async function addStudent() {
-    if (!name.trim()) return toast.error("Enter a student name");
+    if (!name.trim()) return toast.error(t("Enter a student name"));
     setLoading(true);
     try {
       const { data: student, error } = await supabase
@@ -988,12 +1101,12 @@ function AddStudentDialog({
         .select("id")
         .single();
       if (error || !student) throw error ?? new Error("Failed to add student");
-      toast.success("Student added");
+      toast.success(t("Student added"));
       onCreated();
       onOpenChange(false);
       setName("");
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setLoading(false);
     }
@@ -1004,7 +1117,11 @@ function AddStudentDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{t("Add student")}</DialogTitle>
-          <DialogDescription>{t("Add a new student to the class. They will be included in future group distributions.")}</DialogDescription>
+          <DialogDescription>
+            {t(
+              "Add a new student to the class. They will be included in future group distributions.",
+            )}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -1028,7 +1145,9 @@ function AddStudentDialog({
               onOpenChange(false);
               setName("");
             }}
-          >{t("Cancel")}</Button>
+          >
+            {t("Cancel")}
+          </Button>
           <Button disabled={loading} onClick={addStudent}>
             {t(loading ? "Adding…" : "Add student")}
           </Button>

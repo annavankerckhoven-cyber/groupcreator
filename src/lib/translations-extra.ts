@@ -1,6 +1,7 @@
 export const extraDutch: Record<string, string> = {
   "Group Creator — Smarter group making": "Group Creator — Slimmer groepen maken",
-  "Free tool for teachers to create classroom groups based on student preferences.": "Gratis hulpmiddel voor leerkrachten om klasgroepen te maken op basis van leerlingvoorkeuren.",
+  "Free tool for teachers to create classroom groups based on student preferences.":
+    "Gratis hulpmiddel voor leerkrachten om klasgroepen te maken op basis van leerlingvoorkeuren.",
   "How it works — Group Creator": "Hoe het werkt — Group Creator",
   "Sign in — Group Creator": "Inloggen — Group Creator",
   "Reset password — Group Creator": "Wachtwoord herstellen — Group Creator",
@@ -10,65 +11,102 @@ export const extraDutch: Record<string, string> = {
   "Run — Group Creator": "Berekening — Group Creator",
   "Presentation — Group Creator": "Presentatie — Group Creator",
   "Project — Group Creator": "Project — Group Creator",
-  "Learn how to create classes, collect preferences and generate classroom groups.": "Ontdek hoe je klassen aanmaakt, voorkeuren verzamelt en klasgroepen vormt.",
-  "Sign in or create your free Group Creator teacher account.": "Log in of maak je gratis leerkrachtenaccount bij Group Creator aan.",
-  "Reset the password for your Group Creator account.": "Stel het wachtwoord van je Group Creator-account opnieuw in.",
-  "Submit your classroom group preferences privately.": "Dien je voorkeuren voor klasgroepen vertrouwelijk in.",
-  "Manage your classes, student forms and grouping projects.": "Beheer je klassen, leerlingenformulieren en groepsprojecten.",
-  "Manage class projects, student links and your student roster.": "Beheer klasprojecten, leerlingenlinks en je leerlingenlijst.",
-  "Manage project settings and start new group calculations.": "Beheer projectinstellingen en start nieuwe groepsberekeningen.",
-  "Review group distributions and their preference scores.": "Bekijk groepsverdelingen en de scores voor hun voorkeuren.",
-  "Present and download a classroom group distribution.": "Presenteer en download een groepsverdeling voor je klas.",
+  "Learn how to create classes, collect preferences and generate classroom groups.":
+    "Ontdek hoe je klassen aanmaakt, voorkeuren verzamelt en klasgroepen vormt.",
+  "Sign in or create your free Group Creator teacher account.":
+    "Log in of maak je gratis leerkrachtenaccount bij Group Creator aan.",
+  "Reset the password for your Group Creator account.":
+    "Stel het wachtwoord van je Group Creator-account opnieuw in.",
+  "Submit your classroom group preferences privately.":
+    "Dien je voorkeuren voor klasgroepen vertrouwelijk in.",
+  "Manage your classes, student forms and grouping projects.":
+    "Beheer je klassen, leerlingenformulieren en groepsprojecten.",
+  "Manage class projects, student links and your student roster.":
+    "Beheer klasprojecten, leerlingenlinks en je leerlingenlijst.",
+  "Manage project settings and start new group calculations.":
+    "Beheer projectinstellingen en start nieuwe groepsberekeningen.",
+  "Review group distributions and their preference scores.":
+    "Bekijk groepsverdelingen en de scores voor hun voorkeuren.",
+  "Present and download a classroom group distribution.":
+    "Presenteer en download een groepsverdeling voor je klas.",
   "Group Creator — instructions manual": "Group Creator — handleiding",
-  "This page explains how to create a class, collect student preferences, and turn them into balanced groups.": "Deze pagina legt uit hoe je een klas aanmaakt, leerlingvoorkeuren verzamelt en daarmee evenwichtige groepen vormt.",
+  "This page explains how to create a class, collect student preferences, and turn them into balanced groups.":
+    "Deze pagina legt uit hoe je een klas aanmaakt, leerlingvoorkeuren verzamelt en daarmee evenwichtige groepen vormt.",
   "1. Create a class": "1. Maak een klas aan",
-  "Start from the dashboard. Choose New class, and enter a class name.": "Ga naar je klassen. Kies ‘Nieuwe klas’ en geef de klas een naam.",
+  "Start from the dashboard. Choose New class, and enter a class name.":
+    "Ga naar je klassen. Kies ‘Nieuwe klas’ en geef de klas een naam.",
   "Add labels": "Labels toevoegen",
-  "You can give your class a label (for example: \"biology_6th_grade\"). You can add labels when creating a class or edit them later. Labels can be used to clone a project to all classes with a given label.": "Je kunt je klas een label geven, bijvoorbeeld ‘biologie_6de_jaar’. Voeg labels toe wanneer je de klas aanmaakt of pas ze later aan. Met labels kun je een project kopiëren naar alle klassen met hetzelfde label.",
+  'You can give your class a label (for example: "biology_6th_grade"). You can add labels when creating a class or edit them later. Labels can be used to clone a project to all classes with a given label.':
+    "Je kunt je klas een label geven, bijvoorbeeld ‘biologie_6de_jaar’. Voeg labels toe wanneer je de klas aanmaakt of pas ze later aan. Met labels kun je een project kopiëren naar alle klassen met hetzelfde label.",
   "Add students": "Leerlingen toevoegen",
-  "You can add students to your class by typing their names manually or importing them from a CSV or Excel file. If you import a file, you can select the cells containing student names in a preview of the file. Students can still be edited manually after creating the class if needed.": "Voeg leerlingen toe door hun namen in te typen of te importeren uit een CSV- of Excel-bestand. Bij het importeren selecteer je de cellen met leerlingnamen in een voorbeeldweergave. Ook nadat je de klas hebt aangemaakt, kun je de leerlinggegevens nog handmatig aanpassen.",
+  "You can add students to your class by typing their names manually or importing them from a CSV or Excel file. If you import a file, you can select the cells containing student names in a preview of the file. Students can still be edited manually after creating the class if needed.":
+    "Voeg leerlingen toe door hun namen in te typen of te importeren uit een CSV- of Excel-bestand. Bij het importeren selecteer je de cellen met leerlingnamen in een voorbeeldweergave. Ook nadat je de klas hebt aangemaakt, kun je de leerlinggegevens nog handmatig aanpassen.",
   "Archived classes": "Gearchiveerde klassen",
-  "When creating a new class, this class will be active by default for 1 year. After 1 year, this class will be archived. Archived classes are still accessible, but can't be edited. You can clone projects from archived classes to active classes. Archived classes are deleted permanently after 1 year. You can always archive, restore or delete classes manually. If you restore an archived class, this class will remain active again for 1 year. Thereby you can easily maintain your classes.": "Een nieuwe klas blijft standaard één jaar actief. Daarna wordt ze gearchiveerd. Gearchiveerde klassen kun je nog bekijken, maar niet meer bewerken. Je kunt hun projecten wel kopiëren naar actieve klassen. Na één jaar in het archief worden klassen definitief verwijderd. Je kunt klassen ook zelf archiveren, terugzetten of verwijderen. Als je een gearchiveerde klas terugzet, blijft ze opnieuw één jaar actief. Zo houd je je klassen eenvoudig up-to-date.",
+  "When creating a new class, this class will be active by default for 1 year. After 1 year, this class will be archived. Archived classes are still accessible, but can't be edited. You can clone projects from archived classes to active classes. Archived classes are deleted permanently after 1 year. You can always archive, restore or delete classes manually. If you restore an archived class, this class will remain active again for 1 year. Thereby you can easily maintain your classes.":
+    "Een nieuwe klas blijft standaard één jaar actief. Daarna wordt ze gearchiveerd. Gearchiveerde klassen kun je nog bekijken, maar niet meer bewerken. Je kunt hun projecten wel kopiëren naar actieve klassen. Na één jaar in het archief worden klassen definitief verwijderd. Je kunt klassen ook zelf archiveren, terugzetten of verwijderen. Als je een gearchiveerde klas terugzet, blijft ze opnieuw één jaar actief. Zo houd je je klassen eenvoudig up-to-date.",
   "2. Share the student form": "2. Deel het leerlingenformulier",
-  "After the class is created, open the class page and copy the student link. Send that link to students so they can submit who they would like to work with and who they would rather avoid. Their answers are kept anonymous to their peers. Even you (being the teacher) can't view their responses.": "Open na het aanmaken van de klas de klaspagina en kopieer de link voor leerlingen. Deel die link met je leerlingen, zodat ze kunnen aangeven met wie ze graag samenwerken en met wie liever niet. Hun klasgenoten kunnen hun antwoorden niet zien. Ook jij als leerkracht kunt hun antwoorden niet bekijken.",
-  "The same link always remains enabled for the students. That way they can change their responses throughout the year. Previously generated distributions won't be updated, but when you run the grouping process again to generate distributions, the new preferences will be taken into account. The students list on your class page indicates which students have submitted the form.": "Dezelfde link blijft beschikbaar voor leerlingen. Zo kunnen ze hun antwoorden het hele jaar aanpassen. Eerder gemaakte groepsverdelingen veranderen niet. Bij een nieuwe berekening houden we rekening met de aangepaste voorkeuren. In de leerlingenlijst op je klaspagina zie je wie het formulier al heeft ingediend.",
+  "After the class is created, open the class page and copy the student link. Send that link to students so they can submit who they would like to work with and who they would rather avoid. Their answers are kept anonymous to their peers. Even you (being the teacher) can't view their responses.":
+    "Open na het aanmaken van de klas de klaspagina en kopieer de link voor leerlingen. Deel die link met je leerlingen, zodat ze kunnen aangeven met wie ze graag samenwerken en met wie liever niet. Hun klasgenoten kunnen hun antwoorden niet zien. Ook jij als leerkracht kunt hun antwoorden niet bekijken.",
+  "The same link always remains enabled for the students. That way they can change their responses throughout the year. Previously generated distributions won't be updated, but when you run the grouping process again to generate distributions, the new preferences will be taken into account. The students list on your class page indicates which students have submitted the form.":
+    "Dezelfde link blijft beschikbaar voor leerlingen. Zo kunnen ze hun antwoorden het hele jaar aanpassen. Eerder gemaakte groepsverdelingen veranderen niet. Bij een nieuwe berekening houden we rekening met de aangepaste voorkeuren. In de leerlingenlijst op je klaspagina zie je wie het formulier al heeft ingediend.",
   "3. Create a project": "3. Maak een project aan",
-  "Inside a class, create a project. Set the target group size. If the number of students is not divisible by the group size, you can choose whether some groups should have one extra student or one less. You can copy a created project to multiple classes using the clone feature.": "Maak binnen een klas een project aan en stel de gewenste groepsgrootte in. Is het aantal leerlingen niet deelbaar door de groepsgrootte? Kies dan of sommige groepen één leerling meer of minder krijgen. Met de kopieerfunctie kun je het project naar meerdere klassen kopiëren.",
+  "Inside a class, create a project. Set the target group size. If the number of students is not divisible by the group size, you can choose whether some groups should have one extra student or one less. You can copy a created project to multiple classes using the clone feature.":
+    "Maak binnen een klas een project aan en stel de gewenste groepsgrootte in. Is het aantal leerlingen niet deelbaar door de groepsgrootte? Kies dan of sommige groepen één leerling meer of minder krijgen. Met de kopieerfunctie kun je het project naar meerdere klassen kopiëren.",
   "4. Run the grouping process": "4. Bereken de groepsverdelingen",
   "How to start a run": "Een berekening starten",
-  "Open the project page and start a new run. Indicate which students are currently absent (if applicable), so they won't be added to any groups. The application will compute possible group distributions using the student preferences. Indicate the time the run should take. The longer the run, the more distributions are evaluated, increasing the changes of finding the optimal results. Once a run has comleted, you can review the results.": "Open de projectpagina en start een nieuwe berekening. Duid indien nodig afwezige leerlingen aan, zodat ze niet in een groep worden opgenomen. De toepassing berekent mogelijke groepsverdelingen op basis van leerlingvoorkeuren. Stel in hoeveel tijd de berekening mag duren. Hoe langer de rekentijd, hoe meer verdelingen worden beoordeeld en hoe groter de kans op een optimaal resultaat. Zodra de berekening klaar is, kun je de resultaten bekijken.",
+  "Open the project page and start a new run. Indicate which students are currently absent (if applicable), so they won't be added to any groups. The application will compute possible group distributions using the student preferences. Indicate the time the run should take. The longer the run, the more distributions are evaluated, increasing the changes of finding the optimal results. Once a run has comleted, you can review the results.":
+    "Open de projectpagina en start een nieuwe berekening. Duid indien nodig afwezige leerlingen aan, zodat ze niet in een groep worden opgenomen. De toepassing berekent mogelijke groepsverdelingen op basis van leerlingvoorkeuren. Stel in hoeveel tijd de berekening mag duren. Hoe langer de rekentijd, hoe meer verdelingen worden beoordeeld en hoe groter de kans op een optimaal resultaat. Zodra de berekening klaar is, kun je de resultaten bekijken.",
   "Algorithm used to find optimal distributions": "Het algoritme voor optimale groepsverdelingen",
-  "During the run, many distributions are generated using an algoritm specialized for large optimalization problems. To give an illustration: to divide a group of 20 people into groups of 4, there are 2.546.168.625 possible distributions. The algorithm will evaluate as much as possible distributions (optimized based on the students responses) within the time limit you set, and store the best ones. Therefore a longer run gives you a better chance of finding the optimal distribution, but even a short run will give you good results. While running you can see the score of the best distribution found so far. The score is a measure of how well the student preferences are respected. The final results will also show the score of each of the best distribution found.": "Tijdens de berekening maakt een algoritme voor grote optimalisatieproblemen veel groepsverdelingen. Ter illustratie: om 20 leerlingen in groepen van 4 te verdelen, zijn er 2.546.168.625 mogelijke verdelingen. Binnen de ingestelde rekentijd beoordeelt het algoritme zo veel mogelijk verdelingen, bijgestuurd op basis van de antwoorden van leerlingen. De beste verdelingen worden bewaard. Een langere rekentijd vergroot de kans op de optimale verdeling, maar ook een korte berekening levert goede resultaten. Tijdens de berekening zie je de beste score tot dan toe. Die geeft aan hoe goed de leerlingvoorkeuren worden gerespecteerd. Bij de resultaten zie je de score van elke geselecteerde verdeling.",
+  "During the run, many distributions are generated using an algoritm specialized for large optimalization problems. To give an illustration: to divide a group of 20 people into groups of 4, there are 2.546.168.625 possible distributions. The algorithm will evaluate as much as possible distributions (optimized based on the students responses) within the time limit you set, and store the best ones. Therefore a longer run gives you a better chance of finding the optimal distribution, but even a short run will give you good results. While running you can see the score of the best distribution found so far. The score is a measure of how well the student preferences are respected. The final results will also show the score of each of the best distribution found.":
+    "Tijdens de berekening maakt een algoritme voor grote optimalisatieproblemen veel groepsverdelingen. Ter illustratie: om 20 leerlingen in groepen van 4 te verdelen, zijn er 2.546.168.625 mogelijke verdelingen. Binnen de ingestelde rekentijd beoordeelt het algoritme zo veel mogelijk verdelingen, bijgestuurd op basis van de antwoorden van leerlingen. De beste verdelingen worden bewaard. Een langere rekentijd vergroot de kans op de optimale verdeling, maar ook een korte berekening levert goede resultaten. Tijdens de berekening zie je de beste score tot dan toe. Die geeft aan hoe goed de leerlingvoorkeuren worden gerespecteerd. Bij de resultaten zie je de score van elke geselecteerde verdeling.",
   "Distribution scores": "Scores van groepsverdelingen",
-  "Each group gets a score based on the preferences of its members. The score increases per liked peer in a student's group, and decreases per disliked peer in the group. The penalty for being with disliked classmates is higher than the reward for being with liked classmates. Thereby avoiding disliked classmates comes first. Groups also receive a penalty when a student has none of their liked peers in their group. This encourages distributions where every student has at least one friend in their group, rather than concentrating friendships among a few students. The total score of a distribution is the sum of the scores of all the groups.": "Elke groep krijgt een score op basis van de voorkeuren van haar leden. De score stijgt voor elke gewenste klasgenoot in de groep en daalt voor elke ongewenste klasgenoot. De puntenaftrek voor een ongewenste combinatie is groter dan de puntenwinst voor een gewenste combinatie. Ongewenste combinaties vermijden krijgt dus voorrang. Een groep krijgt ook puntenaftrek als een leerling bij geen enkele zelfgekozen klasgenoot zit. Zo moedigen we verdelingen aan waarin elke leerling minstens één gekozen vriend of vriendin in de groep heeft, in plaats van vriendschappen te concentreren bij enkele leerlingen. De totale score is de som van de scores van alle groepen.",
+  "Each group gets a score based on the preferences of its members. The score increases per liked peer in a student's group, and decreases per disliked peer in the group. The penalty for being with disliked classmates is higher than the reward for being with liked classmates. Thereby avoiding disliked classmates comes first. Groups also receive a penalty when a student has none of their liked peers in their group. This encourages distributions where every student has at least one friend in their group, rather than concentrating friendships among a few students. The total score of a distribution is the sum of the scores of all the groups.":
+    "Elke groep krijgt een score op basis van de voorkeuren van haar leden. De score stijgt voor elke gewenste klasgenoot in de groep en daalt voor elke ongewenste klasgenoot. De puntenaftrek voor een ongewenste combinatie is groter dan de puntenwinst voor een gewenste combinatie. Ongewenste combinaties vermijden krijgt dus voorrang. Een groep krijgt ook puntenaftrek als een leerling bij geen enkele zelfgekozen klasgenoot zit. Zo moedigen we verdelingen aan waarin elke leerling minstens één gekozen vriend of vriendin in de groep heeft, in plaats van vriendschappen te concentreren bij enkele leerlingen. De totale score is de som van de scores van alle groepen.",
   "5. Use the results": "5. Gebruik de resultaten",
-  "Once a run is complete, you can inspect the generated distributions. You can also mark favorite runs or distributions to keep the most useful outcomes easy to find. Use the view button to present a distribution.": "Zodra een berekening klaar is, kun je de gemaakte groepsverdelingen bekijken. Markeer berekeningen of verdelingen als favoriet om de bruikbaarste resultaten snel terug te vinden. Gebruik ‘Bekijken’ om een verdeling te presenteren.",
+  "Once a run is complete, you can inspect the generated distributions. You can also mark favorite runs or distributions to keep the most useful outcomes easy to find. Use the view button to present a distribution.":
+    "Zodra een berekening klaar is, kun je de gemaakte groepsverdelingen bekijken. Markeer berekeningen of verdelingen als favoriet om de bruikbaarste resultaten snel terug te vinden. Gebruik ‘Bekijken’ om een verdeling te presenteren.",
   "Name your class and add your students.": "Geef je klas een naam en voeg je leerlingen toe.",
   "Class name": "Klasnaam",
   "e.g. Biology 9A": "bv. Biologie 3A",
-  "Press space to add each label. Labels are optional.": "Druk op de spatiebalk om een label toe te voegen. Labels zijn niet verplicht.",
-  "Type a label and press space (e.g. 6th_year)": "Typ een label en druk op de spatiebalk (bv. 6de_jaar)",
+  "Press space to add each label. Labels are optional.":
+    "Druk op de spatiebalk om een label toe te voegen. Labels zijn niet verplicht.",
+  "Type a label and press space (e.g. 6th_year)":
+    "Typ een label en druk op de spatiebalk (bv. 6de_jaar)",
   "Type a label and press space": "Typ een label en druk op de spatiebalk",
   "Enter manually": "Handmatig invoeren",
   "Import file": "Bestand importeren",
   "One name per line": "Eén naam per regel",
-  "Drag & drop a CSV or Excel file here, or click to browse": "Sleep een CSV- of Excel-bestand hierheen of klik om een bestand te kiezen",
+  "Drag & drop a CSV or Excel file here, or click to browse":
+    "Sleep een CSV- of Excel-bestand hierheen of klik om een bestand te kiezen",
   "Select the cells containing student names": "Selecteer de cellen met leerlingnamen",
-  "Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.": "Klik op een kolomkop om alle waarden te selecteren, of selecteer cellen zoals in Excel: klik voor één cel, sleep voor een bereik. Gebruik Shift+klik om de selectie uit te breiden of Ctrl+klik om afzonderlijke cellen te selecteren of te deselecteren.",
+  "Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.":
+    "Klik op een kolomkop om alle waarden te selecteren, of selecteer cellen zoals in Excel: klik voor één cel, sleep voor een bereik. Gebruik Shift+klik om de selectie uit te breiden of Ctrl+klik om afzonderlijke cellen te selecteren of te deselecteren.",
   "Click to select all values in this column": "Klik om alle waarden in deze kolom te selecteren",
   "Selected —": "Geselecteerd —",
-  "Are you sure you want to delete this class? All of its projects, runs, distributions, and student form responses will be deleted.": "Weet je zeker dat je deze klas wilt verwijderen? Alle bijbehorende projecten, berekeningen, groepsverdelingen en antwoorden op het leerlingenformulier worden verwijderd.",
-  "Archived classes are deleted permanently after 1 year. Set your class to Active again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.": "Gearchiveerde klassen worden na één jaar definitief verwijderd. Maak je klas opnieuw actief om dit te voorkomen. Ze blijft dan opnieuw één jaar actief. Gearchiveerde klassen kun je niet bewerken, maar hun projecten kun je nog bekijken en kopiëren.",
-  "Are you sure you want to delete this project? Its runs and distributions will be removed as well.": "Weet je zeker dat je dit project wilt verwijderen? De bijbehorende berekeningen en groepsverdelingen worden ook verwijderd.",
-  "Update the project settings. Existing runs and distributions keep their groups.": "Pas de projectinstellingen aan. De groepen in bestaande berekeningen en groepsverdelingen blijven ongewijzigd.",
-  "Set the group size; you'll create runs to compute groups on the project page.": "Stel de groepsgrootte in. Op de projectpagina kun je daarna berekeningen starten om groepen te maken.",
-  "Add a new student to the class. They will be included in future group distributions.": "Voeg een nieuwe leerling toe aan de klas. Deze leerling wordt opgenomen in toekomstige groepsverdelingen.",
-  "Are you sure you want to delete this run? The results will no longer be available.": "Weet je zeker dat je deze berekening wilt verwijderen? De resultaten zijn daarna niet meer beschikbaar.",
-  "The optimization runs in your browser. Keep this tab open — closing it cancels the computation. Your settings are saved, so you can re-run with one click.": "De berekening gebeurt in je browser. Laat dit tabblad open: als je het sluit, wordt de berekening afgebroken. Je instellingen worden bewaard, zodat je de berekening met één klik opnieuw kunt starten.",
-  "Longer runs explore more solutions, increasing the chance of finding the optimal distribution.": "Een langere rekentijd onderzoekt meer mogelijkheden en vergroot de kans op de optimale groepsverdeling.",
-  "Don't close this browser tab while a run is computing — you'll have to start it again. Your settings will be saved so you can re-run instantly.": "Sluit dit browsertabblad niet tijdens de berekening, anders moet je die opnieuw starten. Je instellingen worden bewaard, zodat je meteen opnieuw kunt beginnen.",
-  "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results.": "Deze berekening is eerder gestart, maar wordt hier momenteel niet uitgevoerd. Start haar opnieuw om de resultaten te berekenen.",
-  "Don't close this tab while the run is computing. The optimization runs in your browser.": "Sluit dit tabblad niet tijdens de berekening. De optimalisatie gebeurt in je browser.",
+  "Are you sure you want to delete this class? All of its projects, runs, distributions, and student form responses will be deleted.":
+    "Weet je zeker dat je deze klas wilt verwijderen? Alle bijbehorende projecten, berekeningen, groepsverdelingen en antwoorden op het leerlingenformulier worden verwijderd.",
+  "Archived classes are deleted permanently after 1 year. Set your class to Active again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.":
+    "Gearchiveerde klassen worden na één jaar definitief verwijderd. Maak je klas opnieuw actief om dit te voorkomen. Ze blijft dan opnieuw één jaar actief. Gearchiveerde klassen kun je niet bewerken, maar hun projecten kun je nog bekijken en kopiëren.",
+  "Are you sure you want to delete this project? Its runs and distributions will be removed as well.":
+    "Weet je zeker dat je dit project wilt verwijderen? De bijbehorende berekeningen en groepsverdelingen worden ook verwijderd.",
+  "Update the project settings. Existing runs and distributions keep their groups.":
+    "Pas de projectinstellingen aan. De groepen in bestaande berekeningen en groepsverdelingen blijven ongewijzigd.",
+  "Set the group size; you'll create runs to compute groups on the project page.":
+    "Stel de groepsgrootte in. Op de projectpagina kun je daarna berekeningen starten om groepen te maken.",
+  "Add a new student to the class. They will be included in future group distributions.":
+    "Voeg een nieuwe leerling toe aan de klas. Deze leerling wordt opgenomen in toekomstige groepsverdelingen.",
+  "Are you sure you want to delete this run? The results will no longer be available.":
+    "Weet je zeker dat je deze berekening wilt verwijderen? De resultaten zijn daarna niet meer beschikbaar.",
+  "The optimization runs in your browser. Keep this tab open — closing it cancels the computation. Your settings are saved, so you can re-run with one click.":
+    "De berekening gebeurt in je browser. Laat dit tabblad open: als je het sluit, wordt de berekening afgebroken. Je instellingen worden bewaard, zodat je de berekening met één klik opnieuw kunt starten.",
+  "Longer runs explore more solutions, increasing the chance of finding the optimal distribution.":
+    "Een langere rekentijd onderzoekt meer mogelijkheden en vergroot de kans op de optimale groepsverdeling.",
+  "Don't close this browser tab while a run is computing — you'll have to start it again. Your settings will be saved so you can re-run instantly.":
+    "Sluit dit browsertabblad niet tijdens de berekening, anders moet je die opnieuw starten. Je instellingen worden bewaard, zodat je meteen opnieuw kunt beginnen.",
+  "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results.":
+    "Deze berekening is eerder gestart, maar wordt hier momenteel niet uitgevoerd. Start haar opnieuw om de resultaten te berekenen.",
+  "Don't close this tab while the run is computing. The optimization runs in your browser.":
+    "Sluit dit tabblad niet tijdens de berekening. De optimalisatie gebeurt in je browser.",
   "e.g. Project 1": "bv. Project 1",
   "e.g. John Smith": "bv. John Smith",
   "Move back to Active": "Opnieuw actief maken",
@@ -86,7 +124,8 @@ export const extraDutch: Record<string, string> = {
   "Could not update password.": "Het wachtwoord kon niet worden bijgewerkt.",
   "Password updated. You are now signed in.": "Je wachtwoord is bijgewerkt. Je bent nu ingelogd.",
   "Email and password do not match.": "Het e-mailadres en het wachtwoord komen niet overeen.",
-  "If an account exists for that email, a reset link is on its way.": "Als er een account bestaat met dat e-mailadres, ontvang je een link om je wachtwoord opnieuw in te stellen.",
+  "If an account exists for that email, a reset link is on its way.":
+    "Als er een account bestaat met dat e-mailadres, ontvang je een link om je wachtwoord opnieuw in te stellen.",
   "Account created!": "Je account is aangemaakt!",
   "Signed out": "Je bent uitgelogd",
   "Class deleted": "Klas verwijderd",
@@ -120,7 +159,7 @@ export const extraDutch: Record<string, string> = {
   "Give the class a name": "Geef de klas een naam",
   "Need at least 2 students": "Voeg minstens 2 leerlingen toe",
   "Not signed in": "Je bent niet ingelogd",
-  "Failed": "Mislukt",
+  Failed: "Mislukt",
   "Invalid link": "Ongeldige link",
   "Student not in class": "Deze leerling zit niet in deze klas",
   "Failed to add student": "De leerling kon niet worden toegevoegd",
@@ -129,7 +168,8 @@ export const extraDutch: Record<string, string> = {
   "Insert failed": "Het opslaan is mislukt",
   "Email not confirmed": "Het e-mailadres is nog niet bevestigd",
   "Invalid login credentials": "Het e-mailadres en het wachtwoord komen niet overeen.",
-  "Delete this class and all its data? This cannot be undone.": "Deze klas en alle bijbehorende gegevens verwijderen? Dit kan niet ongedaan worden gemaakt.",
+  "Delete this class and all its data? This cannot be undone.":
+    "Deze klas en alle bijbehorende gegevens verwijderen? Dit kan niet ongedaan worden gemaakt.",
   "Alphabetically (A to Z)": "Alfabetisch (A tot Z)",
   "Alphabetically (Z to A)": "Alfabetisch (Z tot A)",
   "Created date (newest first)": "Aanmaakdatum (nieuwste eerst)",
@@ -138,36 +178,38 @@ export const extraDutch: Record<string, string> = {
   "Modified date (oldest first)": "Wijzigingsdatum (oudste eerst)",
   "Succeeded. Click to view distributions.": "Voltooid. Klik om de groepsverdelingen te bekijken.",
   "In progress": "Bezig",
-  "pending": "in afwachting",
-  "completed": "voltooid",
-  "running": "bezig",
-  "error": "fout",
-  "Step": "Stap",
+  pending: "in afwachting",
+  completed: "voltooid",
+  running: "bezig",
+  error: "fout",
+  Step: "Stap",
   "Groups of": "Groepen van",
-  "Group": "Groep",
-  "student": "leerling",
-  "students": "leerlingen",
-  "groups": "groepen",
+  Group: "Groep",
+  student: "leerling",
+  students: "leerlingen",
+  groups: "groepen",
   "some groups +1": "sommige groepen +1",
   "some groups −1": "sommige groepen −1",
   "some groups with 1 additional person": "sommige groepen met 1 persoon extra",
   "some groups with 1 fewer person": "sommige groepen met 1 persoon minder",
-  "of": "van",
+  of: "van",
   "students have submitted their preferences.": "leerlingen hebben hun voorkeuren ingediend.",
   "— submitted on": "— ingediend op",
-  "selected": "geselecteerd",
+  selected: "geselecteerd",
   "Will clone to": "Wordt gekopieerd naar",
   "active class": "actieve klas",
-  "Choose where to clone \"": "Kies naar welke klassen je \"",
-  "\". Only active classes are available as targets.": "\" wilt kopiëren. Alleen actieve klassen kunnen worden gekozen.",
+  'Choose where to clone "': 'Kies naar welke klassen je "',
+  '". Only active classes are available as targets.':
+    '" wilt kopiëren. Alleen actieve klassen kunnen worden gekozen.',
   "Are you sure you want to delete": "Weet je zeker dat je",
-  "? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.": " wilt verwijderen? De ingediende antwoorden en alle voorkeuren die naar deze leerling verwijzen worden verwijderd. De leerling verdwijnt ook uit eerdere groepsverdelingen.",
+  "? Their submissions and any preferences referencing them will be removed, and they will disappear from previous group distributions.":
+    " wilt verwijderen? De ingediende antwoorden en alle voorkeuren die naar deze leerling verwijzen worden verwijderd. De leerling verdwijnt ook uit eerdere groepsverdelingen.",
   "· Absent:": "· Afwezig:",
   "s time limit ·": "s rekentijd ·",
   "absent · status:": "afwezig · status:",
-  "Top": "Beste",
-  "distributions": "groepsverdelingen",
-  "iterations": "iteraties",
+  Top: "Beste",
+  distributions: "groepsverdelingen",
+  iterations: "iteraties",
   "Best score:": "Beste score:",
   "Distribution #": "Verdeling #",
 };

@@ -1,4 +1,4 @@
-import { useTranslation, pageHead } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n";
 import { useState, useRef } from "react";
 import {
   Dialog,
@@ -44,8 +44,12 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
   const [fileDragOver, setFileDragOver] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<{ row: number; column: string } | null>(null);
-  const [selectionCurrent, setSelectionCurrent] = useState<{ row: number; column: string } | null>(null);
+  const [selectionStart, setSelectionStart] = useState<{ row: number; column: string } | null>(
+    null,
+  );
+  const [selectionCurrent, setSelectionCurrent] = useState<{ row: number; column: string } | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -86,7 +90,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
   function applyRawRows(rawRows: string[][]) {
     const nonEmpty = rawRows.filter((r) => r.some((v) => String(v ?? "").trim() !== ""));
-    if (!nonEmpty.length) return toast.error("File is empty");
+    if (!nonEmpty.length) return toast.error(t("File is empty"));
     const colCount = Math.max(...nonEmpty.map((r) => r.length));
     const cols = Array.from({ length: colCount }, (_, i) => columnLabel(i));
     const rows = nonEmpty.map((r) => {
@@ -108,7 +112,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
         header: false,
         skipEmptyLines: true,
         complete: (res) => applyRawRows(res.data as string[][]),
-        error: (err) => toast.error("Parse error: " + err.message),
+        error: (err) => toast.error(t("Parse error: " + err.message)),
       });
     } else if (ext === "xlsx" || ext === "xls") {
       const reader = new FileReader();
@@ -120,12 +124,12 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
           const rawRows = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1, defval: "" });
           applyRawRows(rawRows);
         } catch (err) {
-          toast.error("Could not read file");
+          toast.error(t("Could not read file"));
         }
       };
       reader.readAsArrayBuffer(file);
     } else {
-      toast.error("Please upload a CSV or Excel (.xlsx) file");
+      toast.error(t("Please upload a CSV or Excel (.xlsx) file"));
     }
   }
 
@@ -143,7 +147,7 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
       const [lastRow, lastCol] = lastKey.split(":");
       const rangeSelection = getRange(
         { row: parseInt(lastRow), column: lastCol },
-        { row: rowIndex, column }
+        { row: rowIndex, column },
       );
       // Add range to existing selection, but remove duplicates
       const combined = [...selectedCells, ...rangeSelection];
@@ -169,12 +173,18 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
     setSelectedCells(columnCells);
   }
 
-  function selectRange(start: { row: number; column: string }, end: { row: number; column: string }) {
+  function selectRange(
+    start: { row: number; column: string },
+    end: { row: number; column: string },
+  ) {
     const range = getRange(start, end);
     setSelectedCells(range);
   }
 
-  function getRange(start: { row: number; column: string }, end: { row: number; column: string }): string[] {
+  function getRange(
+    start: { row: number; column: string },
+    end: { row: number; column: string },
+  ): string[] {
     const startRow = Math.min(start.row, end.row);
     const endRow = Math.max(start.row, end.row);
     const startColIndex = columns.indexOf(start.column);
@@ -262,8 +272,8 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
   }
 
   async function create(names: string[]) {
-    if (!name.trim()) return toast.error("Give the class a name");
-    if (names.length < 2) return toast.error("Need at least 2 students");
+    if (!name.trim()) return toast.error(t("Give the class a name"));
+    if (names.length < 2) return toast.error(t("Need at least 2 students"));
     setLoading(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -281,12 +291,12 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
       await supabase.from("share_links").insert({ class_id: cls.id, token: randomToken() });
 
-      toast.success(`Created "${name}" with ${names.length} students`);
+      toast.success(t(`Created "${name}" with ${names.length} students`));
       onCreated?.(cls.id);
       reset();
       onOpenChange(false);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setLoading(false);
     }
@@ -308,7 +318,10 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
         <div className="overflow-y-auto flex-1">
           <div className="space-y-2 px-6">
-            <Label htmlFor="cname">{t("Class name ")}<span className="text-red-500">{t("*")}</span></Label>
+            <Label htmlFor="cname">
+              {t("Class name ")}
+              <span className="text-red-500">{t("*")}</span>
+            </Label>
             <Input
               id="cname"
               value={name}
@@ -320,7 +333,9 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
 
           <div className="mt-3 space-y-2 px-6">
             <Label htmlFor="clabels">{t("Labels")}</Label>
-            <p className="text-xs text-muted-foreground">{t("Press space to add each label. Labels are optional.")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("Press space to add each label. Labels are optional.")}
+            </p>
             <LabelsInput
               id="clabels"
               value={labels}
@@ -331,141 +346,198 @@ export function CreateClassDialog({ open, onOpenChange, onCreated }: Props) {
           </div>
 
           <Tabs defaultValue="paste" className="mt-2 px-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="paste">{t("Enter manually")}</TabsTrigger>
-            <TabsTrigger value="import">{t("Import file")}</TabsTrigger>
-          </TabsList>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="paste">{t("Enter manually")}</TabsTrigger>
+              <TabsTrigger value="import">{t("Import file")}</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="paste" className="space-y-3 pt-2">
-            <Label htmlFor="roster">{t("One name per line")}</Label>
-            <Textarea
-              id="roster"
-              rows={8}
-              value={pasted}
-              onChange={(e) => setPasted(e.target.value)}
-              placeholder={t("Alice\nBilal\nChen\nDamia")}
-            />
-            <DialogFooter>
-              <Button disabled={loading || !name.trim() || namesFromPaste().length === 0} onClick={() => create(namesFromPaste())}>
-                {t(loading ? "Creating…" : `Create class with ${namesFromPaste().length} students`)}
-              </Button>
-            </DialogFooter>
-          </TabsContent>
-
-          <TabsContent value="import" className="space-y-3 pt-2">
-            <label
-              className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${
-                fileDragOver
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-muted/30 hover:bg-muted/50"
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setFileDragOver(true);
-              }}
-              onDragLeave={(e) => {
-                e.preventDefault();
-                setFileDragOver(false);
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                setFileDragOver(false);
-                const file = e.dataTransfer.files?.[0];
-                if (file) handleFile(file);
-              }}
-            >
-              <Upload className="mb-2 h-6 w-6 text-muted-foreground" />
-              <span className="text-sm font-medium">{t("Drag &amp; drop a CSV or Excel file here, or click to browse")}</span>
-              <span className="mt-1 text-xs text-muted-foreground">{t(".csv, .xlsx")}</span>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            <TabsContent value="paste" className="space-y-3 pt-2">
+              <Label htmlFor="roster">{t("One name per line")}</Label>
+              <Textarea
+                id="roster"
+                rows={8}
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                placeholder={t("Alice\nBilal\nChen\nDamia")}
               />
-            </label>
+              <DialogFooter>
+                <Button
+                  disabled={loading || !name.trim() || namesFromPaste().length === 0}
+                  onClick={() => create(namesFromPaste())}
+                >
+                  {t(
+                    loading ? "Creating…" : `Create class with ${namesFromPaste().length} students`,
+                  )}
+                </Button>
+              </DialogFooter>
+            </TabsContent>
 
-            {columns.length > 0 && (
-              <>
-                <div className="space-y-1.5">
-                  <Label>{t("Select the cells containing student names")}</Label>
-                  <p className="text-xs text-muted-foreground">{t("Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.")}</p>
-                  <div ref={tableContainerRef} className="rounded-md border border-border bg-card p-2">
-                    <table className="min-w-full border-collapse text-left text-xs select-none" onMouseUp={handleTableMouseUp} onMouseLeave={() => { if (dragging) { setDragging(false); } }}>
-                      <thead>
-                        <tr>
-                          {columns.map((column) => (
-                            <th 
-                              key={column} 
-                              onClick={() => selectColumn(column)}
-                              className="border border-border bg-muted/50 px-2 py-1 font-medium text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
-                              title={t("Click to select all values in this column")}
-                            >
-                              {column}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parsedRows.slice(0, 80).map((row, rowIndex) => (
-                          <tr key={`${rowIndex}`}>
-                            {columns.map((column) => {
-                              const value = String(row[column] ?? "").trim();
-                              const key = `${rowIndex}:${column}`;
-                              const selected = selectedCells.includes(key);
-                              const isInDragRange = dragging && selectionStart && selectionCurrent
-                                ? (rowIndex >= Math.min(selectionStart.row, selectionCurrent.row) && 
-                                   rowIndex <= Math.max(selectionStart.row, selectionCurrent.row) &&
-                                   columns.indexOf(column) >= Math.min(columns.indexOf(selectionStart.column), columns.indexOf(selectionCurrent.column)) &&
-                                   columns.indexOf(column) <= Math.max(columns.indexOf(selectionStart.column), columns.indexOf(selectionCurrent.column)))
-                                : false;
-                              return (
-                                <td key={column} className="border border-border p-1">
-                                  <button
-                                    type="button"
-                                    className={`block w-full rounded px-2 py-1 text-left cursor-cell transition-colors ${
-                                      selected || isInDragRange
-                                        ? "bg-primary text-primary-foreground"
-                                        : value
-                                          ? "bg-background hover:bg-muted"
-                                          : "bg-muted/40 text-muted-foreground"
-                                    }`}
-                                    onMouseDown={(e) => value && handleCellMouseDown(rowIndex, column, e)}
-                                    onMouseEnter={() => value && handleCellMouseEnter(rowIndex, column)}
-                                    onClick={(e) => value && handleCellClick(rowIndex, column, e.ctrlKey || e.metaKey, e.shiftKey)}
-                                    disabled={!value}
-                                  >
-                                    {value || "—"}
-                                  </button>
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div className="rounded-md border border-border bg-card p-3 text-xs">
-                  <div className="mb-1 font-medium text-muted-foreground">{t("Selected — ")}{namesFromImport().length}{t(" students")}</div>
-                  <div className="max-h-24 overflow-auto text-foreground">
-                    {namesFromImport().slice(0, 30).join(", ")}
-                    {t(namesFromImport().length > 30 ? "…" : "")}
-                  </div>
-                </div>
-              </>
-            )}
-
-            <DialogFooter>
-              <Button
-                disabled={loading || !name.trim() || namesFromImport().length === 0}
-                onClick={() => create(namesFromImport())}
+            <TabsContent value="import" className="space-y-3 pt-2">
+              <label
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${
+                  fileDragOver
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-muted/30 hover:bg-muted/50"
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setFileDragOver(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setFileDragOver(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setFileDragOver(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) handleFile(file);
+                }}
               >
-                {t(loading ? "Creating…" : `Create class with ${namesFromImport().length} students`)}
-              </Button>
-            </DialogFooter>
-          </TabsContent>
-        </Tabs>
+                <Upload className="mb-2 h-6 w-6 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  {t("Drag &amp; drop a CSV or Excel file here, or click to browse")}
+                </span>
+                <span className="mt-1 text-xs text-muted-foreground">{t(".csv, .xlsx")}</span>
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                />
+              </label>
+
+              {columns.length > 0 && (
+                <>
+                  <div className="space-y-1.5">
+                    <Label>{t("Select the cells containing student names")}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        "Click a column header to select all values in a column, or select multiple cells like you would in Excel: click to select one cell, drag to select a range. Shift+Click to extend selection pr Ctrl+Click to toggle individual cells.",
+                      )}
+                    </p>
+                    <div
+                      ref={tableContainerRef}
+                      className="rounded-md border border-border bg-card p-2"
+                    >
+                      <table
+                        className="min-w-full border-collapse text-left text-xs select-none"
+                        onMouseUp={handleTableMouseUp}
+                        onMouseLeave={() => {
+                          if (dragging) {
+                            setDragging(false);
+                          }
+                        }}
+                      >
+                        <thead>
+                          <tr>
+                            {columns.map((column) => (
+                              <th
+                                key={column}
+                                onClick={() => selectColumn(column)}
+                                className="border border-border bg-muted/50 px-2 py-1 font-medium text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
+                                title={t("Click to select all values in this column")}
+                              >
+                                {column}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedRows.slice(0, 80).map((row, rowIndex) => (
+                            <tr key={`${rowIndex}`}>
+                              {columns.map((column) => {
+                                const value = String(row[column] ?? "").trim();
+                                const key = `${rowIndex}:${column}`;
+                                const selected = selectedCells.includes(key);
+                                const isInDragRange =
+                                  dragging && selectionStart && selectionCurrent
+                                    ? rowIndex >=
+                                        Math.min(selectionStart.row, selectionCurrent.row) &&
+                                      rowIndex <=
+                                        Math.max(selectionStart.row, selectionCurrent.row) &&
+                                      columns.indexOf(column) >=
+                                        Math.min(
+                                          columns.indexOf(selectionStart.column),
+                                          columns.indexOf(selectionCurrent.column),
+                                        ) &&
+                                      columns.indexOf(column) <=
+                                        Math.max(
+                                          columns.indexOf(selectionStart.column),
+                                          columns.indexOf(selectionCurrent.column),
+                                        )
+                                    : false;
+                                return (
+                                  <td key={column} className="border border-border p-1">
+                                    <button
+                                      type="button"
+                                      className={`block w-full rounded px-2 py-1 text-left cursor-cell transition-colors ${
+                                        selected || isInDragRange
+                                          ? "bg-primary text-primary-foreground"
+                                          : value
+                                            ? "bg-background hover:bg-muted"
+                                            : "bg-muted/40 text-muted-foreground"
+                                      }`}
+                                      onMouseDown={(e) =>
+                                        value && handleCellMouseDown(rowIndex, column, e)
+                                      }
+                                      onMouseEnter={() =>
+                                        value && handleCellMouseEnter(rowIndex, column)
+                                      }
+                                      onClick={(e) =>
+                                        value &&
+                                        handleCellClick(
+                                          rowIndex,
+                                          column,
+                                          e.ctrlKey || e.metaKey,
+                                          e.shiftKey,
+                                        )
+                                      }
+                                      disabled={!value}
+                                    >
+                                      <span translate="no" className="notranslate">
+                                        {value || "—"}
+                                      </span>
+                                    </button>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-border bg-card p-3 text-xs">
+                    <div className="mb-1 font-medium text-muted-foreground">
+                      {t("Selected — ")}
+                      {namesFromImport().length}
+                      {t(" students")}
+                    </div>
+                    <div className="max-h-24 overflow-auto text-foreground">
+                      <span translate="no" className="notranslate">
+                        {namesFromImport().slice(0, 30).join(", ")}
+                      </span>
+                      {t(namesFromImport().length > 30 ? "…" : "")}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <DialogFooter>
+                <Button
+                  disabled={loading || !name.trim() || namesFromImport().length === 0}
+                  onClick={() => create(namesFromImport())}
+                >
+                  {t(
+                    loading
+                      ? "Creating…"
+                      : `Create class with ${namesFromImport().length} students`,
+                  )}
+                </Button>
+              </DialogFooter>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <div className="border-t px-6 py-4">

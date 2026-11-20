@@ -9,7 +9,12 @@ export const getRouter = () => {
 
   const router = createRouter({
     routeTree,
-    context: { queryClient },
+    context: {
+      queryClient,
+      get locale() {
+        return locale;
+      },
+    },
     rewrite: {
       input: ({ url }) => {
         locale = localeFromPathname(url.pathname);

@@ -17,7 +17,12 @@ import { toast } from "sonner";
 import { getPublicForm, submitPublicForm } from "@/lib/public-form.functions";
 
 export const Route = createFileRoute("/s/$token")({
-  head: ({ match }) => pageHead("Student form — Group Creator", "Submit your classroom group preferences privately.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Student form — Group Creator",
+      "Submit your classroom group preferences privately.",
+      match.context.locale,
+    ),
   component: StudentForm,
 });
 
@@ -86,7 +91,9 @@ export function StudentForm() {
           <CardContent className="flex flex-col items-center py-10 text-center">
             <CheckCircle2 className="mb-3 h-10 w-10 text-primary" />
             <h2 className="text-xl font-semibold">{t("Thanks!")}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{t("Your preferences have been saved. You can close this tab.")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("Your preferences have been saved. You can close this tab.")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -110,11 +117,15 @@ export function StudentForm() {
                 <SelectValue placeholder={t("Select your name")} />
               </SelectTrigger>
               <SelectContent position="item-aligned" portal={false}>
-                {[...data.students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    <span className="notranslate" translate="no">{s.name}</span>
-                  </SelectItem>
-                ))}
+                {[...data.students]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      <span className="notranslate" translate="no">
+                        {s.name}
+                      </span>
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </CardContent>
@@ -124,8 +135,18 @@ export function StudentForm() {
           <Card>
             <CardHeader>
               <CardTitle>{t("For each classmate")}</CardTitle>
-              <CardDescription>{t("Choose whether you'd like to work with them. Your classmates won't see your answers.")}<br />
-                <strong>{t("It is advised not to enter too many \"Not together\" preferences.")}</strong>{t(" The fewer \"Not together\" preferences you enter, the more likely they are to be respected.")}</CardDescription>
+              <CardDescription>
+                {t(
+                  "Choose whether you'd like to work with them. Your classmates won't see your answers.",
+                )}
+                <br />
+                <strong>
+                  {t('It is advised not to enter too many "Not together" preferences.')}
+                </strong>
+                {t(
+                  ' The fewer "Not together" preferences you enter, the more likely they are to be respected.',
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border">
@@ -136,7 +157,9 @@ export function StudentForm() {
                     const v = prefs.get(s.id) ?? "neutral";
                     return (
                       <li key={s.id} className="flex items-center justify-between gap-3 py-3">
-                        <span className="font-medium notranslate" translate="no">{s.name}</span>
+                        <span className="font-medium notranslate" translate="no">
+                          {s.name}
+                        </span>
                         <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
                           {(["with", "neutral", "avoid"] as Pref[]).map((opt) => {
                             const label =

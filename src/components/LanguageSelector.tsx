@@ -16,7 +16,9 @@ export function LanguageSelector() {
 
   function switchLanguage(next: Locale) {
     const path = withLocale(publicPath, next);
-    window.location.assign(`${path}${location.searchStr}${location.hash ? `#${location.hash}` : ""}`);
+    window.location.assign(
+      `${path}${location.searchStr}${location.hash ? `#${location.hash}` : ""}`,
+    );
   }
 
   return (
@@ -33,8 +35,12 @@ export function LanguageSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem translate="no" onSelect={() => switchLanguage("en")}>English</DropdownMenuItem>
-        <DropdownMenuItem translate="no" onSelect={() => switchLanguage("nl")}>Nederlands</DropdownMenuItem>
+        <DropdownMenuItem translate="no" onSelect={() => switchLanguage("en")}>
+          English
+        </DropdownMenuItem>
+        <DropdownMenuItem translate="no" onSelect={() => switchLanguage("nl")}>
+          Nederlands
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -9,7 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/reset-password")({
-  head: ({ match }) => pageHead("Reset password — Group Creator", "Reset the password for your Group Creator account.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Reset password — Group Creator",
+      "Reset the password for your Group Creator account.",
+      match.context.locale,
+    ),
   component: ResetPasswordPage,
 });
 
@@ -48,23 +53,25 @@ export function ResetPasswordPage() {
 
   async function updatePassword(e: React.FormEvent) {
     e.preventDefault();
-    if (password !== confirm) return toast.error("Passwords do not match.");
+    if (password !== confirm) return toast.error(t("Passwords do not match."));
     setLoading(true);
     const { resetPassword } = await import("@/lib/auth.functions");
     try {
       await resetPassword({ data: { password } });
     } catch (err) {
       setLoading(false);
-      return toast.error(err instanceof Error ? err.message : "Could not update password.");
+      return toast.error(t(err instanceof Error ? err.message : "Could not update password."));
     }
     setLoading(false);
-    toast.success("Password updated. You are now signed in.");
+    toast.success(t("Password updated. You are now signed in."));
     navigate({ to: "/dashboard" });
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <Link to="/auth" className="mb-6 text-sm text-muted-foreground hover:text-foreground">{t("← Back to sign in")}</Link>
+      <Link to="/auth" className="mb-6 text-sm text-muted-foreground hover:text-foreground">
+        {t("← Back to sign in")}
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{t("Choose a new password")}</CardTitle>
@@ -72,7 +79,11 @@ export function ResetPasswordPage() {
         <CardContent>
           {invalid ? (
             <div className="space-y-3 pt-2">
-              <p className="text-sm text-muted-foreground">{t("This reset link is invalid or has expired. Request a new one from the sign-in page.")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "This reset link is invalid or has expired. Request a new one from the sign-in page.",
+                )}
+              </p>
               <Link to="/auth">
                 <Button className="w-full">{t("Back to sign in")}</Button>
               </Link>

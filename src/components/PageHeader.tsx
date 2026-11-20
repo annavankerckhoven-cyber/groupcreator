@@ -1,4 +1,4 @@
-import { useTranslation, pageHead } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Users, Coffee, CircleUserRound, Home } from "lucide-react";
@@ -19,7 +19,9 @@ export function PageHeader() {
         <div className="grid h-8 w-8 place-content-center rounded-lg bg-primary text-primary-foreground">
           <Users className="h-4 w-4" />
         </div>
-        <span className="hidden sm:inline text-lg font-semibold tracking-tight">{t("Group Creator")}</span>
+        <span className="hidden sm:inline text-lg font-semibold tracking-tight">
+          {t("Group Creator")}
+        </span>
       </Link>
 
       <div className="ml-auto flex flex-nowrap items-center gap-2">
@@ -37,7 +39,10 @@ export function PageHeader() {
           </a>
         </Button>
         <Button asChild variant="default" className="shrink-0 whitespace-nowrap">
-          <Link to={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center gap-2 whitespace-nowrap">
+          <Link
+            to={signedIn ? "/dashboard" : "/auth"}
+            className="inline-flex items-center gap-2 whitespace-nowrap"
+          >
             {signedIn ? <Home className="h-4 w-4" /> : <CircleUserRound className="h-4 w-4" />}
             <span className="hidden sm:inline">
               {t(signedIn ? "Go to dashboard" : "Log in / Sign up")}

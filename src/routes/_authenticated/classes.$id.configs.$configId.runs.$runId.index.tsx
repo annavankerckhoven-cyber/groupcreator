@@ -27,7 +27,12 @@ import type { WorkerOutbound } from "@/workers/optimizer.worker";
 import OptimizerWorker from "@/workers/optimizer.worker?worker";
 
 export const Route = createFileRoute("/_authenticated/classes/$id/configs/$configId/runs/$runId/")({
-  head: ({ match }) => pageHead("Run — Group Creator", "Review group distributions and their preference scores.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Run — Group Creator",
+      "Review group distributions and their preference scores.",
+      match.context.locale,
+    ),
   validateSearch: z.object({ autostart: z.coerce.number().optional().catch(undefined) }),
   component: RunPage,
 });
@@ -36,12 +41,20 @@ type RunStatus = "pending" | "running" | "completed" | "error";
 
 export function RunPage() {
   const { t, locale } = useTranslation();
-  const { id, configId, runId } = useParams({ strict: false }) as { id: string; configId: string; runId: string };
+  const { id, configId, runId } = useParams({ strict: false }) as {
+    id: string;
+    configId: string;
+    runId: string;
+  };
   const { autostart } = useSearch({ strict: false }) as { autostart?: number };
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const [progress, setProgress] = useState<{ elapsedMs: number; iterations: number; bestScore: number } | null>(null);
+  const [progress, setProgress] = useState<{
+    elapsedMs: number;
+    iterations: number;
+    bestScore: number;
+  } | null>(null);
   const [running, setRunning] = useState(false);
   const [editingRunName, setEditingRunName] = useState(false);
   const [newRunName, setNewRunName] = useState("");
@@ -54,12 +67,24 @@ export function RunPage() {
     queryKey: ["run", runId],
     queryFn: async () => {
       const [run, absent, students, project, subs, dists, cls] = await Promise.all([
-        supabase.from("runs").select("id, name, status, time_limit_seconds, is_favorite, completed_at, error_message").eq("id", runId).single(),
+        supabase
+          .from("runs")
+          .select("id, name, status, time_limit_seconds, is_favorite, completed_at, error_message")
+          .eq("id", runId)
+          .single(),
         supabase.from("run_absent").select("student_id").eq("run_id", runId),
         supabase.from("students").select("id, name").eq("class_id", id).order("sort_order"),
-        supabase.from("group_configs").select("id, name, group_size, size_policy").eq("id", configId).single(),
+        supabase
+          .from("group_configs")
+          .select("id, name, group_size, size_policy")
+          .eq("id", configId)
+          .single(),
         supabase.from("submissions").select("id, student_id").eq("class_id", id),
-        supabase.from("run_distributions").select("id, rank, score, is_favorite").eq("run_id", runId).order("rank"),
+        supabase
+          .from("run_distributions")
+          .select("id, rank, score, is_favorite")
+          .eq("run_id", runId)
+          .order("rank"),
         supabase.from("classes").select("archived_at").eq("id", id).single(),
       ]);
 
@@ -72,7 +97,10 @@ export function RunPage() {
 
       const submissionIds = (subs.data ?? []).map((s) => s.id);
       const prefsResult = submissionIds.length
-        ? await supabase.from("preferences").select("submission_id, target_student_id, kind").in("submission_id", submissionIds)
+        ? await supabase
+            .from("preferences")
+            .select("submission_id, target_student_id, kind")
+            .in("submission_id", submissionIds)
         : null;
       if (prefsResult?.error) throw prefsResult.error;
       const prefs = prefsResult?.data ?? [];
@@ -81,7 +109,10 @@ export function RunPage() {
       let distGroups: { distribution_id: string; group_index: number; student_id: string }[] = [];
       if ((dists.data ?? []).length) {
         const distIds = (dists.data ?? []).map((d) => d.id);
-        const distGroupsResult = await supabase.from("run_distribution_groups").select("distribution_id, group_index, student_id").in("distribution_id", distIds);
+        const distGroupsResult = await supabase
+          .from("run_distribution_groups")
+          .select("distribution_id, group_index, student_id")
+          .in("distribution_id", distIds);
         if (distGroupsResult.error) throw distGroupsResult.error;
         distGroups = distGroupsResult.data ?? [];
       }
@@ -93,15 +124,26 @@ export function RunPage() {
         project: project.data!,
         classArchived: !!cls.data?.archived_at,
         prefs: prefs
-          .map((p) => ({ from: subById.get(p.submission_id), target: p.target_student_id, kind: p.kind as "with" | "avoid" }))
-          .filter((p): p is { from: string; target: string; kind: "with" | "avoid" } => Boolean(p.from)),
+          .map((p) => ({
+            from: subById.get(p.submission_id),
+            target: p.target_student_id,
+            kind: p.kind as "with" | "avoid",
+          }))
+          .filter((p): p is { from: string; target: string; kind: "with" | "avoid" } =>
+            Boolean(p.from),
+          ),
         distributions: dists.data ?? [],
         distGroups,
       };
     },
   });
 
-  useEffect(() => () => { workerRef.current?.terminate(); }, []);
+  useEffect(
+    () => () => {
+      workerRef.current?.terminate();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!data || startedRef.current) return;
@@ -114,8 +156,11 @@ export function RunPage() {
 
   async function markRunError(message: string, detail?: string) {
     const errorMessage = detail ? `${message}: ${detail}` : message;
-    const { error } = await supabase.from("runs").update({ status: "error", error_message: errorMessage }).eq("id", runId);
-    if (error) toast.error(`${message}: ${error.message}`);
+    const { error } = await supabase
+      .from("runs")
+      .update({ status: "error", error_message: errorMessage })
+      .eq("id", runId);
+    if (error) toast.error(t(`${message}: ${error.message}`));
     await qc.invalidateQueries({ queryKey: ["run", runId] });
     refetch();
   }
@@ -124,7 +169,7 @@ export function RunPage() {
     if (!data) return;
     const activeIds = data.students.map((s) => s.id).filter((sid) => !data.absent.has(sid));
     if (activeIds.length === 0) {
-      toast.error("No present students to group.");
+      toast.error(t("No present students to group."));
       await markRunError("Run could not start", "No present students to group.");
       startedRef.current = false;
       return;
@@ -137,9 +182,12 @@ export function RunPage() {
 
     setRunning(true);
     setProgress({ elapsedMs: 0, iterations: 0, bestScore: 0 });
-    const { error: statusError } = await supabase.from("runs").update({ status: "running", error_message: null, completed_at: null }).eq("id", runId);
+    const { error: statusError } = await supabase
+      .from("runs")
+      .update({ status: "running", error_message: null, completed_at: null })
+      .eq("id", runId);
     if (statusError) {
-      toast.error(`Failed to start run: ${statusError.message}`);
+      toast.error(t(`Failed to start run: ${statusError.message}`));
       setRunning(false);
       startedRef.current = false;
       return;
@@ -150,7 +198,7 @@ export function RunPage() {
     try {
       worker = new OptimizerWorker();
     } catch (err) {
-      toast.error("Failed to start optimizer: " + (err as Error).message);
+      toast.error(t("Failed to start optimizer: " + (err as Error).message));
       await markRunError("Optimizer failed to start", (err as Error).message);
       setRunning(false);
       startedRef.current = false;
@@ -167,7 +215,7 @@ export function RunPage() {
     };
 
     worker.onerror = async (e) => {
-      toast.error("Optimizer crashed: " + (e.message || "unknown error"));
+      toast.error(t("Optimizer crashed: " + (e.message || "unknown error")));
       await markRunError("Optimizer crashed", e.message || "unknown error");
       setRunning(false);
       worker.terminate();
@@ -176,9 +224,14 @@ export function RunPage() {
 
     worker.onmessage = async (e: MessageEvent<WorkerOutbound>) => {
       const msg = e.data;
-      if (msg.type === "progress") setProgress({ elapsedMs: msg.elapsedMs, iterations: msg.iterations, bestScore: msg.bestScore });
+      if (msg.type === "progress")
+        setProgress({
+          elapsedMs: msg.elapsedMs,
+          iterations: msg.iterations,
+          bestScore: msg.bestScore,
+        });
       else if (msg.type === "error") {
-        toast.error(msg.error);
+        toast.error(t(msg.error));
         await markRunError("Optimizer failed", msg.error);
         setRunning(false);
         worker.terminate();
@@ -186,9 +239,9 @@ export function RunPage() {
       } else if (msg.type === "done") {
         try {
           await persistResults(msg.result);
-          toast.success("Run complete");
+          toast.success(t("Run complete"));
         } catch (err) {
-          toast.error((err as Error).message);
+          toast.error(t((err as Error).message));
           await markRunError("Results could not be saved", (err as Error).message);
         } finally {
           setRunning(false);
@@ -202,39 +255,61 @@ export function RunPage() {
   }
 
   async function persistResults(results: TopResult[]) {
-    const { error: deleteError } = await supabase.from("run_distributions").delete().eq("run_id", runId);
+    const { error: deleteError } = await supabase
+      .from("run_distributions")
+      .delete()
+      .eq("run_id", runId);
     if (deleteError) throw deleteError;
 
     for (let i = 0; i < results.length; i++) {
       const r = results[i];
-      const { data: dist, error } = await supabase.from("run_distributions").insert({ run_id: runId, rank: i + 1, score: r.score }).select("id").single();
+      const { data: dist, error } = await supabase
+        .from("run_distributions")
+        .insert({ run_id: runId, rank: i + 1, score: r.score })
+        .select("id")
+        .single();
       if (error || !dist) throw error ?? new Error("Insert failed");
       const rows: { distribution_id: string; group_index: number; student_id: string }[] = [];
-      r.groups.forEach((g, gi) => g.forEach((sid) => rows.push({ distribution_id: dist.id, group_index: gi, student_id: sid })));
+      r.groups.forEach((g, gi) =>
+        g.forEach((sid) =>
+          rows.push({ distribution_id: dist.id, group_index: gi, student_id: sid }),
+        ),
+      );
       if (rows.length) {
         const { error: rgErr } = await supabase.from("run_distribution_groups").insert(rows);
         if (rgErr) throw rgErr;
       }
     }
 
-    const { error: completeError } = await supabase.from("runs").update({ status: "completed", completed_at: new Date().toISOString(), error_message: null }).eq("id", runId);
+    const { error: completeError } = await supabase
+      .from("runs")
+      .update({ status: "completed", completed_at: new Date().toISOString(), error_message: null })
+      .eq("id", runId);
     if (completeError) throw completeError;
   }
 
-
   async function toggleDistFavorite(distId: string, current: boolean) {
     if (current) {
-      const { error } = await supabase.from("run_distributions").update({ is_favorite: false }).eq("id", distId);
-      if (error) return toast.error(error.message);
+      const { error } = await supabase
+        .from("run_distributions")
+        .update({ is_favorite: false })
+        .eq("id", distId);
+      if (error) return toast.error(t(error.message));
       qc.invalidateQueries({ queryKey: ["run", runId] });
       return;
     }
 
-    const { error: clearError } = await supabase.from("run_distributions").update({ is_favorite: false }).eq("run_id", runId);
-    if (clearError) return toast.error(clearError.message);
+    const { error: clearError } = await supabase
+      .from("run_distributions")
+      .update({ is_favorite: false })
+      .eq("run_id", runId);
+    if (clearError) return toast.error(t(clearError.message));
 
-    const { error } = await supabase.from("run_distributions").update({ is_favorite: true }).eq("id", distId);
-    if (error) return toast.error(error.message);
+    const { error } = await supabase
+      .from("run_distributions")
+      .update({ is_favorite: true })
+      .eq("id", distId);
+    if (error) return toast.error(t(error.message));
     qc.invalidateQueries({ queryKey: ["run", runId] });
   }
 
@@ -246,11 +321,11 @@ export function RunPage() {
         .update({ name: newRunName.trim() })
         .eq("id", runId);
       if (error) throw error;
-      toast.success("Run name updated");
+      toast.success(t("Run name updated"));
       setEditingRunName(false);
       await qc.invalidateQueries({ queryKey: ["run", runId] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     }
   }
 
@@ -278,20 +353,42 @@ export function RunPage() {
   const nameOf = (sid: string) => nameById.get(sid) ?? sid;
 
   function distributionDetails(groups: string[][]) {
-    const nt = (name: string) => <span className="notranslate" translate="no">{name}</span>;
+    if (!data) return { lonely: [], conflicts: [] };
+    const nt = (name: string) => (
+      <span className="notranslate" translate="no">
+        {name}
+      </span>
+    );
     const lonely: ReactNode[] = [];
     const conflicts: ReactNode[] = [];
     for (const g of groups) {
       const members = new Set(g);
       for (const sid of g) {
         const picked = friendCount.get(sid) ?? 0;
-        const hasFriend = data.prefs.some((p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target));
+        const hasFriend = data.prefs.some(
+          (p) => p.kind === "with" && p.from === sid && p.target !== sid && members.has(p.target),
+        );
         if (picked > 0 && !hasFriend) {
-          lonely.push(<>{nt(nameOf(sid))} has none of their {picked} selected friend{picked === 1 ? "" : "s"} in their group</>);
+          lonely.push(
+            <>
+              {nt(nameOf(sid))}
+              {locale === "nl"
+                ? ` zit bij geen van de ${picked} gekozen vrienden in de groep`
+                : ` has none of their ${picked} selected friend${picked === 1 ? "" : "s"} in their group`}
+            </>,
+          );
         }
         for (const p of data.prefs) {
           if (p.kind === "avoid" && p.from === sid && p.target !== sid && members.has(p.target)) {
-            conflicts.push(<>{nt(nameOf(sid))} does not want to be in the same group as {nt(nameOf(p.target))}</>);
+            conflicts.push(
+              <>
+                {nt(nameOf(sid))}
+                {locale === "nl"
+                  ? " wil niet in dezelfde groep zitten als "
+                  : " does not want to be in the same group as "}
+                {nt(nameOf(p.target))}
+              </>,
+            );
           }
         }
       }
@@ -299,13 +396,18 @@ export function RunPage() {
     return { lonely, conflicts };
   }
 
-
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <Link to="/classes/$id/configs/$configId" params={{ id, configId }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
-            <ArrowLeft className="h-3.5 w-3.5" />{t(" Back to project")}</Link>
+          <Link
+            to="/classes/$id/configs/$configId"
+            params={{ id, configId }}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            {t(" Back to project")}
+          </Link>
           {editingRunName ? (
             <div className="mt-2">
               <Input
@@ -330,10 +432,16 @@ export function RunPage() {
               }}
               title={t(isArchived ? "" : "Click to edit run name")}
             >
-              <h1 className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}>
-                <span className="notranslate" translate="no">{data?.run.name || "Run"}</span>
+              <h1
+                className={`text-2xl font-semibold ${!isArchived ? "group-hover:text-muted-foreground" : ""}`}
+              >
+                <span className="notranslate" translate="no">
+                  {data?.run.name || "Run"}
+                </span>
                 {isArchived && (
-                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">{t("Archived")}</span>
+                  <span className="ml-3 rounded-md bg-yellow-100 px-2 py-0.5 align-middle text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                    {t("Archived")}
+                  </span>
                 )}
               </h1>
               {!isArchived && (
@@ -342,15 +450,32 @@ export function RunPage() {
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            <span className="notranslate" translate="no">{data.project.name}</span>{t(" · ")}{timeSec}{t("s time limit · ")}{data.absent.size}{t(" absent · status: ")}{status}
+            <span className="notranslate" translate="no">
+              {data.project.name}
+            </span>
+            {t(" · ")}
+            {timeSec}
+            {t("s time limit · ")}
+            {data.absent.size}
+            {t(" absent · status: ")}
+            {t(status)}
           </p>
           {data.absent.size > 0 && (
-            <p className="text-sm text-destructive">{t("Absent students: ")}<span className="notranslate" translate="no">{Array.from(data.absent).map((id) => nameById.get(id)).filter(Boolean).join(", ")}</span>
+            <p className="text-sm text-destructive">
+              {t("Absent students: ")}
+              <span className="notranslate" translate="no">
+                {Array.from(data.absent)
+                  .map((id) => nameById.get(id))
+                  .filter(Boolean)
+                  .join(", ")}
+              </span>
             </p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Label htmlFor="show-details" className="text-sm font-normal text-muted-foreground">{t("Show distribution details")}</Label>
+        <div className="flex max-w-[45%] items-center gap-2">
+          <Label htmlFor="show-details" className="text-sm font-normal text-muted-foreground">
+            {t("Show distribution details")}
+          </Label>
           <Switch
             id="show-details"
             checked={showDetails}
@@ -366,11 +491,17 @@ export function RunPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("Show distribution details?")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("Are you sure you want to show the distribution details? It contains sensitive information that should not be shared with students.")}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {t(
+                "Are you sure you want to show the distribution details? It contains sensitive information that should not be shared with students.",
+              )}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setShowDetails(true)}>{t("Show details")}</AlertDialogAction>
+            <AlertDialogAction onClick={() => setShowDetails(true)}>
+              {t("Show details")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -381,9 +512,11 @@ export function RunPage() {
             <div className="flex items-start gap-2 text-amber-900 dark:text-amber-200">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <p className="text-sm">
-                {t(status === "running"
-                  ? "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results."
-                  : "Don't close this tab while the run is computing. The optimization runs in your browser.")}
+                {t(
+                  status === "running"
+                    ? "This run was started earlier, but no browser is currently computing it here. Start it again to recompute the results."
+                    : "Don't close this tab while the run is computing. The optimization runs in your browser.",
+                )}
               </p>
             </div>
             {status === "error" && data.run.error_message && (
@@ -391,8 +524,14 @@ export function RunPage() {
                 {t(data.run.error_message)}
               </p>
             )}
-            <Button onClick={() => { startedRef.current = true; void startRun(); }}>
-              <Play className="mr-1.5 h-4 w-4" /> {t(status === "running" || status === "error" ? "Restart run" : "Start run")}
+            <Button
+              onClick={() => {
+                startedRef.current = true;
+                void startRun();
+              }}
+            >
+              <Play className="mr-1.5 h-4 w-4" />{" "}
+              {t(status === "running" || status === "error" ? "Restart run" : "Start run")}
             </Button>
           </CardContent>
         </Card>
@@ -402,14 +541,27 @@ export function RunPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">{t("Optimizing…")}</CardTitle>
-            <CardDescription>{t("Keep this tab open. Closing it cancels the run.")}</CardDescription>
+            <CardDescription>
+              {t("Keep this tab open. Closing it cancels the run.")}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Progress value={pct} />
             <div className="flex justify-between text-xs tabular-nums text-muted-foreground">
-              <span>{Math.floor((progress?.elapsedMs ?? 0) / 1000)}{t("s / ")}{timeSec}{t("s")}</span>
-              <span>{progress?.iterations ?? 0}{t(" iterations")}</span>
-              <span>{t("Best score: ")}{progress?.bestScore ?? 0}</span>
+              <span>
+                {Math.floor((progress?.elapsedMs ?? 0) / 1000)}
+                {t("s / ")}
+                {timeSec}
+                {t("s")}
+              </span>
+              <span>
+                {progress?.iterations ?? 0}
+                {t(" iterations")}
+              </span>
+              <span>
+                {t("Best score: ")}
+                {progress?.bestScore ?? 0}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -417,7 +569,11 @@ export function RunPage() {
 
       {status === "completed" && data.distributions.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">{t("Top ")}{data.distributions.length}{t(" distributions")}</h2>
+          <h2 className="text-lg font-semibold">
+            {t("Top ")}
+            {data.distributions.length}
+            {t(" distributions")}
+          </h2>
           <div className="grid gap-4 md:grid-cols-2">
             {data.distributions.map((d) => {
               const groups = groupsByDist.get(d.id) ?? [];
@@ -433,25 +589,60 @@ export function RunPage() {
                 <Card key={d.id} className={outlineClass}>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="text-base">{t("#")}{d.rank}{t(" · Score ")}{d.score}</CardTitle>
-                      <CardDescription>{groups.length}{t(" groups")}</CardDescription>
+                      <CardTitle className="text-base">
+                        {t("#")}
+                        {d.rank}
+                        {t(" · Score ")}
+                        {d.score}
+                      </CardTitle>
+                      <CardDescription>
+                        {groups.length}
+                        {t(" groups")}
+                      </CardDescription>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => toggleDistFavorite(d.id, d.is_favorite)} aria-label={t("Favorite distribution")}>
-                        <Heart className={`h-4 w-4 ${d.is_favorite ? "fill-primary text-primary" : ""}`} />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleDistFavorite(d.id, d.is_favorite)}
+                        aria-label={t("Favorite distribution")}
+                      >
+                        <Heart
+                          className={`h-4 w-4 ${d.is_favorite ? "fill-primary text-primary" : ""}`}
+                        />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => navigate({ to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present", params: { id, configId, runId, distId: d.id } })}>
-                        <Eye className="mr-1.5 h-4 w-4" />{t(" View")}</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate({
+                            to: "/classes/$id/configs/$configId/runs/$runId/distributions/$distId/present",
+                            params: { id, configId, runId, distId: d.id },
+                          })
+                        }
+                      >
+                        <Eye className="mr-1.5 h-4 w-4" />
+                        {t(" View")}
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       {groups.map((g, gi) => (
                         <div key={gi} className="rounded-md border border-border p-2.5">
-                          <div className="mb-1 text-xs font-medium text-muted-foreground">{t("Group ")}{gi + 1}</div>
+                          <div className="mb-1 text-xs font-medium text-muted-foreground">
+                            {t("Group ")}
+                            {gi + 1}
+                          </div>
                           <div className="flex flex-wrap gap-1.5">
                             {g.map((sid) => (
-                              <span key={sid} className="notranslate rounded-full bg-muted px-2 py-0.5 text-xs" translate="no">{nameById.get(sid) ?? sid}</span>
+                              <span
+                                key={sid}
+                                className="notranslate rounded-full bg-muted px-2 py-0.5 text-xs"
+                                translate="no"
+                              >
+                                {nameById.get(sid) ?? sid}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -461,17 +652,25 @@ export function RunPage() {
                       <div className="mt-4 space-y-3 rounded-md border border-dashed border-border p-3">
                         {conflicts.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-xs font-bold text-destructive">{t("Unwanted pairings")}</div>
+                            <div className="text-xs font-bold text-destructive">
+                              {t("Unwanted pairings")}
+                            </div>
                             <ul className="list-disc space-y-0.5 pl-4 text-xs text-destructive">
-                              {conflicts.map((line, i) => <li key={i}>{line}</li>)}
+                              {conflicts.map((line, i) => (
+                                <li key={i}>{line}</li>
+                              ))}
                             </ul>
                           </div>
                         )}
                         {lonely.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-xs font-medium text-muted-foreground">{t("Students without a friend")}</div>
+                            <div className="text-xs font-medium text-muted-foreground">
+                              {t("Students without a friend")}
+                            </div>
                             <ul className="list-disc space-y-0.5 pl-4 text-xs">
-                              {lonely.map((line, i) => <li key={i}>{line}</li>)}
+                              {lonely.map((line, i) => (
+                                <li key={i}>{line}</li>
+                              ))}
                             </ul>
                           </div>
                         )}

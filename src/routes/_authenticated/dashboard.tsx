@@ -29,15 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Plus,
-  Users,
-  Trash2,
-  Archive,
-  ArchiveRestore,
-  Search,
-  Tag,
-} from "lucide-react";
+import { Plus, Users, Trash2, Archive, ArchiveRestore, Search, Tag } from "lucide-react";
 import { CreateClassDialog } from "@/components/CreateClassDialog";
 import { toast } from "sonner";
 
@@ -55,7 +47,12 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: ({ match }) => pageHead("Dashboard — Group Creator", "Manage your classes, student forms and grouping projects.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Dashboard — Group Creator",
+      "Manage your classes, student forms and grouping projects.",
+      match.context.locale,
+    ),
   component: Dashboard,
 });
 
@@ -100,48 +97,54 @@ export function Dashboard() {
 
   const sortKey = sortOption.split("-")[0] as SortKey;
   const sortDir = sortOption.split("-")[1] as SortDir;
-  
+
   async function archiveOldActiveClasses(classesToCheck: typeof active) {
     const now = new Date();
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    
+
     const classesToArchive = classesToCheck.filter((c) => {
       const activatedAt = new Date(c.activated_at || c.created_at);
       return activatedAt < oneYearAgo;
     });
-    
+
     if (classesToArchive.length === 0) return;
-    
+
     try {
       const { error } = await supabase
         .from("classes")
         .update({ archived_at: now.toISOString() })
-        .in("id", classesToArchive.map((c) => c.id));
-      
+        .in(
+          "id",
+          classesToArchive.map((c) => c.id),
+        );
+
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["classes"] });
     } catch (e) {
       console.error("Failed to archive old classes:", e);
     }
   }
-  
+
   async function deleteLongArchivedClasses(classesToCheck: typeof archived) {
     const now = new Date();
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    
+
     const classesToDelete = classesToCheck.filter((c) => {
       const archivedAt = new Date(c.archived_at!);
       return archivedAt < oneYearAgo;
     });
-    
+
     if (classesToDelete.length === 0) return;
-    
+
     try {
       const { error } = await supabase
         .from("classes")
         .delete()
-        .in("id", classesToDelete.map((c) => c.id));
-      
+        .in(
+          "id",
+          classesToDelete.map((c) => c.id),
+        );
+
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["classes"] });
     } catch (e) {
@@ -168,10 +171,10 @@ export function Dashboard() {
     try {
       const { error } = await supabase.from("classes").delete().eq("id", classToDelete);
       if (error) throw error;
-      toast.success("Class deleted");
+      toast.success(t("Class deleted"));
       await qc.invalidateQueries({ queryKey: ["classes"] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -188,8 +191,8 @@ export function Dashboard() {
           : { archived_at: null, activated_at: new Date().toISOString() },
       )
       .eq("id", classId);
-    if (error) return toast.error(error.message);
-    toast.success(archive ? "Class archived" : "Class restored");
+    if (error) return toast.error(t(error.message));
+    toast.success(t(archive ? "Class archived" : "Class restored"));
     await qc.invalidateQueries({ queryKey: ["classes"] });
   }
 
@@ -219,8 +222,7 @@ export function Dashboard() {
     const filtered = list.filter((c) => {
       const matchesSearch = !q || c.name.toLowerCase().includes(q);
       const matchesLabels =
-        selectedLabels.length === 0 ||
-        selectedLabels.some((l) => (c.labels ?? []).includes(l));
+        selectedLabels.length === 0 || selectedLabels.some((l) => (c.labels ?? []).includes(l));
       return matchesSearch && matchesLabels;
     });
     const sorted = [...filtered].sort((a, b) => {
@@ -233,7 +235,6 @@ export function Dashboard() {
 
   const active = applyFilters(allActive);
   const archived = applyFilters(allArchived);
-
 
   // Run archival and deletion checks when classes load
   useEffect(() => {
@@ -254,10 +255,14 @@ export function Dashboard() {
           <Card className="h-full transition-shadow hover:shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-lg">
-                <span className="notranslate" translate="no">{c.name}</span>
+                <span className="notranslate" translate="no">
+                  {c.name}
+                </span>
               </CardTitle>
               <CardDescription>
-                {count}{t(" student")}{t(count === 1 ? "" : "s")}
+                {count}
+                {t(" student")}
+                {t(count === 1 ? "" : "s")}
               </CardDescription>
               {c.labels && c.labels.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
@@ -266,7 +271,9 @@ export function Dashboard() {
                       key={l}
                       className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
                     >
-                      {l}
+                      <span translate="no" className="notranslate">
+                        {l}
+                      </span>
                     </span>
                   ))}
                 </div>
@@ -312,7 +319,9 @@ export function Dashboard() {
           <h1 className="text-3xl font-semibold tracking-tight">{t("Your classes")}</h1>
         </div>
         <Button onClick={() => setOpen(true)}>
-          <Plus className="mr-1.5 h-4 w-4" />{t(" New class")}</Button>
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t(" New class")}
+        </Button>
       </div>
 
       <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -341,9 +350,17 @@ export function Dashboard() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 border border-input bg-transparent px-2 font-normal text-xs text-muted-foreground hover:bg-muted">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 border border-input bg-transparent px-2 font-normal text-xs text-muted-foreground hover:bg-muted"
+            >
               <Tag className="h-3.5 w-3.5" />
-              {t(selectedLabels.length > 0 ? `Filter by label (${selectedLabels.length})` : "Filter by label")}
+              {t(
+                selectedLabels.length > 0
+                  ? `Filter by label (${selectedLabels.length})`
+                  : "Filter by label",
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-72 w-56 overflow-auto">
@@ -362,17 +379,22 @@ export function Dashboard() {
                     }
                     onSelect={(e) => e.preventDefault()}
                   >
-                    {t(label)}
+                    <span translate="no" className="notranslate">
+                      <span translate="no" className="notranslate">
+                        {label}
+                      </span>
+                    </span>
                   </DropdownMenuCheckboxItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setSelectedLabels([])}>{t("Clear labels")}</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSelectedLabels([])}>
+                  {t("Clear labels")}
+                </DropdownMenuItem>
               </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">{t("Loading…")}</p>
@@ -381,16 +403,24 @@ export function Dashboard() {
           <section>
             <div className="mb-4">
               <h2 className="text-xl font-semibold tracking-tight">{t("Active classes")}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{t("Active classes are moved to Archive automatically after 1 year.")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("Active classes are moved to Archive automatically after 1 year.")}
+              </p>
             </div>
             {active.length === 0 ? (
               <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                   <Users className="mb-3 h-10 w-10 text-muted-foreground" />
                   <h3 className="text-lg font-semibold">{t("No active classes")}</h3>
-                  <p className="mb-6 mt-1 max-w-sm text-sm text-muted-foreground">{t("Create your first class. Paste a list of names or import a CSV/Excel file.")}</p>
+                  <p className="mb-6 mt-1 max-w-sm text-sm text-muted-foreground">
+                    {t(
+                      "Create your first class. Paste a list of names or import a CSV/Excel file.",
+                    )}
+                  </p>
                   <Button onClick={() => setOpen(true)}>
-                    <Plus className="mr-1.5 h-4 w-4" />{t(" Create a class")}</Button>
+                    <Plus className="mr-1.5 h-4 w-4" />
+                    {t(" Create a class")}
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -403,7 +433,11 @@ export function Dashboard() {
           <section>
             <div className="mb-4">
               <h2 className="text-xl font-semibold tracking-tight">{t("Archive")}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{t("Archived classes are deleted permanently after 1 year. Set your class to Active again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t(
+                  "Archived classes are deleted permanently after 1 year. Set your class to Active again to prevent deletion. It will remain active again for another year. Archived classes can't be edited, but you can still view and clone their projects.",
+                )}
+              </p>
             </div>
             {archived.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("No archived classes.")}</p>
@@ -428,7 +462,11 @@ export function Dashboard() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{t("Delete class")}</DialogTitle>
-            <DialogDescription>{t("Are you sure you want to delete this class? All of its projects, runs, distributions, and student form responses will be deleted.")}</DialogDescription>
+            <DialogDescription>
+              {t(
+                "Are you sure you want to delete this class? All of its projects, runs, distributions, and student form responses will be deleted.",
+              )}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex gap-2">
@@ -439,7 +477,9 @@ export function Dashboard() {
                   setConfirmOpen(false);
                   setClassToDelete(null);
                 }}
-              >{t("Cancel")}</Button>
+              >
+                {t("Cancel")}
+              </Button>
               <Button variant="destructive" disabled={deleting} onClick={confirmDeleteClass}>
                 {t(deleting ? "Deleting…" : "Delete")}
               </Button>

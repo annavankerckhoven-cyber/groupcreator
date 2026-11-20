@@ -18,7 +18,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
-  head: ({ match }) => pageHead("Sign in — Group Creator", "Sign in or create your free Group Creator teacher account.", match.context.locale),
+  head: ({ match }) =>
+    pageHead(
+      "Sign in — Group Creator",
+      "Sign in or create your free Group Creator teacher account.",
+      match.context.locale,
+    ),
   component: AuthPage,
 });
 
@@ -51,9 +56,9 @@ export function AuthPage() {
         error.message.toLowerCase().includes("invalid login") ||
         error.message.toLowerCase().includes("invalid credentials")
       ) {
-        return toast.error("Email and password do not match.");
+        return toast.error(t("Email and password do not match."));
       }
-      return toast.error(error.message);
+      return toast.error(t(error.message));
     }
     navigate({ to: "/dashboard" });
   }
@@ -65,9 +70,9 @@ export function AuthPage() {
       redirectTo: `${window.location.origin}${locale === "nl" ? "/nl" : ""}/reset-password`,
     });
     setResetLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(t(error.message));
     setResetOpen(false);
-    toast.success("If an account exists for that email, a reset link is on its way.");
+    toast.success(t("If an account exists for that email, a reset link is on its way."));
   }
 
   async function signUp(e: React.FormEvent) {
@@ -82,14 +87,16 @@ export function AuthPage() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Account created!");
+    if (error) return toast.error(t(error.message));
+    toast.success(t("Account created!"));
     navigate({ to: "/dashboard" });
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">{t("← Back home")}</Link>
+      <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">
+        {t("← Back home")}
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{t("Welcome to Group Creator")}</CardTitle>
@@ -128,7 +135,9 @@ export function AuthPage() {
                       setResetOpen(true);
                     }}
                     className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                  >{t("Forgot password?")}</button>
+                  >
+                    {t("Forgot password?")}
+                  </button>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {t(loading ? "Signing in…" : "Sign in")}
@@ -180,7 +189,11 @@ export function AuthPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Reset your password")}</DialogTitle>
-            <DialogDescription>{t("Enter the email address of your account and we'll send you a link to reset your password.")}</DialogDescription>
+            <DialogDescription>
+              {t(
+                "Enter the email address of your account and we'll send you a link to reset your password.",
+              )}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={sendResetLink} className="space-y-3">
             <div className="space-y-1.5">
@@ -194,7 +207,9 @@ export function AuthPage() {
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setResetOpen(false)}>{t("Go back")}</Button>
+              <Button type="button" variant="ghost" onClick={() => setResetOpen(false)}>
+                {t("Go back")}
+              </Button>
               <Button type="submit" disabled={resetLoading}>
                 {t(resetLoading ? "Sending…" : "Send reset link")}
               </Button>
